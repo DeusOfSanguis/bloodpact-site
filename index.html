@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Техническая страница подтверждения домена bloodpact.su">
+  <meta name="theme-color" content="#f7f6f2">
+  <title>bloodpact.su — домен работает</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./assets/style.css">
+  <script src="./assets/script.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Перейти к содержимому</a>
+
+  <header class="site-header">
+    <a class="brand" href="/" aria-label="bloodpact.su — главная">
+      <svg class="brand-mark" viewBox="0 0 32 32" role="img" aria-label="Логотип bloodpact.su">
+        <path d="M8 5.5h9.5a6.5 6.5 0 0 1 0 13H8z"/>
+        <path d="M8 18.5h11a4 4 0 0 1 0 8H8z"/>
+      </svg>
+      <span>bloodpact.su</span>
+    </a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Переключить цветовую тему">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    </button>
+  </header>
+
+  <main id="main">
+    <section class="hero" aria-labelledby="page-title">
+      <p class="eyebrow"><span class="status-dot" aria-hidden="true"></span> DNS подключён</p>
+      <h1 id="page-title">Домен работает.</h1>
+      <p class="lead">Если ты видишь эту страницу по адресу <strong>bloodpact.su</strong>, значит домен успешно направлен на GitHub Pages.</p>
+      <div class="actions">
+        <button class="primary-action" id="run-check" type="button">Проверить страницу</button>
+        <a class="secondary-action" href="https://github.com/DeusOfSanguis/bloodpact-site" target="_blank" rel="noopener noreferrer">Открыть GitHub</a>
+      </div>
+      <p class="check-result" id="check-result" role="status" aria-live="polite"></p>
+    </section>
+
+    <section class="details" aria-labelledby="details-title">
+      <h2 id="details-title">Состояние подключения</h2>
+      <dl class="status-list">
+        <div>
+          <dt>Домен</dt>
+          <dd>bloodpact.su</dd>
+        </div>
+        <div>
+          <dt>Хостинг</dt>
+          <dd>GitHub Pages</dd>
+        </div>
+        <div>
+          <dt>HTTPS</dt>
+          <dd id="https-status">Проверяется…</dd>
+        </div>
+        <div>
+          <dt>Последняя загрузка</dt>
+          <dd id="load-time">—</dd>
+        </div>
+      </dl>
+    </section>
+  </main>
+
+  <footer>
+    <span>Тестовая страница владельца домена</span>
+    <span class="footer-code">HTTP 200</span>
+  </footer>
+</body>
+</html>
