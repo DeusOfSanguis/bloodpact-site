@@ -4,9 +4,9 @@
     "short": "yufu",
     "domain": "bloodpact.su",
     "pages_url": "https://bloodpact.su/",
-    "home_label": "Главная страница",
+    "home_label": "ПАКТ·КРОВИ",
     "lang": "ru",
-    "description": "Пакт крови"
+    "description": "Пакт Крови — фракция демонов YUFU. Иерархия, законы, Двенадцать лун и привилегии должностей."
   },
   "assets": {
     "cover.jpg": "https://static.tildacdn.pub/tild3736-3037-4334-b863-353562353039/d946dbce69a24e0288d5.jpg",
@@ -16,7 +16,10 @@
     "territory-3.png": "https://static.tildacdn.pub/tild6131-6164-4731-a135-663630663437/image.png",
     "territory-4.png": "https://static.tildacdn.pub/tild3633-6536-4366-a333-396232373936/image.png",
     "territory-5.png": "https://static.tildacdn.pub/tild3133-6530-4439-b132-306461663261/image.png",
-    "champion.webp": "https://static.tildacdn.pub/tild3938-6139-4036-a531-623036666330/i.webp"
+    "champion.webp": "https://static.tildacdn.pub/tild3938-6139-4036-a531-623036666330/i.webp",
+    "blood-moon.jpg": "https://bloodpact.su/assets/img/blood-moon.jpg",
+    "progenitor.jpg": "https://bloodpact.su/assets/img/progenitor.jpg",
+    "transformation.jpg": "https://bloodpact.su/assets/img/transformation.jpg"
   },
   "pages": [
     {
@@ -24,26 +27,35 @@
       "source": "https://bloodpact-yufu.tilda.ws/",
       "title": "Главная страница",
       "nav": null,
-      "cover_uptitle": "yufu",
+      "cover_uptitle": "YUFU · Фракция демонов",
       "cover_title": "Фракция демонов",
+      "hero_title_1": "ПАКТ",
+      "hero_title_2": "КРОВИ",
+      "hero_quote": "«Ни один демон не имеет права ослушаться приказа Господина»",
+      "cover_image": "blood-moon.jpg",
+      "cover_video": "",
       "youtube": "2P6JSigJ7xo"
     },
     {
       "slug": "law",
       "source": "https://bloodpact-yufu.tilda.ws/law",
       "title": "Демонический закон",
-      "nav": "Демонический закон",
+      "nav": "Закон",
       "cover_uptitle": "yufu",
       "cover_title": "Демонический закон",
+      "cover_image": "cover.jpg",
+      "cover_video": "",
       "youtube": "RMnzGUtdsls"
     },
     {
       "slug": "elevation",
       "source": "https://bloodpact-yufu.tilda.ws/elevation",
       "title": "Возвышение крови",
-      "nav": "Возвышение крови",
+      "nav": "Возвышение",
       "cover_uptitle": "yufu",
       "cover_title": "Возвышение крови",
+      "cover_image": "transformation.jpg",
+      "cover_video": "",
       "youtube": "Hb7SHEtpigc"
     },
     {
@@ -53,6 +65,8 @@
       "nav": "Отряды",
       "cover_uptitle": "yufu",
       "cover_title": "Отряды",
+      "cover_image": "cover.jpg",
+      "cover_video": "",
       "youtube": "Xdbl3z_21P4"
     },
     {
@@ -62,15 +76,19 @@
       "nav": "Шрамы",
       "cover_uptitle": "yufu",
       "cover_title": "Шрамы безотрядных",
+      "cover_image": "cover.jpg",
+      "cover_video": "",
       "youtube": "bMxFePqtYoo"
     },
     {
       "slug": "limits",
       "source": "https://bloodpact-yufu.tilda.ws/limits",
       "title": "Пределы крови",
-      "nav": "Пределы крови",
+      "nav": "Пределы",
       "cover_uptitle": "yufu",
       "cover_title": "Пределы",
+      "cover_image": "cover.jpg",
+      "cover_video": "",
       "youtube": "XVDBTsir2O4"
     },
     {
@@ -80,6 +98,8 @@
       "nav": "Битва крови",
       "cover_uptitle": "yufu",
       "cover_title": "Битвы крови",
+      "cover_image": "cover.jpg",
+      "cover_video": "",
       "youtube": "XJsTQCXAJnY"
     },
     {
@@ -89,6 +109,8 @@
       "nav": "Территории",
       "cover_uptitle": "yufu",
       "cover_title": "Территории",
+      "cover_image": "cover.jpg",
+      "cover_video": "",
       "youtube": "ZmU692cglz8"
     },
     {
@@ -98,6 +120,8 @@
       "nav": "Поощрения",
       "cover_uptitle": "yufu",
       "cover_title": "Поощрения",
+      "cover_image": "cover.jpg",
+      "cover_video": "",
       "youtube": "W_47yPcLm2U"
     },
     {
@@ -107,6 +131,8 @@
       "nav": "Рейтинг",
       "cover_uptitle": "yufu",
       "cover_title": "Рейтинг",
+      "cover_image": "cover.jpg",
+      "cover_video": "",
       "youtube": "GADE8Tkaa2Q"
     },
     {
@@ -116,6 +142,8 @@
       "nav": "Суд",
       "cover_uptitle": "yufu",
       "cover_title": "Суд",
+      "cover_image": "cover.jpg",
+      "cover_video": "",
       "youtube": "Sg0vFNo_Qig"
     }
   ]
