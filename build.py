@@ -10,7 +10,7 @@
                        (для «Вставка → Встроить → Код для встраивания» в Google Sites)
 
 Сборка пишет в корень репозитория, но удаляет только свои артефакты:
-CNAME, .nojekyll, assets/img/, content/, scripts/, build.py и т. п. не трогаются.
+CNAME, .nojekyll, assets/img/, assets/video/, content/, scripts/, build.py и т. п. не трогаются.
 
 Запуск:  python3 build.py [--asset-base https://.../assets/img/]
 Зависимостей нет — только стандартная библиотека Python 3.
@@ -29,6 +29,7 @@ SITE = ROOT
 EMBED = os.path.join(SITE, "embed")
 GS = os.path.join(ROOT, "google-sites")
 IMG_DIR = os.path.join(SITE, "assets", "img")
+VIDEO_DIR = os.path.join(SITE, "assets", "video")
 
 FAVICON = (
     "data:image/svg+xml,"
@@ -36,13 +37,16 @@ FAVICON = (
     "%3Ctext y='.9em' font-size='90'%3E%F0%9F%A9%B8%3C/text%3E%3C/svg%3E"
 )
 
-ARROW_SVG = (
-    '<svg role="presentation" viewBox="0 0 38.417 18.592" xmlns="http://www.w3.org/2000/svg">'
-    '<path d="M19.208,18.592c-0.241,0-0.483-0.087-0.673-0.261L0.327,1.74c-0.408-0.372-0.438-1.004'
-    '-0.066-1.413c0.372-0.409,1.004-0.439,1.413-0.066L19.208,16.24L36.743,0.261c0.411-0.372,1.042'
-    '-0.342,1.413,0.066c0.372,0.408,0.343,1.041-0.065,1.413L19.881,18.332C19.691,18.505,19.449,'
-    '18.592,19.208,18.592z"/></svg>'
+FONTS_URL = (
+    "https://fonts.googleapis.com/css2?"
+    "family=Unbounded:wght@300;400;600;800;900"
+    "&family=Cormorant:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600"
+    "&family=Manrope:wght@300;400;500;600;700;800"
+    "&display=swap"
 )
+
+MARQUEE_WORDS = ["КРОВЬ", "血", "ЛУНА", "月", "ВЕЧНОСТЬ", "鬼",
+                 "ПАКТ", "約", "ТЬМА", "闇", "СИЛА", "力"]
 
 
 def load():
@@ -50,7 +54,9 @@ def load():
         data = json.load(f)
     with open(os.path.join(CONTENT, "theme.css"), encoding="utf-8") as f:
         css = f.read()
-    return data, css
+    with open(os.path.join(CONTENT, "app.js"), encoding="utf-8") as f:
+        js = f.read()
+    return data, css, js
 
 
 def page_href(page):
@@ -69,8 +75,19 @@ def rel_prefix(page):
     return "" if page["slug"] == "index" else "../"
 
 
+def page_url(data, slug, kind, prefix=""):
+    """Ссылка на раздел сайта для подстановки {{page:slug}} в текстах.
+    kind: site | embed | snippet."""
+    if kind == "embed":
+        return "index.html" if slug == "index" else slug + ".html"
+    if kind == "snippet":
+        base = (data["site"].get("pages_url") or "https://bloodpact.su/").rstrip("/")
+        return base + "/" if slug == "index" else base + "/" + slug + "/"
+    return prefix + ("" if slug == "index" else slug + "/")
+
+
 def resolve_asset(name, data, prefix="", asset_base=None):
-    """Локальный файл (если скачан в assets/img) → иначе исходный URL с CDN Tilda."""
+    """Локальный файл (если лежит в assets/img) → иначе запасной URL из pages.json."""
     if asset_base:
         return asset_base.rstrip("/") + "/" + name
     if os.path.exists(os.path.join(IMG_DIR, name)):
@@ -78,11 +95,38 @@ def resolve_asset(name, data, prefix="", asset_base=None):
     return data["assets"][name]
 
 
-def render_fragment(fragment, data, prefix="", asset_base=None):
-    def repl(m):
-        return resolve_asset(m.group(1), data, prefix, asset_base)
-    return re.sub(r"\{\{img:([^}]+)\}\}", repl, fragment)
+def resolve_video(name, data, prefix="", asset_base=None):
+    """Свой видеофайл для фона обложки: сначала ищем в assets/video/, потом в assets/img/."""
+    for folder in ("video", "img"):
+        if os.path.exists(os.path.join(SITE, "assets", folder, name)):
+            if asset_base and folder == "img":
+                return asset_base.rstrip("/") + "/" + name
+            if asset_base and folder == "video":
+                base = (data["site"].get("pages_url") or "https://bloodpact.su/").rstrip("/")
+                return base + "/assets/video/" + name
+            return f"{prefix}assets/{folder}/{name}"
+    return ""
 
+
+def render_fragment(fragment, data, prefix="", asset_base=None, kind="site"):
+    """Подставляет {{img:файл}} и {{page:раздел}} в тексте страницы."""
+    def repl_img(m):
+        name = m.group(1)
+        if name not in data["assets"] and not os.path.exists(os.path.join(IMG_DIR, name)):
+            return m.group(0)  # неизвестное имя — оставляем как есть (например, пример в комментарии)
+        return resolve_asset(name, data, prefix, asset_base)
+
+    def repl_page(m):
+        slug = m.group(1)
+        if slug not in {p["slug"] for p in data["pages"]}:
+            return m.group(0)
+        return page_url(data, slug, kind, prefix)
+
+    out = re.sub(r"\{\{img:([^}]+)\}\}", repl_img, fragment)
+    return re.sub(r"\{\{page:([a-z0-9_-]+)\}\}", repl_page, out)
+
+
+# ---------------------------------------------------------------- шапка ---
 
 def render_nav(data, current_page):
     site = data["site"]
@@ -96,51 +140,191 @@ def render_nav(data, current_page):
     home = "./" if current_page["slug"] == "index" else up
     return (
         '<header class="nav">'
-        f'<a class="nav__logo" href="{home}">{html.escape(site["home_label"])}</a>'
+        '<div class="nav__in">'
+        f'<a class="nav__logo" href="{home}"><span class="nav__drop">🩸</span>'
+        f'<span>{html.escape(site["home_label"]).replace("·", "<i>·</i>")}</span></a>'
         '<nav aria-label="Разделы"><ul class="nav__list">' + "".join(items) + "</ul></nav>"
-        "</header>"
+        '<button class="nav__burger" data-menu-open aria-label="Меню">☰</button>'
+        "</div></header>"
     )
 
 
-def render_cover(page, data, prefix="", asset_base=None, with_arrow=True, with_video=True):
-    bg = resolve_asset("cover.jpg", data, prefix, asset_base)
-    yt = page["youtube"]
-    video = ""
-    if with_video and yt:
-        src = (
-            f"https://www.youtube.com/embed/{yt}?autoplay=1&mute=1&controls=0&loop=1"
-            f"&playlist={yt}&rel=0&modestbranding=1&playsinline=1&disablekb=1"
-            f"&iv_load_policy=3&fs=0"
+def render_mmenu(data, current_page):
+    """Полноэкранное меню для телефона."""
+    up = rel_prefix(current_page)
+    home = "./" if current_page["slug"] == "index" else up
+    links = [f'<a href="{home}" style="transition-delay:.05s">Главная</a>']
+    for i, p in enumerate(data["pages"]):
+        if not p.get("nav"):
+            continue
+        links.append(
+            f'<a href="{up}{page_path(p)}" style="transition-delay:{0.08 + i * 0.04:.2f}s">'
+            f"{html.escape(p['title'])}</a>"
         )
-        video = (
-            '<div class="cover__video" aria-hidden="true">'
-            f'<iframe src="{src}" title="Фоновое видео" tabindex="-1" loading="lazy" '
-            'allow="autoplay; encrypted-media" referrerpolicy="strict-origin-when-cross-origin"></iframe>'
+    return (
+        '<div class="mmenu" role="dialog" aria-label="Меню">'
+        '<button class="mmenu__close" data-menu-close aria-label="Закрыть">✕</button>'
+        "<nav>" + "".join(links) + "</nav>"
+        '<span class="mmenu__foot">鬼 · кровь · честь</span>'
+        "</div>"
+    )
+
+
+# ---------------------------------------------------------------- герой ---
+
+def split_word(word, delay, cls):
+    """Слово по буквам для анимации появления заголовка."""
+    chars = "".join(
+        f'<span class="ch" style="animation-delay:{delay + i * 0.055:.2f}s">'
+        f"{'&nbsp;' if ch == ' ' else html.escape(ch)}</span>"
+        for i, ch in enumerate(word)
+    )
+    return f'<span class="w {cls}">{chars}</span>'
+
+
+def render_hero(page, data, prefix="", asset_base=None, kind="site", compact=False):
+    """Обложка: фон-картинка (грузится всегда) + опционально свой видеофайл
+    + опционально кнопка ▶ (YouTube грузится только по клику)."""
+    is_index = page["slug"] == "index" and not compact
+    bg = resolve_asset(page.get("cover_image") or "cover.jpg", data, prefix, asset_base)
+
+    media = f'<img class="bg" src="{bg}" alt="" fetchpriority="high">'
+    local = resolve_video(page.get("cover_video") or "", data, prefix, asset_base) \
+        if page.get("cover_video") else ""
+    if local:
+        media = (
+            f'<video class="bg" autoplay muted loop playsinline poster="{bg}">'
+            f'<source src="{local}"></video>'
+        )
+
+    yt = (page.get("youtube") or "").strip()
+    watch = ""
+    video_slot = ""
+    if yt:
+        watch = (
+            f'<button class="hero__watch" data-yt="{yt}" aria-label="Смотреть видео">'
+            '<span class="play">▶</span><span>Видео</span></button>'
+        )
+        video_slot = '<div class="hero__video"></div>'
+
+    if is_index:
+        w1 = page.get("hero_title_1") or "ПАКТ"
+        w2 = page.get("hero_title_2") or "КРОВИ"
+        quote = page.get("hero_quote") or ""
+        title = split_word(w1, 0.7, "bone") + split_word(w2, 1.0, "red")
+        quote_html = f'<p class="hero__quote">{html.escape(quote)}</p>' if quote else ""
+        btns = (
+            '<div class="hero__btns">'
+            '<a class="btn btn--blood" href="#faction"><span>Познать тьму</span></a>'
+            '<a class="btn btn--ghost" href="#hierarchy">Иерархия</a>'
             "</div>"
         )
-    arrow = f'<div class="cover__arrow" aria-hidden="true">{ARROW_SVG}</div>' if with_arrow else ""
+        kanji = (
+            '<div class="hero__kanji">'
+            '<span class="v">鬼ノ契約</span>'
+            '<span class="line"></span>'
+            '<span class="t">клятва демона</span>'
+            "</div>"
+        )
+        cue = '<a class="hero__cue" href="#faction"><span>Склонись ниже</span><span>﹀</span></a>'
+        cls = "hero"
+        content = (
+            f'<p class="hero__eyebrow">☾&nbsp;&nbsp;{html.escape(page["cover_uptitle"])}</p>'
+            f'<h1 class="hero__title">{title}</h1>'
+            f"{quote_html}{btns}"
+        )
+    else:
+        title = split_word(page["cover_title"], 0.3, "bone")
+        cue = '<a class="hero__cue" href="#content"><span>Читать</span><span>﹀</span></a>'
+        cls = "hero hero--inner"
+        kanji = ""
+        content = (
+            f'<p class="hero__eyebrow">{html.escape(page["cover_uptitle"])}</p>'
+            f'<h1 class="hero__title">{title}</h1>'
+        )
+
     return (
-        f'<section class="cover" style="background-image:url(\'{bg}\')">'
-        f"{video}"
-        '<div class="cover__filter"></div>'
-        '<div class="cover__content">'
-        f'<p class="cover__uptitle">{html.escape(page["cover_uptitle"])}</p>'
-        f'<h1 class="cover__title">{html.escape(page["cover_title"])}</h1>'
-        "</div>"
-        f"{arrow}"
+        f'<section class="{cls}">'
+        f'<div class="hero__media">{media}</div>'
+        '<div class="hero__shade"></div>'
+        f"{kanji}"
+        f'<div class="hero__in">{content}</div>'
+        f"{cue}{video_slot}{watch}"
         "</section>"
     )
 
 
-def render_document(page, data, body, css_link=None, css_inline=None, prefix="",
-                    asset_base=None, body_class=""):
+def render_marquee(reverse=False):
+    def word(w):
+        cls = "marquee__w k" if re.search(r"[\u4e00-\u9fff]", w) else "marquee__w"
+        return f'<span><span class="{cls}">{w}</span><span class="marquee__dot"></span></span>'
+
+    row = '<div class="marquee__row">' + "".join(word(w) for w in MARQUEE_WORDS) + "</div>"
+    cls = "marquee marquee--reverse" if reverse else "marquee"
+    return f'<div class="{cls}" aria-hidden="true"><div class="marquee__track">{row}{row}</div></div>'
+
+
+# --------------------------------------------------------------- подвал ---
+
+def render_footer(data, current_page):
+    site = data["site"]
+    up = rel_prefix(current_page)
+    links = []
+    for p in data["pages"]:
+        if not p.get("nav"):
+            continue
+        links.append(f'<a href="{up}{page_path(p)}">{html.escape(p["nav"])}</a>')
+    return (
+        '<footer class="footer">'
+        '<div class="footer__glow"></div>'
+        '<div class="footer__in">'
+        '<div class="footer__top">'
+        "<div>"
+        f'<p class="footer__up">{html.escape(site["short"])} · Фракция демонов</p>'
+        '<p class="footer__big"><span class="stroke">Пакт</span> <span class="fill">Крови</span></p>'
+        '<p class="footer__quote">Кровь, что связывает нас, сильнее смерти. Ночь наша — и она будет длиться вечно.</p>'
+        "</div>"
+        '<div class="footer__side">'
+        '<div class="footer__nav">' + "".join(links) + "</div>"
+        '<a class="btn btn--ghost" href="#top">↑&nbsp;&nbsp;Наверх</a>'
+        "</div>"
+        "</div>"
+        '<div class="footer__bot">'
+        f'<p>© <span data-year>2026</span> {html.escape(site["name"])} · {html.escape(site["short"])}. Все права принадлежат ночи.</p>'
+        "<p>鬼 · 血 · 月</p>"
+        "</div>"
+        "</div></footer>"
+    )
+
+
+def render_preloader():
+    return (
+        '<div class="preloader">'
+        '<span class="preloader__kanji">血</span>'
+        '<div class="preloader__bar">'
+        '<div class="preloader__row"><span>Пробуждение</span><b data-count>0%</b></div>'
+        '<div class="preloader__track"><div class="preloader__fill"></div></div>'
+        "</div>"
+        '<span class="preloader__foot">кровь помнит всё</span>'
+        "</div>"
+    )
+
+
+# ------------------------------------------------------------- документ ---
+
+def render_document(page, data, body, css_link=None, css_inline=None,
+                    js_link=None, js_inline=None, body_class=""):
     site = data["site"]
     title = site["name"] if page["slug"] == "index" else f'{page["title"]} — {site["name"]}'
-    og = resolve_asset("og-image.png", data, prefix, asset_base)
+    base = (site.get("pages_url") or "https://bloodpact.su/").rstrip("/")
+    og = base + "/assets/img/og-image.png"
     head_css = (
         f'<link rel="stylesheet" href="{css_link}">' if css_link else f"<style>\n{css_inline}\n</style>"
     )
-    body_attr = f' class="{body_class}"' if body_class else ""
+    script = (
+        f'<script src="{js_link}" defer></script>' if js_link else f"<script>\n{js_inline}\n</script>"
+    )
+    cls = ("grain " + body_class).strip()
     return f"""<!DOCTYPE html>
 <html lang="{site['lang']}">
 <head>
@@ -155,27 +339,23 @@ def render_document(page, data, body, css_link=None, css_inline=None, prefix="",
 <link rel="icon" href="{FAVICON}">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="{FONTS_URL}">
 {head_css}
 </head>
-<body{body_attr}>
+<body id="top" class="{cls}">
 {body}
+{script}
 </body>
 </html>
 """
 
 
-def youtube_bg_iframe(yt):
-    """Короткий код фонового автоплей-видео — удобно вставлять в Google Sites отдельным блоком."""
-    src = (
-        f"https://www.youtube.com/embed/{yt}?autoplay=1&mute=1&controls=0&loop=1"
-        f"&playlist={yt}&rel=0&modestbranding=1&playsinline=1"
-    )
-    return (
-        '<div style="position:relative;padding-top:56.25%;background:#000;overflow:hidden">'
-        f'<iframe src="{src}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0" '
-        'allow="autoplay; encrypted-media" allowfullscreen></iframe></div>'
-    )
+def youtube_link_block(page):
+    """Для шпаргалки: ссылка на ролик + код вставки по клику."""
+    yt = (page.get("youtube") or "").strip()
+    if not yt:
+        return "—"
+    return f"https://www.youtube.com/watch?v={yt}"
 
 
 def write_cheatsheet(data):
@@ -187,27 +367,30 @@ def write_cheatsheet(data):
         "",
         "## Страницы",
         "",
-        "| № | Страница в Google Sites | Заголовок на обложке | Файл с текстом | Исходник на Tilda | Видео на обложке |",
-        "|---|---|---|---|---|---|",
+        "| № | Страница в Google Sites | Заголовок на обложке | Файл с текстом | Исходник на Tilda | Видео |",
+        "|---|---|---|---|---|---",
     ]
     for i, p in enumerate(data["pages"], 1):
-        yt = f"https://www.youtube.com/watch?v={p['youtube']}"
         lines.append(
             f"| {i} | {p['title']} | {p['cover_uptitle'].upper()} / {p['cover_title']} | "
-            f"`google-sites/{i:02d}-{p['slug']}.html` | {p['source']} | {yt} |"
+            f"`google-sites/{i:02d}-{p['slug']}.html` | {p['source']} | {youtube_link_block(p)} |"
         )
     lines += [
         "",
         "## Картинки",
         "",
-        "Скачать одной командой: `python3 scripts/fetch_assets.py` (лягут в `assets/img/`).",
+        "Старые картинки — с CDN Tilda (`python3 scripts/fetch_assets.py` кладёт их в `assets/img/`).",
+        "Новые (`blood-moon.jpg`, `progenitor.jpg`, `transformation.jpg`) — уже лежат в `assets/img/`.",
         "",
-        "| Файл | Где используется | Ссылка на оригинал (CDN Tilda) |",
+        "| Файл | Где используется | Запасная ссылка |",
         "|---|---|---|",
     ]
     usage = {
-        "cover.jpg": "фон обложки на всех страницах (поверх — затемнение 70 %)",
+        "cover.jpg": "фон обложек внутренних страниц",
         "og-image.png": "картинка для превью ссылки (og:image)",
+        "blood-moon.jpg": "обложка главной + герой",
+        "progenitor.jpg": "главная — портрет Прародителя",
+        "transformation.jpg": "главная — фон «Обращения», обложка «Возвышения крови»",
         "territory-1.png": "Территории — после «Зал высших лун»",
         "territory-2.png": "Территории — после «Зал Доумы»",
         "territory-3.png": "Территории — после «Зал низших лун»",
@@ -219,14 +402,14 @@ def write_cheatsheet(data):
         lines.append(f"| `{name}` | {usage.get(name, '')} | {url} |")
     lines += [
         "",
-        "## Код фонового видео (для блока «Встроить → Код для встраивания»)",
+        "## Видео на обложках",
         "",
-        "В Google Sites нельзя поставить видео фоном баннера, поэтому видео вставляется отдельным блоком",
-        "сразу под баннером. Код ниже запускает ролик автоматически, без звука и по кругу.",
+        "Видео с YouTube теперь грузится только по клику на кнопку ▶ —",
+        "поэтому обложка всегда показывает картинку, даже если YouTube недоступен.",
+        "Свой видеофайл (mp4/webm, будет играть фоном и грузиться всегда):",
+        "положи в `assets/video/`, укажи в `content/pages.json` → `cover_video`.",
         "",
     ]
-    for p in data["pages"]:
-        lines += [f"### {p['title']}", "", "```html", youtube_bg_iframe(p["youtube"]), "```", ""]
     with open(os.path.join(GS, "ASSETS.md"), "w", encoding="utf-8") as f:
         f.write("\n".join(lines))
 
@@ -265,19 +448,22 @@ def clean_dir(path):
 
 
 def build(asset_base=None):
-    data, css = load()
+    data, css, js = load()
 
     # чистим только свои артефакты и создаём выходные папки
-    # (CNAME, .nojekyll, assets/img/, content/, scripts/ и build.py не трогаем)
+    # (CNAME, .nojekyll, assets/img/, assets/video/, content/, scripts/ и build.py не трогаем)
     clean_site(p["slug"] for p in data["pages"])
     clean_dir(GS)
     os.makedirs(os.path.join(SITE, "assets"), exist_ok=True)
     os.makedirs(IMG_DIR, exist_ok=True)
+    os.makedirs(VIDEO_DIR, exist_ok=True)
     os.makedirs(EMBED, exist_ok=True)
     os.makedirs(GS, exist_ok=True)
 
     with open(os.path.join(SITE, "assets", "style.css"), "w", encoding="utf-8") as f:
         f.write(css)
+    with open(os.path.join(SITE, "assets", "app.js"), "w", encoding="utf-8") as f:
+        f.write(js)
     open(os.path.join(SITE, ".nojekyll"), "w").close()
 
     site = data["site"]
@@ -288,49 +474,60 @@ def build(asset_base=None):
         with open(os.path.join(SITE, "CNAME"), "w", encoding="utf-8") as f:
             f.write(domain + "\n")
 
-    footer = f'<footer class="footer">{html.escape(site["name"])} · {html.escape(site["short"])}</footer>'
-
     for i, page in enumerate(data["pages"]):
         with open(os.path.join(CONTENT, page["slug"] + ".html"), encoding="utf-8") as f:
             fragment = f.read().strip()
 
+        is_index = page["slug"] == "index"
+
         # 1) полноценная страница сайта: index.html, law/index.html, … (в корне репозитория)
         up = rel_prefix(page)
+        main_cls = ' id="content"' if is_index else ' id="content" class="article"'
         body = (
-            render_nav(data, page)
-            + render_cover(page, data, prefix=up)
-            + '<main id="content">\n' + render_fragment(fragment, data, prefix=up) + "\n</main>\n"
-            + footer
+            '<div class="cursor" aria-hidden="true">'
+            '<div class="cursor__ring"></div><div class="cursor__dot"></div></div>\n'
+            '<div class="progress"></div>\n'
+            + (render_preloader() if is_index else "")
+            + render_nav(data, page)
+            + render_mmenu(data, page)
+            + render_hero(page, data, prefix=up, kind="site")
+            + render_marquee()
+            + f"<main{main_cls}>\n" + render_fragment(fragment, data, prefix=up, kind="site") + "\n</main>\n"
+            + render_footer(data, page)
         )
-        out = render_document(page, data, body, css_link=f"{up}assets/style.css", prefix=up)
+        out = render_document(page, data, body, css_link=f"{up}assets/style.css",
+                              js_link=f"{up}assets/app.js")
         out_dir = os.path.join(SITE, page_path(page))
         os.makedirs(out_dir, exist_ok=True)
         with open(os.path.join(out_dir, "index.html"), "w", encoding="utf-8") as f:
             f.write(out)
 
         # 2) embed-версия без меню (для «Встроить по URL» в Google Sites)
+        main_cls_e = ' id="content"' if is_index else ' id="content" class="article"'
         body = (
-            render_cover(page, data, prefix="../", with_arrow=False)
-            + '<main id="content">\n' + render_fragment(fragment, data, prefix="../") + "\n</main>\n"
+            render_hero(page, data, prefix="../", kind="embed", compact=True)
+            + render_marquee()
+            + f"<main{main_cls_e}>\n" + render_fragment(fragment, data, prefix="../", kind="embed") + "\n</main>\n"
         )
         out = render_document(page, data, body, css_link="../assets/style.css",
-                              prefix="../", body_class="embed")
+                              js_link="../assets/app.js", body_class="embed")
         with open(os.path.join(EMBED, page_href(page)), "w", encoding="utf-8") as f:
             f.write(out)
 
-        # 3) автономный сниппет для «Код для встраивания» (все стили внутри файла,
-        #    картинки — по абсолютным ссылкам)
-        base = asset_base  # None → ссылки на CDN Tilda
+        # 3) автономный сниппет для «Код для встраивания» (все стили и скрипты внутри файла)
+        base = asset_base  # None → запасные ссылки из pages.json
+        main_cls_g = ' id="content"' if is_index else ' id="content" class="article"'
         body = (
-            render_cover(page, data, asset_base=base, with_arrow=False)
-            + '<main id="content">\n' + render_fragment(fragment, data, asset_base=base) + "\n</main>\n"
+            render_hero(page, data, asset_base=base, kind="snippet", compact=True)
+            + render_marquee()
+            + f"<main{main_cls_g}>\n" + render_fragment(fragment, data, asset_base=base, kind="snippet") + "\n</main>\n"
         )
-        out = render_document(page, data, body, css_inline=css, asset_base=base, body_class="embed")
+        out = render_document(page, data, body, css_inline=css, js_inline=js, body_class="embed")
         name = f"{i + 1:02d}-{page['slug']}.html"
         with open(os.path.join(GS, name), "w", encoding="utf-8") as f:
             f.write(out)
 
-    write_404(data, css)
+    write_404(data, css, js)
     write_cheatsheet(data)
 
     # список страниц для README/проверки
@@ -341,25 +538,23 @@ def build(asset_base=None):
         print("Свой домен (CNAME):", domain)
 
 
-def write_404(data, css):
-    """404.html в корне — GitHub Pages показывает её для несуществующих адресов.
-    Ссылка «на главную» вычисляется скриптом: на *.github.io сайт лежит в подпапке
-    /<репозиторий>/, на своём домене — в корне."""
-    site = data["site"]
+def write_404(data, css, js):
+    """404.html в корне — GitHub Pages показывает её для несуществующих адресов."""
     body = (
-        '<section class="cover" style="--cover-h:100vh">'
-        '<div class="cover__filter"></div>'
-        '<div class="cover__content">'
-        '<p class="cover__uptitle">404</p>'
-        '<h1 class="cover__title">Такой страницы нет</h1>'
-        '<p style="margin-top:30px"><a id="home" href="/" style="font-size:18px">← На главную</a></p>'
+        '<div class="progress"></div>\n'
+        '<section class="hero hero--inner">'
+        '<div class="hero__shade"></div>'
+        '<div class="hero__in">'
+        '<p class="hero__eyebrow">Ошибка 404</p>'
+        f'<h1 class="hero__title">{split_word("ПУСТОТА", 0.2, "bone")}</h1>'
+        '<p class="hero__quote">Такой страницы нет даже у ночи.</p>'
+        '<div class="hero__btns"><a class="btn btn--blood" id="home" href="/">На главную</a></div>'
         "</div></section>"
         "<script>(function(){var h=location.hostname,p=location.pathname.split('/');"
         "document.getElementById('home').href=/\\.github\\.io$/.test(h)&&p[1]?'/'+p[1]+'/':'/';})();</script>"
     )
-    page = {"slug": "404", "title": "Страница не найдена", "cover_uptitle": "404",
-            "cover_title": "Такой страницы нет", "youtube": ""}
-    out = render_document(page, data, body, css_inline=css)
+    page = {"slug": "404", "title": "Страница не найдена"}
+    out = render_document(page, data, body, css_inline=css, js_inline=js)
     with open(os.path.join(SITE, "404.html"), "w", encoding="utf-8") as f:
         f.write(out)
 
@@ -369,6 +564,6 @@ if __name__ == "__main__":
     ap.add_argument("--asset-base", default=None,
                     help="абсолютный URL папки с картинками для сниппетов google-sites/ "
                          "(например https://bloodpact.su/assets/img). "
-                         "По умолчанию используются исходные ссылки на CDN Tilda.")
+                         "По умолчанию используются запасные ссылки из content/pages.json.")
     args = ap.parse_args()
     build(asset_base=args.asset_base)
