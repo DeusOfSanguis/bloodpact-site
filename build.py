@@ -48,6 +48,31 @@ FONTS_URL = (
 MARQUEE_WORDS = ["КРОВЬ", "血", "ЛУНА", "月", "ВЕЧНОСТЬ", "鬼",
                  "ПАКТ", "約", "ТЬМА", "闇", "СИЛА", "力"]
 
+# Печать раздела: иероглиф на обложке, в кодексе и на свитке.
+SIGIL = {
+    "index": "血",
+    "law": "法",
+    "elevation": "昇",
+    "squads": "隊",
+    "scars": "傷",
+    "limits": "限",
+    "bloodbattle": "闘",
+    "territories": "域",
+    "incentives": "賞",
+    "ranking": "位",
+    "court": "裁",
+}
+
+# Короткие подписи боковой шкалы главной (не пункты меню).
+SPINE = [
+    ("faction", "01", "Демоны"),
+    ("laws", "02", "Устав"),
+    ("moons", "03", "Луны"),
+    ("rebirth", "04", "Кровь"),
+    ("hierarchy", "05", "Ранги"),
+    ("privileges", "06", "Власть"),
+]
+
 
 def load():
     with open(os.path.join(CONTENT, "pages.json"), encoding="utf-8") as f:
@@ -123,51 +148,93 @@ def render_fragment(fragment, data, prefix="", asset_base=None, kind="site"):
         return page_url(data, slug, kind, prefix)
 
     out = re.sub(r"\{\{img:([^}]+)\}\}", repl_img, fragment)
-    return re.sub(r"\{\{page:([a-z0-9_-]+)\}\}", repl_page, out)
+    out = re.sub(r"\{\{page:([a-z0-9_-]+)\}\}", repl_page, out)
+    out = out.replace("{{marquee}}", render_marquee(False))
+    out = out.replace("{{marquee:reverse}}", render_marquee(True))
+    return out
 
 
 # ---------------------------------------------------------------- шапка ---
 
+def _sigil(page):
+    return page.get("sigil") or SIGIL.get(page["slug"], "鬼")
+
+
 def render_nav(data, current_page):
+    """Шапка: печать фракции + печати разделов + кнопка кодекса."""
     site = data["site"]
     up = rel_prefix(current_page)
-    items = []
+    home = "./" if current_page["slug"] == "index" else up
+    seals = []
+    home_on = current_page["slug"] == "index"
+    seals.append(
+        f'<a class="seal{" seal--on" if home_on else ""}" href="{home}"'
+        + (' aria-current="page"' if home_on else "")
+        + f'><i>{SIGIL["index"]}</i><span>Пакт</span></a>'
+    )
     for p in data["pages"]:
         if not p.get("nav"):
             continue
-        cls = ' class="active" aria-current="page"' if p["slug"] == current_page["slug"] else ""
-        items.append(f'<li><a href="{up}{page_path(p)}"{cls}>{html.escape(p["nav"])}</a></li>')
-    home = "./" if current_page["slug"] == "index" else up
+        on = p["slug"] == current_page["slug"]
+        seals.append(
+            f'<a class="seal{" seal--on" if on else ""}" href="{up}{page_path(p)}"'
+            + (' aria-current="page"' if on else "")
+            + f'><i>{html.escape(_sigil(p))}</i><span>{html.escape(p["nav"])}</span></a>'
+        )
     return (
         '<header class="nav">'
         '<div class="nav__in">'
-        f'<a class="nav__logo" href="{home}"><span class="nav__drop">🩸</span>'
+        f'<a class="nav__logo" href="{home}"><span class="nav__drop">{SIGIL["index"]}</span>'
         f'<span>{html.escape(site["home_label"]).replace("·", "<i>·</i>")}</span></a>'
-        '<nav aria-label="Разделы"><ul class="nav__list">' + "".join(items) + "</ul></nav>"
-        '<button class="nav__burger" data-menu-open aria-label="Меню">☰</button>'
+        '<div class="nav__seals" data-seals><div class="nav__seals-track">'
+        + "".join(seals) +
+        "</div></div>"
+        '<button class="nav__burger" data-menu-open aria-label="Открыть кодекс">'
+        '<span class="nav__burger-k">鬼</span><span class="nav__burger-t">Кодекс</span></button>'
         "</div></header>"
     )
 
 
 def render_mmenu(data, current_page):
-    """Полноэкранное меню для телефона."""
+    """Кодекс — переключение разделов печатями, а не списком ссылок."""
     up = rel_prefix(current_page)
     home = "./" if current_page["slug"] == "index" else up
-    links = [f'<a href="{home}" style="transition-delay:.05s">Главная</a>']
-    for i, p in enumerate(data["pages"]):
+    cards = []
+    entries = [("index", "Главная", "Клятва крови", home, SIGIL["index"])]
+    for p in data["pages"]:
         if not p.get("nav"):
             continue
-        links.append(
-            f'<a href="{up}{page_path(p)}" style="transition-delay:{0.08 + i * 0.04:.2f}s">'
-            f"{html.escape(p['title'])}</a>"
+        entries.append((p["slug"], p["title"], p["nav"], up + page_path(p), _sigil(p)))
+    for i, (slug, title, short, href, sig) in enumerate(entries):
+        on = " on" if slug == current_page["slug"] else ""
+        cards.append(
+            f'<a class="codex__card{on}" href="{href}" style="transition-delay:{0.04 + i * 0.035:.2f}s">'
+            f'<span class="codex__n">{i:02d}</span>'
+            f'<span class="codex__t">{html.escape(title)}</span>'
+            f'<span class="codex__s">{html.escape(short)}</span>'
+            f'<span class="codex__k" aria-hidden="true">{html.escape(sig)}</span>'
+            "</a>"
         )
     return (
-        '<div class="mmenu" role="dialog" aria-label="Меню">'
+        '<div class="mmenu" role="dialog" aria-label="Кодекс фракции">'
+        '<div class="mmenu__bar">'
+        '<p class="mmenu__brand"><i>血</i><span>Кодекс фракции</span></p>'
         '<button class="mmenu__close" data-menu-close aria-label="Закрыть">✕</button>'
-        "<nav>" + "".join(links) + "</nav>"
-        '<span class="mmenu__foot">鬼 · кровь · честь</span>'
+        "</div>"
+        '<nav class="codex">' + "".join(cards) + "</nav>"
+        '<span class="mmenu__foot">鬼 · кровь · честь · ночь не отпускает</span>'
         "</div>"
     )
+
+
+def render_spine():
+    """Боковая шкала разделов главной — только широкие экраны."""
+    links = []
+    for anchor, num, label in SPINE:
+        links.append(
+            f'<a href="#{anchor}" data-spy="{anchor}"><i>{num}</i><span>{label}</span></a>'
+        )
+    return '<nav class="spine" aria-label="Разделы главной">' + "".join(links) + "</nav>"
 
 
 # ---------------------------------------------------------------- герой ---
@@ -233,21 +300,30 @@ def render_hero(page, data, prefix="", asset_base=None, kind="site", compact=Fal
             f'<h1 class="hero__title">{title}</h1>'
             f"{quote_html}{btns}"
         )
+        crest = ""
     else:
-        title = split_word(page["cover_title"], 0.3, "bone")
-        cue = '<a class="hero__cue" href="#content"><span>Читать</span><span>﹀</span></a>'
+        sig = html.escape(_sigil(page))
+        label = page.get("nav") or page["cover_uptitle"]
+        title = f'<span class="hero__plain"><span>{html.escape(page["cover_title"])}</span></span>'
+        cue = '<a class="hero__cue" href="#content"><span>Читать свиток</span><span>﹀</span></a>'
         cls = "hero hero--inner"
-        kanji = ""
+        kanji = (
+            '<div class="hero__kanji">'
+            f'<span class="v">{sig}</span>'
+            '<span class="line"></span>'
+            f'<span class="t">{html.escape(label)}</span>'
+            "</div>"
+        )
+        crest = f'<div class="hero__crest" aria-hidden="true"><span>{sig}</span></div>'
         content = (
-            f'<p class="hero__eyebrow">{html.escape(page["cover_uptitle"])}</p>'
+            f'<p class="hero__eyebrow">{sig}&nbsp;&nbsp;{html.escape(page["cover_uptitle"])} · свиток</p>'
             f'<h1 class="hero__title">{title}</h1>'
         )
-
     return (
         f'<section class="{cls}">'
         f'<div class="hero__media">{media}</div>'
         '<div class="hero__shade"></div>'
-        f"{kanji}"
+        f"{kanji}{crest}"
         f'<div class="hero__in">{content}</div>'
         f"{cue}{video_slot}{watch}"
         "</section>"
@@ -324,7 +400,9 @@ def render_document(page, data, body, css_link=None, css_inline=None,
     script = (
         f'<script src="{js_link}" defer></script>' if js_link else f"<script>\n{js_inline}\n</script>"
     )
-    cls = ("grain " + body_class).strip()
+    slug = page.get("slug") or "page"
+    sig = html.escape(SIGIL.get(slug, ""))
+    cls = f"page-{slug} {body_class}".strip()
     return f"""<!DOCTYPE html>
 <html lang="{site['lang']}">
 <head>
@@ -342,7 +420,8 @@ def render_document(page, data, body, css_link=None, css_inline=None,
 <link rel="stylesheet" href="{FONTS_URL}">
 {head_css}
 </head>
-<body id="top" class="{cls}">
+<body id="top" class="{cls}" data-sigil="{sig}">
+<div class="veil" aria-hidden="true"></div>
 {body}
 {script}
 </body>
@@ -479,15 +558,17 @@ def build(asset_base=None):
             fragment = f.read().strip()
 
         is_index = page["slug"] == "index"
+        sig = html.escape(_sigil(page))
 
         # 1) полноценная страница сайта: index.html, law/index.html, … (в корне репозитория)
         up = rel_prefix(page)
-        main_cls = ' id="content"' if is_index else ' id="content" class="article"'
+        main_cls = ' id="content"' if is_index else f' id="content" class="article" data-kanji="{sig}"'
         body = (
             '<div class="cursor" aria-hidden="true">'
             '<div class="cursor__ring"></div><div class="cursor__dot"></div></div>\n'
             '<div class="progress"></div>\n'
             + (render_preloader() if is_index else "")
+            + (render_spine() if is_index else "")
             + render_nav(data, page)
             + render_mmenu(data, page)
             + render_hero(page, data, prefix=up, kind="site")
@@ -503,7 +584,7 @@ def build(asset_base=None):
             f.write(out)
 
         # 2) embed-версия без меню (для «Встроить по URL» в Google Sites)
-        main_cls_e = ' id="content"' if is_index else ' id="content" class="article"'
+        main_cls_e = ' id="content"' if is_index else f' id="content" class="article" data-kanji="{sig}"'
         body = (
             render_hero(page, data, prefix="../", kind="embed", compact=True)
             + render_marquee()
@@ -548,7 +629,7 @@ def write_404(data, css, js):
         '<p class="hero__eyebrow">Ошибка 404</p>'
         f'<h1 class="hero__title">{split_word("ПУСТОТА", 0.2, "bone")}</h1>'
         '<p class="hero__quote">Такой страницы нет даже у ночи.</p>'
-        '<div class="hero__btns"><a class="btn btn--blood" id="home" href="/">На главную</a></div>'
+        '<div class="hero__btns"><a class="btn btn--blood" id="home" href="/"><span>На главную</span></a></div>'
         "</div></section>"
         "<script>(function(){var h=location.hostname,p=location.pathname.split('/');"
         "document.getElementById('home').href=/\\.github\\.io$/.test(h)&&p[1]?'/'+p[1]+'/':'/';})();</script>"

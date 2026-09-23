@@ -26,6 +26,7 @@
       if (p < 1) requestAnimationFrame(tick);
       else setTimeout(function () {
         pre.classList.add("done");
+        document.body.classList.add("ready");
         document.body.style.overflow = "";
         setTimeout(function () { pre.remove(); }, 1000);
       }, 350);
@@ -100,12 +101,63 @@
     els.forEach(function (el) { io.observe(el); });
   })();
 
-  /* ---------- Аккордеон: открыта только одна вкладка ---------- */
+  /* ---------- Аккордеон: высота, и открыта только одна вкладка ---------- */
   (function () {
+    var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     document.querySelectorAll("[data-acc]").forEach(function (group) {
       group.querySelectorAll("details").forEach(function (d) {
-        d.addEventListener("toggle", function () {
-          if (d.open) group.querySelectorAll("details").forEach(function (o) { if (o !== d) o.open = false; });
+        var body = d.querySelector(".acc__body");
+        var head = d.querySelector("summary");
+        if (!body || !head || reduce) {
+          d.addEventListener("toggle", function () {
+            if (d.open) group.querySelectorAll("details").forEach(function (o) { if (o !== d) o.open = false; });
+          });
+          return;
+        }
+        body.style.overflow = "hidden";
+        body.style.transition = "height 0.42s cubic-bezier(0.22, 1, 0.36, 1)";
+        body.style.height = d.open ? "auto" : "0px";
+        function shut(item) {
+          var b = item.querySelector(".acc__body");
+          item._seq = (item._seq || 0) + 1;
+          if (b) b.style.height = "0px";
+          item.open = false;
+        }
+        head.addEventListener("click", function (e) {
+          e.preventDefault();
+          if (d.open) {
+            var h = body.getBoundingClientRect().height;
+            body.style.height = h + "px";
+            d._seq = (d._seq || 0) + 1;
+            var id = d._seq;
+            requestAnimationFrame(function () {
+              if (d._seq !== id) return;
+              body.style.height = "0px";
+            });
+            setTimeout(function () {
+              if (d._seq !== id) return;
+              d.open = false;
+              body.style.height = "0px";
+            }, 460);
+            return;
+          }
+          group.querySelectorAll("details").forEach(function (o) {
+            if (o !== d && o.open) shut(o);
+          });
+          d._seq = (d._seq || 0) + 1;
+          var id = d._seq;
+          d.open = true;
+          body.style.height = "0px";
+          requestAnimationFrame(function () {
+            if (d._seq !== id) return;
+            body.style.height = body.scrollHeight + "px";
+          });
+          function opened(ev) {
+            if (ev.propertyName !== "height" || d._seq !== id) return;
+            body.style.height = "auto";
+            body.removeEventListener("transitionend", opened);
+          }
+          body.addEventListener("transitionend", opened);
         });
       });
     });
@@ -149,6 +201,76 @@
       });
     });
   })();
+
+  /* ---------- Готовность героя (буквы встают после прелоадера) ---------- */
+  if (!document.querySelector(".preloader")) document.body.classList.add("ready");
+
+  /* ---------- Печати разделов: активная в центре ленты ---------- */
+  (function () {
+    var box = document.querySelector("[data-seals]");
+    var on = box && box.querySelector(".seal--on");
+    if (!box || !on) return;
+    var track = box.querySelector(".nav__seals-track") || box;
+    var left = on.offsetLeft - (track.clientWidth - on.offsetWidth) / 2;
+    track.scrollLeft = Math.max(0, left);
+  })();
+
+  /* ---------- Шкала главной ---------- */
+  (function () {
+    var links = document.querySelectorAll(".spine a[data-spy]");
+    if (!links.length || !("IntersectionObserver" in window)) return;
+    var map = {};
+    links.forEach(function (a) { map[a.getAttribute("data-spy")] = a; });
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        var id = e.target.id;
+        links.forEach(function (a) { a.classList.toggle("on", a.getAttribute("data-spy") === id); });
+      });
+    }, { rootMargin: "-40% 0px -45% 0px", threshold: 0.01 });
+    Object.keys(map).forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) io.observe(el);
+    });
+  })();
+
+  /* ---------- Пометки «исключение / примечание» на свитках ---------- */
+  (function () {
+    document.querySelectorAll(".article p, .article li").forEach(function (el) {
+      var t = (el.textContent || "").replace(/^\s+/, "");
+      if (/^\[?\s*(исключен|примечан|пояснен|дополнен)/i.test(t)) el.classList.add("edict");
+    });
+  })();
+
+  /* ---------- Закрыть кодекс по Escape ---------- */
+  document.addEventListener("keydown", function (e) {
+    if (e.key !== "Escape") return;
+    var menu = document.querySelector(".mmenu.open");
+    if (!menu) return;
+    menu.classList.remove("open");
+    document.body.style.overflow = "";
+  });
+
+  /* ---------- Переход между свитками: кровавая штора, не рябь ---------- */
+  document.addEventListener("click", function (e) {
+    var a = e.target && e.target.closest ? e.target.closest("a") : null;
+    if (!a || e.defaultPrevented) return;
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button) return;
+    if (a.target && a.target !== "_self") return;
+    var href = a.getAttribute("href");
+    if (!href || href.charAt(0) === "#" || href.indexOf("mailto:") === 0 || href.indexOf("javascript:") === 0) return;
+    var url;
+    try { url = new URL(a.href, location.href); } catch (err) { return; }
+    if (url.origin !== location.origin) return;
+    if (url.pathname === location.pathname && url.search === location.search) return;
+    if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    e.preventDefault();
+    document.body.classList.add("leaving");
+    setTimeout(function () { location.href = a.href; }, 420);
+  });
+  window.addEventListener("pageshow", function () {
+    document.body.classList.remove("leaving");
+  });
 
   /* ---------- Свой курсор (только для мыши) ---------- */
   (function () {
