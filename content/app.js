@@ -180,28 +180,6 @@
     });
   })();
 
-  /* ---------- Видео на обложке: грузится ТОЛЬКО по клику ----------
-     (Пока не нажали ▶ — видна картинка, поэтому обложка не бывает чёрной,
-     даже если YouTube заблокирован или не грузится.) */
-  (function () {
-    document.querySelectorAll("[data-yt]").forEach(function (btn) {
-      btn.addEventListener("click", function () {
-        var id = btn.getAttribute("data-yt");
-        var scope = btn.closest(".hero");
-        var slot = scope ? scope.querySelector(".hero__video") : null;
-        if (!id || !slot) return;
-        var src = "https://www.youtube-nocookie.com/embed/" + id +
-          "?autoplay=1&mute=1&controls=1&loop=1&playlist=" + id +
-          "&rel=0&modestbranding=1&playsinline=1";
-        slot.innerHTML = '<iframe src="' + src + '" title="Видео" ' +
-          'allow="autoplay; encrypted-media; fullscreen" allowfullscreen ' +
-          'referrerpolicy="strict-origin-when-cross-origin"></iframe>';
-        slot.classList.add("on");
-        btn.style.display = "none";
-      });
-    });
-  })();
-
   /* ---------- Готовность героя (буквы встают после прелоадера) ---------- */
   if (!document.querySelector(".preloader")) document.body.classList.add("ready");
 

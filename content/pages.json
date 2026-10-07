@@ -10,16 +10,12 @@
   },
   "assets": {
     "cover.jpg": "https://static.tildacdn.pub/tild3736-3037-4334-b863-353562353039/d946dbce69a24e0288d5.jpg",
-    "og-image.png": "https://static.tildacdn.pub/tild6233-3966-4466-b663-643734636462/image.png",
     "territory-1.png": "https://static.tildacdn.pub/tild6631-3432-4730-a366-346236323566/image.png",
     "territory-2.png": "https://static.tildacdn.pub/tild3461-6166-4264-b434-633430366439/image.png",
     "territory-3.png": "https://static.tildacdn.pub/tild6131-6164-4731-a135-663630663437/image.png",
     "territory-4.png": "https://static.tildacdn.pub/tild3633-6536-4366-a333-396232373936/image.png",
     "territory-5.png": "https://static.tildacdn.pub/tild3133-6530-4439-b132-306461663261/image.png",
-    "champion.webp": "https://static.tildacdn.pub/tild3938-6139-4036-a531-623036666330/i.webp",
-    "blood-moon.jpg": "https://bloodpact.su/assets/img/blood-moon.jpg",
-    "progenitor.jpg": "https://bloodpact.su/assets/img/progenitor.jpg",
-    "transformation.jpg": "https://bloodpact.su/assets/img/transformation.jpg"
+    "blood-moon.jpg": "https://bloodpact.su/assets/img/blood-moon.jpg"
   },
   "pages": [
     {
@@ -31,10 +27,9 @@
       "cover_title": "Фракция демонов",
       "hero_title_1": "ПАКТ",
       "hero_title_2": "КРОВИ",
-      "hero_quote": "«Ни один демон не имеет права ослушаться приказа Господина»",
+      "hero_quote": "Я — живое существо, бесконечно близкое к совершенству.",
       "cover_image": "blood-moon.jpg",
-      "cover_video": "",
-      "youtube": "2P6JSigJ7xo"
+      "hero_quote_author": "Мудзан Кибуцуджи · Прародитель демонов"
     },
     {
       "slug": "law",
@@ -43,9 +38,7 @@
       "nav": "Закон",
       "cover_uptitle": "yufu",
       "cover_title": "Демонический закон",
-      "cover_image": "blood-moon.jpg",
-      "cover_video": "",
-      "youtube": "RMnzGUtdsls"
+      "cover_image": "blood-moon.jpg"
     },
     {
       "slug": "elevation",
@@ -54,9 +47,7 @@
       "nav": "Возвышение",
       "cover_uptitle": "yufu",
       "cover_title": "Возвышение крови",
-      "cover_image": "transformation.jpg",
-      "cover_video": "",
-      "youtube": "Hb7SHEtpigc"
+      "cover_image": "blood-moon.jpg"
     },
     {
       "slug": "squads",
@@ -65,9 +56,7 @@
       "nav": "Отряды",
       "cover_uptitle": "yufu",
       "cover_title": "Отряды",
-      "cover_image": "blood-moon.jpg",
-      "cover_video": "",
-      "youtube": "Xdbl3z_21P4"
+      "cover_image": "blood-moon.jpg"
     },
     {
       "slug": "scars",
@@ -76,9 +65,7 @@
       "nav": "Шрамы",
       "cover_uptitle": "yufu",
       "cover_title": "Шрамы безотрядных",
-      "cover_image": "blood-moon.jpg",
-      "cover_video": "",
-      "youtube": "bMxFePqtYoo"
+      "cover_image": "blood-moon.jpg"
     },
     {
       "slug": "limits",
@@ -87,9 +74,7 @@
       "nav": "Пределы",
       "cover_uptitle": "yufu",
       "cover_title": "Пределы",
-      "cover_image": "blood-moon.jpg",
-      "cover_video": "",
-      "youtube": "XVDBTsir2O4"
+      "cover_image": "blood-moon.jpg"
     },
     {
       "slug": "bloodbattle",
@@ -98,9 +83,7 @@
       "nav": "Битва крови",
       "cover_uptitle": "yufu",
       "cover_title": "Битвы крови",
-      "cover_image": "blood-moon.jpg",
-      "cover_video": "",
-      "youtube": "XJsTQCXAJnY"
+      "cover_image": "blood-moon.jpg"
     },
     {
       "slug": "territories",
@@ -109,9 +92,7 @@
       "nav": "Территории",
       "cover_uptitle": "yufu",
       "cover_title": "Территории",
-      "cover_image": "blood-moon.jpg",
-      "cover_video": "",
-      "youtube": "ZmU692cglz8"
+      "cover_image": "blood-moon.jpg"
     },
     {
       "slug": "incentives",
@@ -120,9 +101,7 @@
       "nav": "Поощрения",
       "cover_uptitle": "yufu",
       "cover_title": "Поощрения",
-      "cover_image": "blood-moon.jpg",
-      "cover_video": "",
-      "youtube": "W_47yPcLm2U"
+      "cover_image": "blood-moon.jpg"
     },
     {
       "slug": "ranking",
@@ -131,9 +110,7 @@
       "nav": "Рейтинг",
       "cover_uptitle": "yufu",
       "cover_title": "Рейтинг",
-      "cover_image": "blood-moon.jpg",
-      "cover_video": "",
-      "youtube": "GADE8Tkaa2Q"
+      "cover_image": "blood-moon.jpg"
     },
     {
       "slug": "court",
@@ -142,9 +119,17 @@
       "nav": "Суд",
       "cover_uptitle": "yufu",
       "cover_title": "Суд",
-      "cover_image": "blood-moon.jpg",
-      "cover_video": "",
-      "youtube": "Sg0vFNo_Qig"
+      "cover_image": "blood-moon.jpg"
     }
-  ]
+  ],
+  "quotes": {
+    "footer": {
+      "text": "Будь благодарен за кровь. Не пролей на землю ни капли — иначе голова и тело расстанутся.",
+      "author": "Кокушибо · Первая Высшая Луна"
+    },
+    "not_found": {
+      "text": "Стань демоном, Кёджуро. Мы сможем сражаться вечно.",
+      "author": "Аказа · Третья Высшая Луна"
+    }
+  }
 }
