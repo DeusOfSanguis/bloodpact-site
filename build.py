@@ -44,8 +44,17 @@ FONTS_URL = (
     "&display=swap"
 )
 
-MARQUEE_WORDS = ["КРОВЬ", "血", "ЛУНА", "月", "ВЕЧНОСТЬ", "鬼",
-                 "ПАКТ", "約", "ТЬМА", "闇", "СИЛА", "力"]
+# Бегущая строка — цитаты демонов (Луны и Прародитель).
+# Список правится в content/pages.json → "quotes" → "marquee".
+# Здесь — только запасной вариант, если в pages.json его нет.
+MARQUEE_QUOTES = [
+    {"text": "Я — живое существо, бесконечно близкое к совершенству.",
+     "author": "Мудзан Кибуцуджи · Прародитель демонов"},
+    {"text": "Будь благодарен за кровь. Не пролей на землю ни капли — иначе голова и тело расстанутся.",
+     "author": "Кокушибо · Первая Высшая Луна"},
+    {"text": "Стань демоном, Кёджуро. Мы сможем сражаться вечно.",
+     "author": "Аказа · Третья Высшая Луна"},
+]
 
 # Печать раздела: иероглиф на обложке, в кодексе и на свитке.
 SIGIL = {
@@ -135,8 +144,8 @@ def render_fragment(fragment, data, prefix="", asset_base=None, kind="site"):
 
     out = re.sub(r"\{\{img:([^}]+)\}\}", repl_img, fragment)
     out = re.sub(r"\{\{page:([a-z0-9_-]+)\}\}", repl_page, out)
-    out = out.replace("{{marquee}}", render_marquee(False))
-    out = out.replace("{{marquee:reverse}}", render_marquee(True))
+    out = out.replace("{{marquee}}", render_marquee(data, False))
+    out = out.replace("{{marquee:reverse}}", render_marquee(data, True))
     return out
 
 
@@ -307,12 +316,18 @@ def render_hero(page, data, prefix="", asset_base=None, kind="site", compact=Fal
     )
 
 
-def render_marquee(reverse=False):
-    def word(w):
-        cls = "marquee__w k" if re.search(r"[\u4e00-\u9fff]", w) else "marquee__w"
-        return f'<span><span class="{cls}">{w}</span><span class="marquee__dot"></span></span>'
+def render_marquee(data=None, reverse=False):
+    """Бегущая строка: цитаты демонов вместо отдельных слов."""
+    quotes = ((data or {}).get("quotes") or {}).get("marquee") or MARQUEE_QUOTES
 
-    row = '<div class="marquee__row">' + "".join(word(w) for w in MARQUEE_WORDS) + "</div>"
+    def item(q):
+        text = html.escape(str(q.get("text", "")).strip())
+        author = html.escape(str(q.get("author", "")).strip())
+        cite = f'<span class="marquee__a">— {author}</span>' if author else ""
+        return (f'<span class="marquee__item"><span class="marquee__q">«{text}»</span>'
+                f'{cite}<span class="marquee__dot"></span></span>')
+
+    row = '<div class="marquee__row">' + "".join(item(q) for q in quotes) + "</div>"
     cls = "marquee marquee--reverse" if reverse else "marquee"
     return f'<div class="{cls}" aria-hidden="true"><div class="marquee__track">{row}{row}</div></div>'
 
@@ -527,7 +542,7 @@ def build(asset_base=None):
             + render_nav(data, page)
             + render_mmenu(data, page)
             + render_hero(page, data, prefix=up, kind="site")
-            + render_marquee()
+            + render_marquee(data)
             + f"<main{main_cls}>\n" + render_fragment(fragment, data, prefix=up, kind="site") + "\n</main>\n"
             + render_footer(data, page)
         )
@@ -542,7 +557,7 @@ def build(asset_base=None):
         main_cls_e = ' id="content"' if is_index else f' id="content" class="article" data-kanji="{sig}"'
         body = (
             render_hero(page, data, prefix="../", kind="embed", compact=True)
-            + render_marquee()
+            + render_marquee(data)
             + f"<main{main_cls_e}>\n" + render_fragment(fragment, data, prefix="../", kind="embed") + "\n</main>\n"
         )
         out = render_document(page, data, body, css_link="../assets/style.css",
@@ -555,7 +570,7 @@ def build(asset_base=None):
         main_cls_g = ' id="content"' if is_index else ' id="content" class="article"'
         body = (
             render_hero(page, data, asset_base=base, kind="snippet", compact=True)
-            + render_marquee()
+            + render_marquee(data)
             + f"<main{main_cls_g}>\n" + render_fragment(fragment, data, asset_base=base, kind="snippet") + "\n</main>\n"
         )
         out = render_document(page, data, body, css_inline=css, js_inline=js, body_class="embed")

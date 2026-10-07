@@ -490,36 +490,55 @@ a { color: inherit; }
 @keyframes cueY { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(8px); } }
 
 /* =====================================================================
-   БЕГУЩАЯ СТРОКА
+   БЕГУЩАЯ СТРОКА — цитаты демонов (Луны и Прародитель)
    ===================================================================== */
 .marquee {
   overflow: hidden;
   border-top: 1px solid rgba(211, 19, 42, 0.15);
   border-bottom: 1px solid rgba(211, 19, 42, 0.15);
   background: rgba(13, 8, 16, 0.6);
-  padding: 18px 0;
+  padding: 16px 0;
 }
 .marquee__track {
   display: flex;
   width: max-content;
-  animation: marquee 32s linear infinite;
+  animation: marquee 120s linear infinite;
 }
 .marquee--reverse .marquee__track { animation-direction: reverse; }
 @keyframes marquee { to { transform: translateX(-50%); } }
 .marquee__row { display: flex; align-items: center; flex-shrink: 0; }
-.marquee__row > span { display: flex; align-items: center; }
-.marquee__w {
-  margin: 0 24px;
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: clamp(18px, 3.4vw, 32px);
-  letter-spacing: 0.15em;
-  color: rgba(237, 228, 214, 0.6);
+.marquee__item { display: flex; align-items: baseline; flex-shrink: 0; }
+.marquee__q {
+  margin-left: 34px;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: clamp(15px, 2.1vw, 21px);
+  line-height: 1.4;
+  color: rgba(237, 228, 214, 0.74);
   user-select: none;
   white-space: nowrap;
 }
-.marquee__w.k { color: rgba(211, 19, 42, 0.8); }
-.marquee__dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(211, 19, 42, 0.7); flex-shrink: 0; }
+.marquee__a {
+  margin-left: 12px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(9px, 1.1vw, 12px);
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: rgba(211, 19, 42, 0.9);
+  user-select: none;
+  white-space: nowrap;
+}
+.marquee__dot {
+  align-self: center;
+  width: 7px;
+  height: 7px;
+  margin-left: 30px;
+  border-radius: 1px;
+  background: rgba(211, 19, 42, 0.75);
+  transform: rotate(45deg);
+  flex-shrink: 0;
+}
 
 /* =====================================================================
    СЕКЦИИ
@@ -585,20 +604,20 @@ a { color: inherit; }
 .reveal.in { opacity: 1; transform: none; }
 
 /* =====================================================================
-   01 ФРАКЦИЯ: печать Прародителя + карточки свойств
+   01 ДЕМОНЫ: определение (как на старом сайте) + свойства вида
    ===================================================================== */
 .faction { display: grid; gap: 48px; }
 @media (min-width: 1024px) { .faction { grid-template-columns: 1fr 1fr; gap: 80px; align-items: start; } }
 
-.lordcard { position: relative; }
-@media (min-width: 1024px) { .lordcard { position: sticky; top: 112px; } }
-.lordcard__frame {
+.creed {
   position: relative;
   isolation: isolate;
-  display: grid;
-  place-items: center;
-  min-height: 420px;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 300px;
+  padding: 32px 24px;
   border-radius: var(--radius);
   border: 1px solid rgba(211, 19, 42, 0.32);
   background:
@@ -606,59 +625,64 @@ a { color: inherit; }
     linear-gradient(145deg, #190b12, #0d0810 56%, #07050a);
   box-shadow: 0 0 60px -10px rgba(211, 19, 42, 0.45), 0 0 140px -30px rgba(211, 19, 42, 0.35);
 }
-@media (min-width: 768px) { .lordcard__frame { min-height: 600px; } }
-.lordcard__art { position: absolute; inset: 0; display: grid; place-items: center; overflow: hidden; }
-.lordcard__ring {
+@media (min-width: 768px) { .creed { min-height: 380px; padding: 44px 40px; } }
+@media (min-width: 1024px) { .creed { position: sticky; top: 112px; } }
+.creed__k {
   position: absolute;
-  aspect-ratio: 1;
-  border: 1px solid rgba(211, 19, 42, 0.24);
-  border-radius: 50%;
-}
-.lordcard__ring--outer {
-  width: min(76%, 390px);
-  box-shadow: 0 0 0 18px rgba(211, 19, 42, 0.035), 0 0 90px rgba(211, 19, 42, 0.12);
-}
-.lordcard__ring--inner { width: min(58%, 300px); transform: rotate(45deg); border-radius: 42%; }
-.lordcard__kanji {
-  position: relative;
-  z-index: 1;
+  z-index: 0;
+  right: -26px;
+  bottom: -64px;
   font-family: var(--font-display);
   font-weight: 600;
-  font-size: clamp(150px, 22vw, 280px);
+  font-size: clamp(180px, 24vw, 300px);
   line-height: 1;
-  color: rgba(211, 19, 42, 0.17);
-  text-shadow: 0 0 70px rgba(211, 19, 42, 0.3);
+  color: rgba(211, 19, 42, 0.11);
+  text-shadow: 0 0 80px rgba(211, 19, 42, 0.28);
+  pointer-events: none;
   user-select: none;
 }
-.lordcard__stamp {
-  position: absolute;
-  top: 18%;
-  left: 50%;
-  transform: translateX(-50%);
-  color: rgba(237, 228, 214, 0.45);
-  font-size: 9px;
-  letter-spacing: 0.32em;
-  white-space: nowrap;
+.creed__stamp,
+.creed__text,
+.creed__sign { position: relative; z-index: 1; }
+.creed__stamp {
+  margin: 0 0 18px;
+  font-size: 10px;
+  letter-spacing: 0.36em;
+  text-transform: uppercase;
+  color: var(--blood);
 }
-.lordcard__shade { position: absolute; z-index: 1; inset: 0; background: linear-gradient(180deg, transparent 24%, rgba(6, 3, 9, 0.2) 48%, var(--void) 100%); }
-.lordcard__cap { position: absolute; z-index: 2; bottom: 0; left: 0; right: 0; padding: 24px; text-align: left; }
-.lordcard__cap .who { font-size: 10px; letter-spacing: 0.4em; text-transform: uppercase; color: var(--blood); margin: 0 0 8px; }
-.lordcard__cap .name { font-family: var(--font-display); font-weight: 700; font-size: clamp(18px, 3vw, 24px); margin: 0; }
-.lordcard__cap .note { font-family: var(--font-serif); font-style: italic; font-size: 14px; color: rgba(237, 228, 214, 0.68); margin: 8px 0 0; max-width: 380px; }
-.lordcard__seal {
-  position: absolute;
-  z-index: 3;
-  top: -20px; right: -8px;
+.creed__text {
+  margin: 0;
+  max-width: 52ch;
+  font-family: var(--font-serif);
+  font-size: clamp(17px, 2vw, 22px);
+  line-height: 1.74;
+  color: rgba(237, 228, 214, 0.88);
+}
+.creed__text strong { color: var(--bone); font-weight: 700; }
+.creed__sign {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 28px 0 0;
+  padding-top: 16px;
+  border-top: 1px solid rgba(237, 228, 214, 0.1);
+  font-size: 10px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--ash);
+}
+.creed__seal {
   display: grid;
   place-items: center;
-  width: 64px; height: 64px;
+  flex-shrink: 0;
+  width: 34px; height: 34px;
   border-radius: 50%;
   border: 1px solid rgba(211, 19, 42, 0.4);
-  background: var(--void);
+  background: rgba(211, 19, 42, 0.14);
   font-family: var(--font-display);
-  font-size: 30px;
+  font-size: 16px;
   color: var(--blood);
-  box-shadow: 0 0 60px -10px rgba(211, 19, 42, 0.55);
   animation: sealPulse 4s ease-in-out infinite;
   user-select: none;
 }
@@ -1299,7 +1323,7 @@ body.embed .tabs__btns { display: none; }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   .marquee__track, .hero__cue span:last-child,
-  .lordcard__seal, .preloader__kanji { animation: none; }
+  .creed__seal, .preloader__kanji { animation: none; }
   .veil, body.leaving .veil { animation: none; }
   .reveal { opacity: 1; transform: none; transition: none; }
   .hero__title .ch { animation: none; transform: none; }
@@ -1395,11 +1419,11 @@ body.ready .hero__crest { animation: fadeIn 1s 1.15s both; }
 .btn--blood:hover::after { transform: none; }
 .btn--blood:hover { transform: scale(1.04); background: var(--blood); }
 
-.lordcard__frame {
-  clip-path: inset(7% 7% 7% 7%);
+.creed {
+  clip-path: inset(8% 0 8% 0);
   transition: clip-path 1.05s cubic-bezier(0.22, 1, 0.36, 1);
 }
-.lordcard.in .lordcard__frame { clip-path: inset(0); }
+.creed.in { clip-path: inset(0); }
 
 .traits .trait:nth-child(2) { transition-delay: 0.08s; }
 .traits .trait:nth-child(3) { transition-delay: 0.16s; }
@@ -2110,7 +2134,7 @@ body.embed .hero__crest { display: none; }
   body:not(.ready) .hero__crest { opacity: 1; }
   .hero__plain span,
   body:not(.ready) .hero__title .ch { transform: none; }
-  .lordcard__frame { clip-path: none; }
+  .creed { clip-path: none; }
   .mooncol.in .moonrow,
   .tabs__panel.active,
   .tabs__panel.active .permit li,
@@ -2310,7 +2334,7 @@ body.embed .hero__crest { display: none; }
 </head>
 <body id="top" class="page-court embed" data-sigil="裁">
 <div class="veil" aria-hidden="true"></div>
-<section class="hero hero--inner"><div class="hero__media"><img class="bg" src="assets/img/blood-moon.jpg" alt="" fetchpriority="high"></div><div class="hero__shade"></div><div class="hero__kanji"><span class="v">裁</span><span class="line"></span><span class="t">Суд</span></div><div class="hero__crest" aria-hidden="true"><span>裁</span></div><div class="hero__in"><p class="hero__eyebrow">裁&nbsp;&nbsp;yufu · свиток</p><h1 class="hero__title"><span class="hero__plain"><span>Суд</span></span></h1></div><a class="hero__cue" href="#content"><span>Читать свиток</span><span>﹀</span></a></section><div class="marquee" aria-hidden="true"><div class="marquee__track"><div class="marquee__row"><span><span class="marquee__w">КРОВЬ</span><span class="marquee__dot"></span></span><span><span class="marquee__w k">血</span><span class="marquee__dot"></span></span><span><span class="marquee__w">ЛУНА</span><span class="marquee__dot"></span></span><span><span class="marquee__w k">月</span><span class="marquee__dot"></span></span><span><span class="marquee__w">ВЕЧНОСТЬ</span><span class="marquee__dot"></span></span><span><span class="marquee__w k">鬼</span><span class="marquee__dot"></span></span><span><span class="marquee__w">ПАКТ</span><span class="marquee__dot"></span></span><span><span class="marquee__w k">約</span><span class="marquee__dot"></span></span><span><span class="marquee__w">ТЬМА</span><span class="marquee__dot"></span></span><span><span class="marquee__w k">闇</span><span class="marquee__dot"></span></span><span><span class="marquee__w">СИЛА</span><span class="marquee__dot"></span></span><span><span class="marquee__w k">力</span><span class="marquee__dot"></span></span></div><div class="marquee__row"><span><span class="marquee__w">КРОВЬ</span><span class="marquee__dot"></span></span><span><span class="marquee__w k">血</span><span class="marquee__dot"></span></span><span><span class="marquee__w">ЛУНА</span><span class="marquee__dot"></span></span><span><span class="marquee__w k">月</span><span class="marquee__dot"></span></span><span><span class="marquee__w">ВЕЧНОСТЬ</span><span class="marquee__dot"></span></span><span><span class="marquee__w k">鬼</span><span class="marquee__dot"></span></span><span><span class="marquee__w">ПАКТ</span><span class="marquee__dot"></span></span><span><span class="marquee__w k">約</span><span class="marquee__dot"></span></span><span><span class="marquee__w">ТЬМА</span><span class="marquee__dot"></span></span><span><span class="marquee__w k">闇</span><span class="marquee__dot"></span></span><span><span class="marquee__w">СИЛА</span><span class="marquee__dot"></span></span><span><span class="marquee__w k">力</span><span class="marquee__dot"></span></span></div></div></div><main id="content" class="article">
+<section class="hero hero--inner"><div class="hero__media"><img class="bg" src="assets/img/blood-moon.jpg" alt="" fetchpriority="high"></div><div class="hero__shade"></div><div class="hero__kanji"><span class="v">裁</span><span class="line"></span><span class="t">Суд</span></div><div class="hero__crest" aria-hidden="true"><span>裁</span></div><div class="hero__in"><p class="hero__eyebrow">裁&nbsp;&nbsp;yufu · свиток</p><h1 class="hero__title"><span class="hero__plain"><span>Суд</span></span></h1></div><a class="hero__cue" href="#content"><span>Читать свиток</span><span>﹀</span></a></section><div class="marquee" aria-hidden="true"><div class="marquee__track"><div class="marquee__row"><span class="marquee__item"><span class="marquee__q">«Я — живое существо, бесконечно близкое к совершенству.»</span><span class="marquee__a">— Мудзан Кибуцуджи · Прародитель демонов</span><span class="marquee__dot"></span></span><span class="marquee__item"><span class="marquee__q">«Будь благодарен за кровь. Не пролей на землю ни капли — иначе голова и тело расстанутся.»</span><span class="marquee__a">— Кокушибо · Первая Высшая Луна</span><span class="marquee__dot"></span></span><span class="marquee__item"><span class="marquee__q">«Я люблю людей. Всё, чего я хочу, — быть рядом с ними.»</span><span class="marquee__a">— Доума · Вторая Высшая Луна</span><span class="marquee__dot"></span></span><span class="marquee__item"><span class="marquee__q">«Стань демоном, Кёджуро. Мы сможем сражаться вечно.»</span><span class="marquee__a">— Аказа · Третья Высшая Луна</span><span class="marquee__dot"></span></span><span class="marquee__item"><span class="marquee__q">«Мы не брат и сестра. Мы — одна Шестая Высшая Луна.»</span><span class="marquee__a">— Гютаро · Шестая Высшая Луна</span><span class="marquee__dot"></span></span><span class="marquee__item"><span class="marquee__q">«Тот, кто красивее меня, не заслуживает жить.»</span><span class="marquee__a">— Даки · Шестая Высшая Луна</span><span class="marquee__dot"></span></span><span class="marquee__item"><span class="marquee__q">«Почему я? Почему Прародитель выбрал именно меня?»</span><span class="marquee__a">— Энму · Первая Низшая Луна</span><span class="marquee__dot"></span></span><span class="marquee__item"><span class="marquee__q">«Семья должна быть вместе. Семейные узы — это всё.»</span><span class="marquee__a">— Руи · Пятая Низшая Луна</span><span class="marquee__dot"></span></span></div><div class="marquee__row"><span class="marquee__item"><span class="marquee__q">«Я — живое существо, бесконечно близкое к совершенству.»</span><span class="marquee__a">— Мудзан Кибуцуджи · Прародитель демонов</span><span class="marquee__dot"></span></span><span class="marquee__item"><span class="marquee__q">«Будь благодарен за кровь. Не пролей на землю ни капли — иначе голова и тело расстанутся.»</span><span class="marquee__a">— Кокушибо · Первая Высшая Луна</span><span class="marquee__dot"></span></span><span class="marquee__item"><span class="marquee__q">«Я люблю людей. Всё, чего я хочу, — быть рядом с ними.»</span><span class="marquee__a">— Доума · Вторая Высшая Луна</span><span class="marquee__dot"></span></span><span class="marquee__item"><span class="marquee__q">«Стань демоном, Кёджуро. Мы сможем сражаться вечно.»</span><span class="marquee__a">— Аказа · Третья Высшая Луна</span><span class="marquee__dot"></span></span><span class="marquee__item"><span class="marquee__q">«Мы не брат и сестра. Мы — одна Шестая Высшая Луна.»</span><span class="marquee__a">— Гютаро · Шестая Высшая Луна</span><span class="marquee__dot"></span></span><span class="marquee__item"><span class="marquee__q">«Тот, кто красивее меня, не заслуживает жить.»</span><span class="marquee__a">— Даки · Шестая Высшая Луна</span><span class="marquee__dot"></span></span><span class="marquee__item"><span class="marquee__q">«Почему я? Почему Прародитель выбрал именно меня?»</span><span class="marquee__a">— Энму · Первая Низшая Луна</span><span class="marquee__dot"></span></span><span class="marquee__item"><span class="marquee__q">«Семья должна быть вместе. Семейные узы — это всё.»</span><span class="marquee__a">— Руи · Пятая Низшая Луна</span><span class="marquee__dot"></span></span></div></div></div><main id="content" class="article">
 <section class="s">
   <h3>Основания для созыва суда</h3>
   <ul>
