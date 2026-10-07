@@ -2127,13 +2127,192 @@ body.embed .hero__crest { display: none; }
   mask: var(--m) center / contain no-repeat;
 }
 
+/* =====================================================================
+   EDITORIAL TYPOGRAPHY — читаемая иерархия для разных типов текста
+   Сохраняем единые шрифты и палитру, но отделяем заголовки, основной текст,
+   примечания и справочную информацию друг от друга.
+   ===================================================================== */
+.article .s p,
+.article .s ul,
+.article .s ol {
+  font-size: 16px;
+  line-height: 1.8;
+  letter-spacing: 0.005em;
+  color: rgba(237, 228, 214, 0.86);
+  text-wrap: pretty;
+}
+@media (min-width: 768px) {
+  .article .s p,
+  .article .s ul,
+  .article .s ol { font-size: 17px; }
+}
+.article .s p { max-width: 74ch; margin-bottom: 18px; }
+.article .s ul,
+.article .s ol { max-width: 76ch; margin-bottom: 20px; }
+.article .s strong { font-weight: 750; }
+.article .s em { color: var(--ember); font-family: var(--font-serif); font-size: 1.05em; }
+
+.article .s h3:not(.squad) {
+  font-family: var(--font-sans);
+  font-weight: 750;
+  text-transform: none;
+  letter-spacing: -0.015em;
+  font-size: clamp(18px, 2.3vw, 23px);
+  line-height: 1.35;
+  margin: 36px 0 14px;
+  text-wrap: balance;
+}
+.article .s h3.squad {
+  font-family: var(--font-display);
+  font-size: clamp(18px, 2.2vw, 23px);
+  letter-spacing: 0.045em;
+  text-transform: uppercase;
+  line-height: 1.3;
+  text-wrap: balance;
+}
+.article .s > p.lead {
+  max-width: 76ch;
+  margin-bottom: 24px;
+  padding-left: 16px;
+  border-left: 2px solid rgba(211, 19, 42, 0.75);
+  color: rgba(237, 228, 214, 0.96);
+  font-size: clamp(16px, 1.45vw, 19px);
+  line-height: 1.8;
+}
+.article .s.center > p.lead {
+  margin-right: auto;
+  margin-left: auto;
+  padding-left: 0;
+  border-left: 0;
+  text-align: center;
+}
+
+.article .s p.note {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+  max-width: 100%;
+  margin: 14px 0 20px;
+  padding: 12px 15px;
+  border: 1px solid rgba(211, 19, 42, 0.22);
+  border-radius: 10px;
+  background: rgba(211, 19, 42, 0.055);
+  color: rgba(237, 228, 214, 0.82);
+  font-size: 14px;
+  line-height: 1.65;
+  font-style: normal;
+}
+.article .s p.note::before {
+  content: "ⓘ";
+  flex: 0 0 auto;
+  color: var(--blood);
+  font-family: var(--font-sans);
+  font-weight: 800;
+}
+.article .s p.note strong { color: var(--bone); }
+.article .s p.note--exception {
+  border-color: rgba(255, 46, 66, 0.34);
+  background: rgba(211, 19, 42, 0.1);
+}
+.article .s p.note--exception::before { content: "!"; color: var(--ember); }
+.article .s p.note--addition::before { content: "+"; }
+.article .s p.note--example::before { content: "↳"; }
+
+.article .s p.squad-parent {
+  display: table;
+  width: fit-content;
+  max-width: 100%;
+  margin: 0 0 14px;
+  padding: 7px 12px;
+  border-left: 2px solid rgba(211, 19, 42, 0.75);
+  border-radius: 0 8px 8px 0;
+  background: rgba(211, 19, 42, 0.08);
+  color: var(--ash);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.article .s p.squad-parent strong { color: var(--ember); }
+
+.article .s.squad-updates {
+  border-color: rgba(211, 19, 42, 0.48);
+  background:
+    radial-gradient(ellipse at 0 0, rgba(211, 19, 42, 0.16), transparent 62%),
+    rgba(8, 5, 12, 0.82);
+}
+.article .s.squad-updates h2 {
+  margin: 2px 0 20px;
+  padding: 0;
+  border: 0;
+  color: var(--bone);
+  font-size: clamp(20px, 3vw, 29px);
+  text-align: left;
+}
+.article .s.squad-updates blockquote {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  font-family: var(--font-sans);
+  font-style: normal;
+}
+.article .s.squad-updates .squad-updates__quote p {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  max-width: none;
+  margin: 0 0 8px;
+  padding: 11px 14px;
+  border-left: 2px solid rgba(211, 19, 42, 0.55);
+  border-radius: 0 8px 8px 0;
+  background: rgba(237, 228, 214, 0.035);
+  color: rgba(237, 228, 214, 0.92);
+  font-size: 15px;
+  line-height: 1.65;
+}
+.article .s.squad-updates .squad-updates__quote p:last-child { margin-bottom: 0; }
+.article .s.squad-updates .squad-updates__quote p::before {
+  content: "↳";
+  flex: 0 0 auto;
+  color: var(--ember);
+}
+.article .s.squad-updates .squad-updates__quote strong { font-weight: 750; }
+@media (min-width: 768px) {
+  .article .s.squad-updates .squad-updates__quote p { font-size: 16px; }
+}
+
+/* Уточнения находятся прямо под тем правом, к которому относятся. */
+.permit li { font-size: 15px; line-height: 1.72; }
+@media (min-width: 768px) { .permit li { font-size: 16px; } }
+.permit__text { display: block; min-width: 0; flex: 1 1 auto; }
+.permit__detail {
+  display: block;
+  margin-top: 9px;
+  padding: 8px 11px;
+  border-left: 2px solid rgba(211, 19, 42, 0.42);
+  border-radius: 0 8px 8px 0;
+  background: rgba(6, 3, 9, 0.34);
+  color: rgba(237, 228, 214, 0.72);
+  font-size: 13px;
+  line-height: 1.65;
+  font-style: normal;
+}
+.permit__detail strong { color: var(--bone); font-weight: 700; }
+.permit__detail--exception {
+  border-left-color: var(--ember);
+  background: rgba(211, 19, 42, 0.09);
+}
+.permit__detail--warning { border-left-color: rgba(255, 46, 66, 0.7); }
+@media (min-width: 768px) { .permit__detail { font-size: 14px; } }
+
 </style>
 </head>
 <body id="top" class="page-law embed" data-sigil="法">
 <div class="veil" aria-hidden="true"></div>
 <section class="hero hero--inner"><div class="hero__media"><img class="bg" src="assets/img/blood-moon.jpg" alt="" fetchpriority="high"></div><div class="hero__shade"></div><div class="hero__kanji"><span class="v">法</span><span class="line"></span><span class="t">Закон</span></div><div class="hero__crest" aria-hidden="true"><span>法</span></div><div class="hero__in"><p class="hero__eyebrow">法&nbsp;&nbsp;yufu · свиток</p><h1 class="hero__title"><span class="hero__plain"><span>Демонический закон</span></span></h1></div><a class="hero__cue" href="#content"><span>Читать свиток</span><span>﹀</span></a></section><div class="marquee" aria-hidden="true"><div class="marquee__track"><div class="marquee__row"><span><span class="marquee__w">КРОВЬ</span><span class="marquee__dot"></span></span><span><span class="marquee__w k">血</span><span class="marquee__dot"></span></span><span><span class="marquee__w">ЛУНА</span><span class="marquee__dot"></span></span><span><span class="marquee__w k">月</span><span class="marquee__dot"></span></span><span><span class="marquee__w">ВЕЧНОСТЬ</span><span class="marquee__dot"></span></span><span><span class="marquee__w k">鬼</span><span class="marquee__dot"></span></span><span><span class="marquee__w">ПАКТ</span><span class="marquee__dot"></span></span><span><span class="marquee__w k">約</span><span class="marquee__dot"></span></span><span><span class="marquee__w">ТЬМА</span><span class="marquee__dot"></span></span><span><span class="marquee__w k">闇</span><span class="marquee__dot"></span></span><span><span class="marquee__w">СИЛА</span><span class="marquee__dot"></span></span><span><span class="marquee__w k">力</span><span class="marquee__dot"></span></span></div><div class="marquee__row"><span><span class="marquee__w">КРОВЬ</span><span class="marquee__dot"></span></span><span><span class="marquee__w k">血</span><span class="marquee__dot"></span></span><span><span class="marquee__w">ЛУНА</span><span class="marquee__dot"></span></span><span><span class="marquee__w k">月</span><span class="marquee__dot"></span></span><span><span class="marquee__w">ВЕЧНОСТЬ</span><span class="marquee__dot"></span></span><span><span class="marquee__w k">鬼</span><span class="marquee__dot"></span></span><span><span class="marquee__w">ПАКТ</span><span class="marquee__dot"></span></span><span><span class="marquee__w k">約</span><span class="marquee__dot"></span></span><span><span class="marquee__w">ТЬМА</span><span class="marquee__dot"></span></span><span><span class="marquee__w k">闇</span><span class="marquee__dot"></span></span><span><span class="marquee__w">СИЛА</span><span class="marquee__dot"></span></span><span><span class="marquee__w k">力</span><span class="marquee__dot"></span></span></div></div></div><main id="content" class="article">
 <section class="s">
-  <p><strong>Демонический закон</strong> - это свод правил и норм, регламентирующий различные аспекты жизни во фракции. Исполнение данных законов обязательно для каждого демона, а их нарушение наказуемо!</p>
+  <p class="lead"><strong>Демонический закон</strong> - это свод правил и норм, регламентирующий различные аспекты жизни во фракции. Исполнение данных законов обязательно для каждого демона, а их нарушение наказуемо!</p>
   <p>Незнание закона не освобождает от ответственности, а также он не распространяется на дискорд фракции</p>
   <p>На демонический закон работает прецедентная система правил =&gt; если вы будете абузить пунктами правил либо нарушите то, что не прописано (к примеру убегаете на спавн когда с вами пытается РПшить луна), то вы получите наказание по усмотрению того, кто отвечает за выговоры (Dep.Leader)</p>
 
@@ -2144,7 +2323,7 @@ body.embed .hero__crest { display: none; }
     <li>Физическое наказание</li>
     <li>Отработка заданием</li>
   </ul>
-  <p>Примечание: Последние 2 пункта демон обязуется выполнить если выдающий наказание посчитал его нарушения не критичным для выдачи первых двух пунктов наказания, но, в случае если демон отказывается от отработки, он получает выговор не смотря на тяжесть нарушения. Срок выполнения задания не должен превышать 3-х дней. Запрещается выдавать сразу 2 РП наказания (Т.e Отработку задание + Физ отработку)</p>
+  <p class="note"><strong>Примечание:</strong> Последние 2 пункта демон обязуется выполнить если выдающий наказание посчитал его нарушения не критичным для выдачи первых двух пунктов наказания, но, в случае если демон отказывается от отработки, он получает выговор не смотря на тяжесть нарушения. Срок выполнения задания не должен превышать 3-х дней. Запрещается выдавать сразу 2 РП наказания (Т.e Отработку задание + Физ отработку)</p>
 
   <h3>Предупреждение может быть выдано за:</h3>
   <ul>
@@ -2174,7 +2353,7 @@ body.embed .hero__crest { display: none; }
   </ul>
   <p>Выдающий наказание демон вправе смягчить меру наказания за нарушение конкретных пунктов если оно было несерьезно</p>
   <p>Нельзя приплетать больше двух пунктов демонического закона к одной ситуации (=&gt; вы не можете выдать больше одного выговора демону за 1 ситуацию)</p>
-  <p>[Исключение: Намеренные нарушения демонического закона]</p>
+  <p class="note note--exception"><strong>Исключение:</strong> Намеренные нарушения демонического закона</p>
 </section>
 
 <hr>
@@ -2200,7 +2379,7 @@ body.embed .hero__crest { display: none; }
 
   <h3>[7] Нападение на демона</h3>
   <p>В демонах все разногласия решаются битвой крови, поэтому нападение на демона даже с весомой причиной будет являться нарушением. Если вы случайно задели демона - это может быть смягчено до предупреждения</p>
-  <p>[Исключение: 12 лун, прародитель]</p>
+  <p class="note note--exception"><strong>Исключение:</strong> 12 лун, прародитель</p>
 
   <h3>[8] Толкание демона на территории цитадели без причины</h3>
   <p>Если вы толкнули демона случайно - это будет приравниваться к предупреждению. Если вы выталкиваете демона из строя, в бездну намеренно толкаете больше двух раз - выговор.</p>
@@ -2211,7 +2390,7 @@ body.embed .hero__crest { display: none; }
 
   <h3>[10] Убийство демона на территории цитадели</h3>
   <p>Все разногласия, как уже было сказано, решаются в битве крови, поэтому убийство демона даже с весомой причиной будет являться нарушением.</p>
-  <p>[Исключение: 12 лун, Прародитель]</p>
+  <p class="note note--exception"><strong>Исключение:</strong> 12 лун, Прародитель</p>
 
   <h3>[11] Отказ от отработки</h3>
   <p>При выдаче физ. наказания или отработки вы обязаны принять и выполнить в течении указанного срока</p>
@@ -2226,13 +2405,13 @@ body.embed .hero__crest { display: none; }
   <p>Запрещено высказываться в негативном ключе о других отрядах с целью высмеивания или переманивания</p>
 
   <h3>[15] Диким и низшим демонам запрещено использовать маскировку, так как они ей еще не обучены</h3>
-  <p>[Исключение: ивент]</p>
+  <p class="note note--exception"><strong>Исключение:</strong> ивент</p>
 
   <h3>[16] Запрещен намеренный слив члена фракции из отряда/фракции</h3>
 
   <h3>[17] Попрошайничество поощрений</h3>
-  <p>[Пример: Вы приходите на тренировку и первое что спрашиваете: А поощерение будет? А поощерение дадут?<br>
-  После тренировки: А дайте поощерение, а дайте задание на поощерение ]</p>
+  <p class="note note--example"><strong>Пример:</strong> Вы приходите на тренировку и первое что спрашиваете: А поощерение будет? А поощерение дадут?<br>
+  После тренировки: А дайте поощерение, а дайте задание на поощерение </p>
 </section>
 
 <hr>
@@ -2241,7 +2420,7 @@ body.embed .hero__crest { display: none; }
   <h3>Правила поведения в трен. зале</h3>
   <p>[1] Запрещено прятаться за демоном, не состоящим в дуэли, как живым щитом</p>
   <p>[2] Покидать трен. зал во время активной дуэли запрещено</p>
-  <p>[Исключение: сборы, 12 лун, Прародитель]</p>
+  <p class="note note--exception"><strong>Исключение:</strong> сборы, 12 лун, Прародитель</p>
   <p>[3] Запрещено влезать в активную дуэль, дабы помочь одной из сторон</p>
 
   <h3>Правила поведения в строю</h3>
@@ -2254,7 +2433,7 @@ body.embed .hero__crest { display: none; }
   <p>[1] Кд на тренировки - пятнадцать минут, за этим КД должны наблюдать главный инструктор и луны</p>
   <p>[2] Однотипные тренировки запрещены</p>
   <p>[3] При проведении тренировки вы должны слушать проводящего</p>
-  <p>[Исключение: иерархия, некорректные приказы]</p>
+  <p class="note note--exception"><strong>Исключение:</strong> иерархия, некорректные приказы</p>
   <p>[4] Примечание по поводу сбора на захваты точек:</p>
   <p>КД на захваты - один час, за этим КД должны наблюдать луны</p>
   <p>[5] Пропуск сбора без уважительной причины равен <strong>предупреждению</strong> при обращении к конкретному демону. Повторный пропуск после предупреждения - <strong>выговор</strong>.</p>
