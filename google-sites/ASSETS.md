@@ -6,17 +6,17 @@
 
 | № | Страница в Google Sites | Заголовок на обложке | Файл с текстом | Исходник на Tilda |
 |---|---|---|---|---|
-| 1 | Главная страница | YUFU · ФРАКЦИЯ ДЕМОНОВ / Фракция демонов | `google-sites/01-index.html` | https://bloodpact-yufu.tilda.ws/ |
-| 2 | Демонический закон | YUFU / Демонический закон | `google-sites/02-law.html` | https://bloodpact-yufu.tilda.ws/law |
-| 3 | Возвышение крови | YUFU / Возвышение крови | `google-sites/03-elevation.html` | https://bloodpact-yufu.tilda.ws/elevation |
-| 4 | Отряды | YUFU / Отряды | `google-sites/04-squads.html` | https://bloodpact-yufu.tilda.ws/squads |
-| 5 | Шрамы | YUFU / Шрамы безотрядных | `google-sites/05-scars.html` | https://bloodpact-yufu.tilda.ws/scars |
-| 6 | Пределы крови | YUFU / Пределы | `google-sites/06-limits.html` | https://bloodpact-yufu.tilda.ws/limits |
-| 7 | Битва крови | YUFU / Битвы крови | `google-sites/07-bloodbattle.html` | https://bloodpact-yufu.tilda.ws/bloodbattle |
-| 8 | Территории | YUFU / Территории | `google-sites/08-territories.html` | https://bloodpact-yufu.tilda.ws/territories |
-| 9 | Поощрения | YUFU / Поощрения | `google-sites/09-incentives.html` | https://bloodpact-yufu.tilda.ws/incentives |
-| 10 | Рейтинг | YUFU / Рейтинг | `google-sites/10-ranking.html` | https://bloodpact-yufu.tilda.ws/ranking |
-| 11 | Суд | YUFU / Суд | `google-sites/11-court.html` | https://bloodpact-yufu.tilda.ws/court |
+| 1 | Главная страница | ФРАКЦИЯ ДЕМОНОВ / Фракция демонов | `google-sites/01-index.html` | https://bloodpact-yufu.tilda.ws/ |
+| 2 | Демонический закон | ПАКТ КРОВИ / Демонический закон | `google-sites/02-law.html` | https://bloodpact-yufu.tilda.ws/law |
+| 3 | Возвышение крови | ПАКТ КРОВИ / Возвышение крови | `google-sites/03-elevation.html` | https://bloodpact-yufu.tilda.ws/elevation |
+| 4 | Отряды | ПАКТ КРОВИ / Отряды | `google-sites/04-squads.html` | https://bloodpact-yufu.tilda.ws/squads |
+| 5 | Шрамы | ПАКТ КРОВИ / Шрамы безотрядных | `google-sites/05-scars.html` | https://bloodpact-yufu.tilda.ws/scars |
+| 6 | Пределы крови | ПАКТ КРОВИ / Пределы | `google-sites/06-limits.html` | https://bloodpact-yufu.tilda.ws/limits |
+| 7 | Битва крови | ПАКТ КРОВИ / Битвы крови | `google-sites/07-bloodbattle.html` | https://bloodpact-yufu.tilda.ws/bloodbattle |
+| 8 | Территории | ПАКТ КРОВИ / Территории | `google-sites/08-territories.html` | https://bloodpact-yufu.tilda.ws/territories |
+| 9 | Поощрения | ПАКТ КРОВИ / Поощрения | `google-sites/09-incentives.html` | https://bloodpact-yufu.tilda.ws/incentives |
+| 10 | Рейтинг | ПАКТ КРОВИ / Рейтинг | `google-sites/10-ranking.html` | https://bloodpact-yufu.tilda.ws/ranking |
+| 11 | Суд | ПАКТ КРОВИ / Суд | `google-sites/11-court.html` | https://bloodpact-yufu.tilda.ws/court |
 
 ## Картинки
 

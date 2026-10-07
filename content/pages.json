@@ -1,12 +1,12 @@
 {
   "site": {
-    "name": "Пакт крови — beta 0.1",
+    "name": "Пакт крови — beta 0.2",
     "short": "yufu",
     "domain": "bloodpact.su",
     "pages_url": "https://bloodpact.su/",
     "home_label": "ПАКТ·КРОВИ",
     "lang": "ru",
-    "description": "Пакт Крови — фракция демонов YUFU. Иерархия, законы, Двенадцать лун и привилегии должностей."
+    "description": "Пакт крови — фракция демонов: иерархия, законы, Двенадцать лун и привилегии должностей."
   },
   "assets": {
     "cover.jpg": "https://static.tildacdn.pub/tild3736-3037-4334-b863-353562353039/d946dbce69a24e0288d5.jpg",
@@ -23,7 +23,7 @@
       "source": "https://bloodpact-yufu.tilda.ws/",
       "title": "Главная страница",
       "nav": null,
-      "cover_uptitle": "YUFU · Фракция демонов",
+      "cover_uptitle": "Фракция демонов",
       "cover_title": "Фракция демонов",
       "hero_title_1": "ПАКТ",
       "hero_title_2": "КРОВИ",
@@ -36,7 +36,7 @@
       "source": "https://bloodpact-yufu.tilda.ws/law",
       "title": "Демонический закон",
       "nav": "Закон",
-      "cover_uptitle": "yufu",
+      "cover_uptitle": "Пакт крови",
       "cover_title": "Демонический закон",
       "cover_image": "blood-moon.jpg"
     },
@@ -45,7 +45,7 @@
       "source": "https://bloodpact-yufu.tilda.ws/elevation",
       "title": "Возвышение крови",
       "nav": "Возвышение",
-      "cover_uptitle": "yufu",
+      "cover_uptitle": "Пакт крови",
       "cover_title": "Возвышение крови",
       "cover_image": "blood-moon.jpg"
     },
@@ -54,7 +54,7 @@
       "source": "https://bloodpact-yufu.tilda.ws/squads",
       "title": "Отряды",
       "nav": "Отряды",
-      "cover_uptitle": "yufu",
+      "cover_uptitle": "Пакт крови",
       "cover_title": "Отряды",
       "cover_image": "blood-moon.jpg"
     },
@@ -63,7 +63,7 @@
       "source": "https://bloodpact-yufu.tilda.ws/scars",
       "title": "Шрамы",
       "nav": "Шрамы",
-      "cover_uptitle": "yufu",
+      "cover_uptitle": "Пакт крови",
       "cover_title": "Шрамы безотрядных",
       "cover_image": "blood-moon.jpg"
     },
@@ -72,7 +72,7 @@
       "source": "https://bloodpact-yufu.tilda.ws/limits",
       "title": "Пределы крови",
       "nav": "Пределы",
-      "cover_uptitle": "yufu",
+      "cover_uptitle": "Пакт крови",
       "cover_title": "Пределы",
       "cover_image": "blood-moon.jpg"
     },
@@ -81,7 +81,7 @@
       "source": "https://bloodpact-yufu.tilda.ws/bloodbattle",
       "title": "Битва крови",
       "nav": "Битва крови",
-      "cover_uptitle": "yufu",
+      "cover_uptitle": "Пакт крови",
       "cover_title": "Битвы крови",
       "cover_image": "blood-moon.jpg"
     },
@@ -90,7 +90,7 @@
       "source": "https://bloodpact-yufu.tilda.ws/territories",
       "title": "Территории",
       "nav": "Территории",
-      "cover_uptitle": "yufu",
+      "cover_uptitle": "Пакт крови",
       "cover_title": "Территории",
       "cover_image": "blood-moon.jpg"
     },
@@ -99,7 +99,7 @@
       "source": "https://bloodpact-yufu.tilda.ws/incentives",
       "title": "Поощрения",
       "nav": "Поощрения",
-      "cover_uptitle": "yufu",
+      "cover_uptitle": "Пакт крови",
       "cover_title": "Поощрения",
       "cover_image": "blood-moon.jpg"
     },
@@ -108,7 +108,7 @@
       "source": "https://bloodpact-yufu.tilda.ws/ranking",
       "title": "Рейтинг",
       "nav": "Рейтинг",
-      "cover_uptitle": "yufu",
+      "cover_uptitle": "Пакт крови",
       "cover_title": "Рейтинг",
       "cover_image": "blood-moon.jpg"
     },
@@ -117,7 +117,7 @@
       "source": "https://bloodpact-yufu.tilda.ws/court",
       "title": "Суд",
       "nav": "Суд",
-      "cover_uptitle": "yufu",
+      "cover_uptitle": "Пакт крови",
       "cover_title": "Суд",
       "cover_image": "blood-moon.jpg"
     }

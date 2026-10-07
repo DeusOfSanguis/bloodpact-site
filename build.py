@@ -266,12 +266,7 @@ def render_hero(page, data, prefix="", asset_base=None, kind="site", compact=Fal
         quote = page.get("hero_quote") or ""
         title = split_word(w1, 0.7, "bone") + split_word(w2, 1.0, "red")
         quote_html = render_quote(quote, page.get("hero_quote_author"), "hero__quote")
-        btns = (
-            '<div class="hero__btns">'
-            '<a class="btn btn--blood" href="#faction"><span>Познать тьму</span></a>'
-            '<a class="btn btn--ghost" href="#hierarchy">Иерархия</a>'
-            "</div>"
-        )
+        # Кнопки «Познать тьму» и «Иерархия» на обложке не нужны — убраны.
         kanji = (
             '<div class="hero__kanji">'
             '<span class="v">鬼ノ契約</span>'
@@ -284,7 +279,7 @@ def render_hero(page, data, prefix="", asset_base=None, kind="site", compact=Fal
         content = (
             f'<p class="hero__eyebrow">☾&nbsp;&nbsp;{html.escape(page["cover_uptitle"])}</p>'
             f'<h1 class="hero__title">{title}</h1>'
-            f"{quote_html}{btns}"
+            f"{quote_html}"
         )
         crest = ""
     else:
@@ -359,7 +354,7 @@ def render_footer(data, current_page):
         "</div>"
         "</div>"
         '<div class="footer__bot">'
-        f'<p>© <span data-year>2026</span> {html.escape(site["name"])} · {html.escape(site["short"])}. Сайт фракции демонов YUFU.</p>'
+        f'<p>© <span data-year>2026</span> {html.escape(site["name"])}. Сайт фракции демонов.</p>'
         "<p>鬼 · 血 · 月</p>"
         "</div>"
         "</div></footer>"
