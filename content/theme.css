@@ -84,9 +84,20 @@ a { color: inherit; }
   align-items: center;
   justify-content: center;
   background: var(--void);
-  transition: transform 0.9s cubic-bezier(0.76, 0, 0.24, 1);
+  transition: transform 1.05s cubic-bezier(0.55, 0, 0.2, 1);
 }
 .preloader.done { transform: translateY(-100%); }
+/* Экран загрузки — один раз за сеанс. Дальше переходы между страницами
+   обходятся только шторкой, поэтому две анимации подряд не накладываются. */
+html.bp-seen .preloader { display: none; }
+/* содержимое экрана гаснет первым — уход получается одной плавной волной */
+.preloader__kanji,
+.preloader__bar,
+.preloader__foot { transition: opacity 0.5s ease, transform 0.75s cubic-bezier(0.4, 0, 0.2, 1); }
+.preloader.done .preloader__kanji { animation: none; }
+.preloader.done .preloader__kanji,
+.preloader.done .preloader__bar,
+.preloader.done .preloader__foot { opacity: 0; transform: translateY(-18px); }
 .preloader__kanji {
   font-family: var(--font-display);
   font-weight: 900;
@@ -1334,6 +1345,7 @@ body.embed .tabs__btns { display: none; }
   .marquee__track, .hero__cue span:last-child,
   .creed__seal, .preloader__kanji { animation: none; }
   .veil, body.leaving .veil { animation: none; }
+  .preloader, .preloader__kanji, .preloader__bar, .preloader__foot { transition: none; }
   .reveal { opacity: 1; transform: none; transition: none; }
   .hero__title .ch { animation: none; transform: none; }
 }
@@ -1789,9 +1801,9 @@ body:has(.mmenu.open) .spine { opacity: 0; pointer-events: none; }
 }
 body.leaving .veil {
   pointer-events: auto;
-  animation: veilDown 0.42s cubic-bezier(0.76, 0, 0.24, 1) forwards;
+  animation: veilDown 0.55s cubic-bezier(0.6, 0, 0.25, 1) forwards;
 }
-body.leaving .veil::after { opacity: 1; transition: opacity 0.2s 0.12s; }
+body.leaving .veil::after { opacity: 1; transition: opacity 0.3s 0.14s ease; }
 @keyframes veilDown {
   from { transform: scaleY(0); }
   to { transform: scaleY(1); }

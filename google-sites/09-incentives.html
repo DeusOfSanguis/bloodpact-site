@@ -10,6 +10,7 @@
 <meta property="og:description" content="Пакт крови — фракция демонов: иерархия, законы, Двенадцать лун и привилегии должностей.">
 <meta property="og:image" content="https://bloodpact.su/assets/img/blood-moon.jpg">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%A9%B8%3C/text%3E%3C/svg%3E">
+<script>try{if(sessionStorage.getItem('bp-visited')){document.documentElement.classList.add('bp-seen');}else{sessionStorage.setItem('bp-visited','1');}}catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@300;400;600;800;900&family=Cormorant:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=Manrope:wght@300;400;500;600;700;800&display=swap">
@@ -100,9 +101,20 @@ a { color: inherit; }
   align-items: center;
   justify-content: center;
   background: var(--void);
-  transition: transform 0.9s cubic-bezier(0.76, 0, 0.24, 1);
+  transition: transform 1.05s cubic-bezier(0.55, 0, 0.2, 1);
 }
 .preloader.done { transform: translateY(-100%); }
+/* Экран загрузки — один раз за сеанс. Дальше переходы между страницами
+   обходятся только шторкой, поэтому две анимации подряд не накладываются. */
+html.bp-seen .preloader { display: none; }
+/* содержимое экрана гаснет первым — уход получается одной плавной волной */
+.preloader__kanji,
+.preloader__bar,
+.preloader__foot { transition: opacity 0.5s ease, transform 0.75s cubic-bezier(0.4, 0, 0.2, 1); }
+.preloader.done .preloader__kanji { animation: none; }
+.preloader.done .preloader__kanji,
+.preloader.done .preloader__bar,
+.preloader.done .preloader__foot { opacity: 0; transform: translateY(-18px); }
 .preloader__kanji {
   font-family: var(--font-display);
   font-weight: 900;
@@ -1350,6 +1362,7 @@ body.embed .tabs__btns { display: none; }
   .marquee__track, .hero__cue span:last-child,
   .creed__seal, .preloader__kanji { animation: none; }
   .veil, body.leaving .veil { animation: none; }
+  .preloader, .preloader__kanji, .preloader__bar, .preloader__foot { transition: none; }
   .reveal { opacity: 1; transform: none; transition: none; }
   .hero__title .ch { animation: none; transform: none; }
 }
@@ -1805,9 +1818,9 @@ body:has(.mmenu.open) .spine { opacity: 0; pointer-events: none; }
 }
 body.leaving .veil {
   pointer-events: auto;
-  animation: veilDown 0.42s cubic-bezier(0.76, 0, 0.24, 1) forwards;
+  animation: veilDown 0.55s cubic-bezier(0.6, 0, 0.25, 1) forwards;
 }
-body.leaving .veil::after { opacity: 1; transition: opacity 0.2s 0.12s; }
+body.leaving .veil::after { opacity: 1; transition: opacity 0.3s 0.14s ease; }
 @keyframes veilDown {
   from { transform: scaleY(0); }
   to { transform: scaleY(1); }
@@ -2392,7 +2405,7 @@ body.embed .hero__crest { display: none; }
 </head>
 <body id="top" class="page-incentives embed" data-sigil="賞">
 <div class="veil" aria-hidden="true"></div>
-<section class="hero hero--inner"><div class="hero__media"><img class="bg" src="assets/img/blood-moon.jpg" alt="" fetchpriority="high"></div><div class="hero__shade"></div><div class="hero__kanji"><span class="v">賞</span><span class="line"></span><span class="t">Поощрения</span></div><div class="hero__crest" aria-hidden="true"><span>賞</span></div><div class="hero__in"><p class="hero__eyebrow">賞&nbsp;&nbsp;Пакт крови · свиток</p><h1 class="hero__title"><span class="hero__plain"><span>Поощрения</span></span></h1></div><a class="hero__cue" href="#content"><span>Читать свиток</span><span>﹀</span></a></section><div class="marquee" aria-hidden="true"><div class="marquee__track"><div class="marquee__row"><span class="marquee__item"><span class="marquee__q">«Я — живое существо, бесконечно близкое к совершенству.»</span><span class="marquee__a">— Мудзан Кибуцуджи · Прародитель демонов</span><span class="marquee__dot"></span></span><span class="marquee__item"><span class="marquee__q">«Будь благодарен за кровь. Не пролей на землю ни капли — иначе голова и тело расстанутся.»</span><span class="marquee__a">— Кокушибо · Первая Высшая Луна</span><span class="marquee__dot"></span></span><span class="marquee__item"><span class="marquee__q">«Я люблю людей. Всё, чего я хочу, — быть рядом с ними.»</span><span class="marquee__a">— Доума · Вторая Высшая Луна</span><span class="marquee__dot"></span></span><span class="marquee__item"><span class="marquee__q">«Стань демоном, Кёджуро. Мы сможем сражаться вечно.»</span><span class="marquee__a">— Аказа · Третья Высшая Луна</span><span class="marquee__dot"></span></span><span class="marquee__item"><span class="marquee__q">«Мы не брат и сестра. Мы — одна Шестая Высшая Луна.»</span><span class="marquee__a">— Гютаро · Шестая Высшая Луна</span><span class="marquee__dot"></span></span><span class="marquee__item"><span class="marquee__q">«Тот, кто красивее меня, не заслуживает жить.»</span><span class="marquee__a">— Даки · Шестая Высшая Луна</span><span class="marquee__dot"></span></span><span class="marquee__item"><span class="marquee__q">«Почему я? Почему Прародитель выбрал именно меня?»</span><span class="marquee__a">— Энму · Первая Низшая Луна</span><span class="marquee__dot"></span></span><span class="marquee__item"><span class="marquee__q">«Семья должна быть вместе. Семейные узы — это всё.»</span><span class="marquee__a">— Руи · Пятая Низшая Луна</span><span class="marquee__dot"></span></span></div><div class="marquee__row"><span class="marquee__item"><span class="marquee__q">«Я — живое существо, бесконечно близкое к совершенству.»</span><span class="marquee__a">— Мудзан Кибуцуджи · Прародитель демонов</span><span class="marquee__dot"></span></span><span class="marquee__item"><span class="marquee__q">«Будь благодарен за кровь. Не пролей на землю ни капли — иначе голова и тело расстанутся.»</span><span class="marquee__a">— Кокушибо · Первая Высшая Луна</span><span class="marquee__dot"></span></span><span class="marquee__item"><span class="marquee__q">«Я люблю людей. Всё, чего я хочу, — быть рядом с ними.»</span><span class="marquee__a">— Доума · Вторая Высшая Луна</span><span class="marquee__dot"></span></span><span class="marquee__item"><span class="marquee__q">«Стань демоном, Кёджуро. Мы сможем сражаться вечно.»</span><span class="marquee__a">— Аказа · Третья Высшая Луна</span><span class="marquee__dot"></span></span><span class="marquee__item"><span class="marquee__q">«Мы не брат и сестра. Мы — одна Шестая Высшая Луна.»</span><span class="marquee__a">— Гютаро · Шестая Высшая Луна</span><span class="marquee__dot"></span></span><span class="marquee__item"><span class="marquee__q">«Тот, кто красивее меня, не заслуживает жить.»</span><span class="marquee__a">— Даки · Шестая Высшая Луна</span><span class="marquee__dot"></span></span><span class="marquee__item"><span class="marquee__q">«Почему я? Почему Прародитель выбрал именно меня?»</span><span class="marquee__a">— Энму · Первая Низшая Луна</span><span class="marquee__dot"></span></span><span class="marquee__item"><span class="marquee__q">«Семья должна быть вместе. Семейные узы — это всё.»</span><span class="marquee__a">— Руи · Пятая Низшая Луна</span><span class="marquee__dot"></span></span></div></div></div><main id="content" class="article">
+<section class="hero hero--inner"><div class="hero__media"><img class="bg" src="assets/img/blood-moon.jpg" alt="" fetchpriority="high"></div><div class="hero__shade"></div><div class="hero__kanji"><span class="v">賞</span><span class="line"></span><span class="t">Поощрения</span></div><div class="hero__crest" aria-hidden="true"><span>賞</span></div><div class="hero__in"><p class="hero__eyebrow">賞&nbsp;&nbsp;Пакт крови</p><h1 class="hero__title"><span class="hero__plain"><span>Поощрения</span></span></h1></div><a class="hero__cue" href="#content"><span>Читать свиток</span><span>﹀</span></a></section><div class="marquee" aria-hidden="true"><div class="marquee__track"><div class="marquee__row"><span class="marquee__item"><span class="marquee__q">«Я — живое существо, бесконечно близкое к совершенству.»</span><span class="marquee__a">— Мудзан Кибуцуджи · Прародитель демонов</span><span class="marquee__dot"></span></span><span class="marquee__item"><span class="marquee__q">«Будь благодарен за кровь. Не пролей на землю ни капли — иначе голова и тело расстанутся.»</span><span class="marquee__a">— Кокушибо · Первая Высшая Луна</span><span class="marquee__dot"></span></span><span class="marquee__item"><span class="marquee__q">«Я люблю людей. Всё, чего я хочу, — быть рядом с ними.»</span><span class="marquee__a">— Доума · Вторая Высшая Луна</span><span class="marquee__dot"></span></span><span class="marquee__item"><span class="marquee__q">«Стань демоном, Кёджуро. Мы сможем сражаться вечно.»</span><span class="marquee__a">— Аказа · Третья Высшая Луна</span><span class="marquee__dot"></span></span><span class="marquee__item"><span class="marquee__q">«Мы не брат и сестра. Мы — одна Шестая Высшая Луна.»</span><span class="marquee__a">— Гютаро · Шестая Высшая Луна</span><span class="marquee__dot"></span></span><span class="marquee__item"><span class="marquee__q">«Тот, кто красивее меня, не заслуживает жить.»</span><span class="marquee__a">— Даки · Шестая Высшая Луна</span><span class="marquee__dot"></span></span><span class="marquee__item"><span class="marquee__q">«Почему я? Почему Прародитель выбрал именно меня?»</span><span class="marquee__a">— Энму · Первая Низшая Луна</span><span class="marquee__dot"></span></span><span class="marquee__item"><span class="marquee__q">«Семья должна быть вместе. Семейные узы — это всё.»</span><span class="marquee__a">— Руи · Пятая Низшая Луна</span><span class="marquee__dot"></span></span></div><div class="marquee__row"><span class="marquee__item"><span class="marquee__q">«Я — живое существо, бесконечно близкое к совершенству.»</span><span class="marquee__a">— Мудзан Кибуцуджи · Прародитель демонов</span><span class="marquee__dot"></span></span><span class="marquee__item"><span class="marquee__q">«Будь благодарен за кровь. Не пролей на землю ни капли — иначе голова и тело расстанутся.»</span><span class="marquee__a">— Кокушибо · Первая Высшая Луна</span><span class="marquee__dot"></span></span><span class="marquee__item"><span class="marquee__q">«Я люблю людей. Всё, чего я хочу, — быть рядом с ними.»</span><span class="marquee__a">— Доума · Вторая Высшая Луна</span><span class="marquee__dot"></span></span><span class="marquee__item"><span class="marquee__q">«Стань демоном, Кёджуро. Мы сможем сражаться вечно.»</span><span class="marquee__a">— Аказа · Третья Высшая Луна</span><span class="marquee__dot"></span></span><span class="marquee__item"><span class="marquee__q">«Мы не брат и сестра. Мы — одна Шестая Высшая Луна.»</span><span class="marquee__a">— Гютаро · Шестая Высшая Луна</span><span class="marquee__dot"></span></span><span class="marquee__item"><span class="marquee__q">«Тот, кто красивее меня, не заслуживает жить.»</span><span class="marquee__a">— Даки · Шестая Высшая Луна</span><span class="marquee__dot"></span></span><span class="marquee__item"><span class="marquee__q">«Почему я? Почему Прародитель выбрал именно меня?»</span><span class="marquee__a">— Энму · Первая Низшая Луна</span><span class="marquee__dot"></span></span><span class="marquee__item"><span class="marquee__q">«Семья должна быть вместе. Семейные узы — это всё.»</span><span class="marquee__a">— Руи · Пятая Низшая Луна</span><span class="marquee__dot"></span></span></div></div></div><main id="content" class="article">
 <section class="s">
   <p class="lead">Прародитель и демоны 12 лун могут выдавать поощрения в зависимости от проделанной работы</p>
 
@@ -2476,14 +2489,17 @@ body.embed .hero__crest { display: none; }
     el.textContent = new Date().getFullYear();
   });
 
-  /* ---------- Прелоадер (только главная, ~1.5 сек) ---------- */
+  /* ---------- Экран загрузки (только главная и только раз за сеанс) ----------
+     Если человек уже открывал какую-то страницу сайта, экран пропускается:
+     при переходе с другой страницы остаётся только шторка, без второй анимации. */
   (function () {
     var pre = document.querySelector(".preloader");
     if (!pre) return;
+    if (document.documentElement.classList.contains("bp-seen")) { pre.remove(); return; }
     var num = pre.querySelector("[data-count]");
     var fill = pre.querySelector(".preloader__fill");
     document.body.style.overflow = "hidden";
-    var start = performance.now(), dur = 1400;
+    var start = performance.now(), dur = 1200;
     function tick(t) {
       var p = Math.min(1, (t - start) / dur);
       if (num) num.textContent = Math.round(p * 100) + "%";
@@ -2493,8 +2509,8 @@ body.embed .hero__crest { display: none; }
         pre.classList.add("done");
         document.body.classList.add("ready");
         document.body.style.overflow = "";
-        setTimeout(function () { pre.remove(); }, 1000);
-      }, 350);
+        setTimeout(function () { pre.remove(); }, 1300);
+      }, 300);
     }
     requestAnimationFrame(tick);
   })();
@@ -2709,7 +2725,7 @@ body.embed .hero__crest { display: none; }
     if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     e.preventDefault();
     document.body.classList.add("leaving");
-    setTimeout(function () { location.href = a.href; }, 420);
+    setTimeout(function () { location.href = a.href; }, 540);
   });
   window.addEventListener("pageshow", function () {
     document.body.classList.remove("leaving");

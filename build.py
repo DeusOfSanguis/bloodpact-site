@@ -297,7 +297,7 @@ def render_hero(page, data, prefix="", asset_base=None, kind="site", compact=Fal
         )
         crest = f'<div class="hero__crest" aria-hidden="true"><span>{sig}</span></div>'
         content = (
-            f'<p class="hero__eyebrow">{sig}&nbsp;&nbsp;{html.escape(page["cover_uptitle"])} · свиток</p>'
+            f'<p class="hero__eyebrow">{sig}&nbsp;&nbsp;{html.escape(page["cover_uptitle"])}</p>'
             f'<h1 class="hero__title">{title}</h1>'
         )
     return (
@@ -366,10 +366,10 @@ def render_preloader():
         '<div class="preloader">'
         '<span class="preloader__kanji">血</span>'
         '<div class="preloader__bar">'
-        '<div class="preloader__row"><span>Пробуждение</span><b data-count>0%</b></div>'
+        '<div class="preloader__row"><span>Возгордись</span><b data-count>0%</b></div>'
         '<div class="preloader__track"><div class="preloader__fill"></div></div>'
         "</div>"
-        '<span class="preloader__foot">Клятва крови</span>'
+        '<span class="preloader__foot">своей расой, своей кровью</span>'
         "</div>"
     )
 
@@ -391,6 +391,14 @@ def render_document(page, data, body, css_link=None, css_inline=None,
     slug = page.get("slug") or "page"
     sig = html.escape(SIGIL.get(slug, ""))
     cls = f"page-{slug} {body_class}".strip()
+    # Экран загрузки показывается только один раз за сеанс: если человек уже открывал
+    # любую страницу сайта, при следующих переходах остаётся только шторка (один переход, а не два).
+    visit = (
+        "<script>try{"
+        "if(sessionStorage.getItem('bp-visited')){document.documentElement.classList.add('bp-seen');}"
+        "else{sessionStorage.setItem('bp-visited','1');}"
+        "}catch(e){}</script>"
+    )
     return f"""<!DOCTYPE html>
 <html lang="{site['lang']}">
 <head>
@@ -403,6 +411,7 @@ def render_document(page, data, body, css_link=None, css_inline=None,
 <meta property="og:description" content="{html.escape(site['description'])}">
 <meta property="og:image" content="{og}">
 <link rel="icon" href="{FAVICON}">
+{visit}
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="{FONTS_URL}">
