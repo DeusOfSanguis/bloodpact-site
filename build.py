@@ -274,7 +274,7 @@ def render_hero(page, data, prefix="", asset_base=None, kind="site", compact=Fal
             '<span class="t">клятва демона</span>'
             "</div>"
         )
-        cue = '<a class="hero__cue" href="#faction"><span>Склонись ниже</span><span>﹀</span></a>'
+        cue = '<a class="hero__cue" href="#faction" aria-label="Дальше"><span aria-hidden="true">﹀</span></a>'
         cls = "hero"
         content = (
             f'<p class="hero__eyebrow">☾&nbsp;&nbsp;{html.escape(page["cover_uptitle"])}</p>'
