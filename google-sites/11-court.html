@@ -3,13 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Суд — Пакт крови — beta 0.1</title>
-<meta name="description" content="Пакт Крови — фракция демонов YUFU. Иерархия, законы, Двенадцать лун и привилегии должностей.">
+<title>Суд — Пакт крови — beta 0.2</title>
+<meta name="description" content="Пакт крови — фракция демонов: иерархия, законы, Двенадцать лун и привилегии должностей.">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Суд — Пакт крови — beta 0.1">
-<meta property="og:description" content="Пакт Крови — фракция демонов YUFU. Иерархия, законы, Двенадцать лун и привилегии должностей.">
+<meta property="og:title" content="Суд — Пакт крови — beta 0.2">
+<meta property="og:description" content="Пакт крови — фракция демонов: иерархия, законы, Двенадцать лун и привилегии должностей.">
 <meta property="og:image" content="https://bloodpact.su/assets/img/blood-moon.jpg">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%A9%B8%3C/text%3E%3C/svg%3E">
+<script>try{if(sessionStorage.getItem('bp-visited')){document.documentElement.classList.add('bp-seen');}else{sessionStorage.setItem('bp-visited','1');}}catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@300;400;600;800;900&family=Cormorant:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=Manrope:wght@300;400;500;600;700;800&display=swap">
@@ -100,9 +101,20 @@ a { color: inherit; }
   align-items: center;
   justify-content: center;
   background: var(--void);
-  transition: transform 0.9s cubic-bezier(0.76, 0, 0.24, 1);
+  transition: transform 1.05s cubic-bezier(0.55, 0, 0.2, 1);
 }
 .preloader.done { transform: translateY(-100%); }
+/* Экран загрузки — один раз за сеанс. Дальше переходы между страницами
+   обходятся только шторкой, поэтому две анимации подряд не накладываются. */
+html.bp-seen .preloader { display: none; }
+/* содержимое экрана гаснет первым — уход получается одной плавной волной */
+.preloader__kanji,
+.preloader__bar,
+.preloader__foot { transition: opacity 0.5s ease, transform 0.75s cubic-bezier(0.4, 0, 0.2, 1); }
+.preloader.done .preloader__kanji { animation: none; }
+.preloader.done .preloader__kanji,
+.preloader.done .preloader__bar,
+.preloader.done .preloader__foot { opacity: 0; transform: translateY(-18px); }
 .preloader__kanji {
   font-family: var(--font-display);
   font-weight: 900;
@@ -604,29 +616,32 @@ a { color: inherit; }
 .reveal.in { opacity: 1; transform: none; }
 
 /* =====================================================================
-   01 ДЕМОНЫ: определение (как на старом сайте) + свойства вида
+   01 ДЕМОНЫ: один блок — определение вида и четыре свойства демона.
+   Свойства лежат внутри того же свитка и отделены линиями, а не карточками.
    ===================================================================== */
-.faction { display: grid; gap: 48px; }
-@media (min-width: 1024px) { .faction { grid-template-columns: 1fr 1fr; gap: 80px; align-items: start; } }
-
-.creed {
+.faction {
   position: relative;
+  display: block;
   isolation: isolate;
   overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  min-height: 300px;
-  padding: 32px 24px;
+  padding: 30px 22px;
   border-radius: var(--radius);
   border: 1px solid rgba(211, 19, 42, 0.32);
   background:
-    radial-gradient(ellipse at 50% 38%, rgba(92, 10, 18, 0.48), transparent 58%),
-    linear-gradient(145deg, #190b12, #0d0810 56%, #07050a);
+    radial-gradient(ellipse at 50% 16%, rgba(92, 10, 18, 0.42), transparent 62%),
+    linear-gradient(158deg, #170a11, #0d0810 58%, #07050a);
   box-shadow: 0 0 60px -10px rgba(211, 19, 42, 0.45), 0 0 140px -30px rgba(211, 19, 42, 0.35);
 }
-@media (min-width: 768px) { .creed { min-height: 380px; padding: 44px 40px; } }
-@media (min-width: 1024px) { .creed { position: sticky; top: 112px; } }
+@media (min-width: 768px) { .faction { padding: 44px 40px 38px; } }
+@media (min-width: 1080px) { .faction { padding: 56px 60px 42px; } }
+
+.creed__k,
+.creed__stamp,
+.creed__text,
+.traits__cap,
+.traits,
+.creed__sign { position: relative; z-index: 1; }
+
 .creed__k {
   position: absolute;
   z-index: 0;
@@ -636,14 +651,11 @@ a { color: inherit; }
   font-weight: 600;
   font-size: clamp(180px, 24vw, 300px);
   line-height: 1;
-  color: rgba(211, 19, 42, 0.11);
-  text-shadow: 0 0 80px rgba(211, 19, 42, 0.28);
+  color: rgba(211, 19, 42, 0.09);
+  text-shadow: 0 0 80px rgba(211, 19, 42, 0.24);
   pointer-events: none;
   user-select: none;
 }
-.creed__stamp,
-.creed__text,
-.creed__sign { position: relative; z-index: 1; }
 .creed__stamp {
   margin: 0 0 18px;
   font-size: 10px;
@@ -653,18 +665,94 @@ a { color: inherit; }
 }
 .creed__text {
   margin: 0;
-  max-width: 52ch;
+  max-width: 68ch;
   font-family: var(--font-serif);
   font-size: clamp(17px, 2vw, 22px);
   line-height: 1.74;
   color: rgba(237, 228, 214, 0.88);
 }
 .creed__text strong { color: var(--bone); font-weight: 700; }
+
+/* заголовок четырёх свойств — внутри того же блока */
+.traits__cap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 34px 0 0;
+  padding: 18px 0 12px;
+  border-top: 1px solid rgba(237, 228, 214, 0.12);
+  font-size: 10px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--ash);
+}
+.traits__cap .k {
+  font-family: var(--font-display);
+  font-size: 14px;
+  letter-spacing: 0;
+  color: var(--blood);
+}
+
+/* четыре свойства — строки одного свитка, разделённые линиями */
+.traits { display: grid; gap: 0; margin: 0; }
+.trait {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  gap: 18px;
+  align-items: flex-start;
+  padding: 24px 0;
+  border-top: 1px solid rgba(237, 228, 214, 0.1);
+}
+@media (min-width: 900px) {
+  .traits { grid-template-columns: 1fr 1fr; }
+  .trait { padding: 28px 40px 30px 0; }
+  .trait:nth-child(even) { padding: 28px 0 30px 40px; border-left: 1px solid rgba(237, 228, 214, 0.1); }
+}
+.trait__num {
+  position: absolute;
+  right: 0;
+  bottom: -26px;
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 68px;
+  color: rgba(237, 228, 214, 0.04);
+  user-select: none;
+  transition: color 0.5s;
+}
+@media (min-width: 900px) { .trait:nth-child(even) .trait__num { right: 8px; } }
+.trait:hover .trait__num { color: rgba(211, 19, 42, 0.12); }
+.trait__icon {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  border: 1px solid rgba(211, 19, 42, 0.4);
+  background: rgba(211, 19, 42, 0.1);
+  color: var(--blood);
+  font-size: 20px;
+  transition: background 0.5s, color 0.5s, box-shadow 0.5s;
+}
+.trait:hover .trait__icon { background: var(--blood); color: var(--bone); box-shadow: 0 0 26px -8px rgba(211, 19, 42, 0.95); }
+.trait h3 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(15px, 2.4vw, 18px);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: color 0.5s;
+}
+.trait:hover h3 { color: var(--ember); }
+.trait p { margin: 8px 0 0; font-size: 14px; color: var(--ash); line-height: 1.7; }
+@media (min-width: 768px) { .trait p { font-size: 15px; } }
+
 .creed__sign {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin: 28px 0 0;
+  margin: 30px 0 0;
   padding-top: 16px;
   border-top: 1px solid rgba(237, 228, 214, 0.1);
   font-size: 10px;
@@ -687,56 +775,6 @@ a { color: inherit; }
   user-select: none;
 }
 @keyframes sealPulse { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
-
-.traits { display: flex; flex-direction: column; gap: 16px; }
-.trait {
-  position: relative;
-  overflow: hidden;
-  border: 1px solid rgba(237, 228, 214, 0.1);
-  border-radius: 12px;
-  background: rgba(13, 8, 16, 0.6);
-  padding: 24px;
-  display: flex;
-  gap: 20px;
-  align-items: flex-start;
-  transition: border-color 0.5s;
-}
-@media (min-width: 768px) { .trait { padding: 32px; } }
-.trait:hover { border-color: rgba(211, 19, 42, 0.5); }
-.trait__num {
-  position: absolute;
-  right: -8px; bottom: -28px;
-  font-family: var(--font-display);
-  font-weight: 900;
-  font-size: 72px;
-  color: rgba(237, 228, 214, 0.04);
-  user-select: none;
-  transition: color 0.5s;
-}
-.trait:hover .trait__num { color: rgba(211, 19, 42, 0.1); }
-.trait__icon {
-  flex-shrink: 0;
-  display: grid;
-  place-items: center;
-  width: 44px; height: 44px;
-  border-radius: 50%;
-  border: 1px solid rgba(211, 19, 42, 0.4);
-  background: rgba(211, 19, 42, 0.1);
-  color: var(--blood);
-  font-size: 20px;
-  transition: background 0.5s, color 0.5s;
-}
-.trait:hover .trait__icon { background: var(--blood); color: var(--bone); }
-.trait h3 {
-  margin: 0;
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: clamp(15px, 2.4vw, 18px);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-.trait p { margin: 8px 0 0; font-size: 14px; color: var(--ash); line-height: 1.7; }
-@media (min-width: 768px) { .trait p { font-size: 15px; } }
 
 .quote {
   margin: 16px 0 0;
@@ -1076,8 +1114,7 @@ a { color: inherit; }
 }
 .tabs__btn.active .k { color: var(--blood); }
 .tabs__panel { display: none; }
-.tabs__panel.active { display: block; animation: panelIn 0.45s cubic-bezier(0.22, 1, 0.36, 1); }
-@keyframes panelIn { from { opacity: 0; transform: translateY(24px); filter: blur(6px); } to { opacity: 1; transform: none; filter: blur(0); } }
+.tabs__panel.active { display: block; }
 .permit { display: grid; gap: 20px; }
 @media (min-width: 768px) { .permit { grid-template-columns: 1fr 1fr; } }
 .permit__col { border-radius: var(--radius); padding: 24px; }
@@ -1325,6 +1362,7 @@ body.embed .tabs__btns { display: none; }
   .marquee__track, .hero__cue span:last-child,
   .creed__seal, .preloader__kanji { animation: none; }
   .veil, body.leaving .veil { animation: none; }
+  .preloader, .preloader__kanji, .preloader__bar, .preloader__foot { transition: none; }
   .reveal { opacity: 1; transform: none; transition: none; }
   .hero__title .ch { animation: none; transform: none; }
 }
@@ -1419,15 +1457,23 @@ body.ready .hero__crest { animation: fadeIn 1s 1.15s both; }
 .btn--blood:hover::after { transform: none; }
 .btn--blood:hover { transform: scale(1.04); background: var(--blood); }
 
-.creed {
-  clip-path: inset(8% 0 8% 0);
-  transition: clip-path 1.05s cubic-bezier(0.22, 1, 0.36, 1);
+.faction {
+  clip-path: inset(4% 0 4% 0);
+  transition:
+    clip-path 1.05s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.7s ease,
+    transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
 }
-.creed.in { clip-path: inset(0); }
+.faction.in { clip-path: inset(0); }
 
-.traits .trait:nth-child(2) { transition-delay: 0.08s; }
-.traits .trait:nth-child(3) { transition-delay: 0.16s; }
-.traits .trait:nth-child(4) { transition-delay: 0.24s; }
+/* строки свойств подтягиваются вслед за свитком — по одной, целиком */
+.faction.in .traits__cap { animation: rise 0.6s 0.16s both; }
+.faction.in .trait { animation: rise 0.6s both; }
+.faction.in .trait:nth-child(1) { animation-delay: 0.22s; }
+.faction.in .trait:nth-child(2) { animation-delay: 0.3s; }
+.faction.in .trait:nth-child(3) { animation-delay: 0.38s; }
+.faction.in .trait:nth-child(4) { animation-delay: 0.46s; }
+.faction.in .creed__sign { animation: rise 0.7s 0.54s both; }
 
 .mooncol.in .moonrow {
   animation: rowIn 0.5s both;
@@ -1772,9 +1818,9 @@ body:has(.mmenu.open) .spine { opacity: 0; pointer-events: none; }
 }
 body.leaving .veil {
   pointer-events: auto;
-  animation: veilDown 0.42s cubic-bezier(0.76, 0, 0.24, 1) forwards;
+  animation: veilDown 0.55s cubic-bezier(0.6, 0, 0.25, 1) forwards;
 }
-body.leaving .veil::after { opacity: 1; transition: opacity 0.2s 0.12s; }
+body.leaving .veil::after { opacity: 1; transition: opacity 0.3s 0.14s ease; }
 @keyframes veilDown {
   from { transform: scaleY(0); }
   to { transform: scaleY(1); }
@@ -2071,20 +2117,38 @@ body.embed .hero__crest { display: none; }
   border-color: var(--blood);
   box-shadow: 0 0 22px -6px rgba(211, 19, 42, 0.95);
 }
-.tabs__panel.active { animation: bloodIn 0.5s cubic-bezier(0.22, 1, 0.36, 1); }
-@keyframes bloodIn {
-  from { opacity: 0; clip-path: inset(0 0 100% 0); }
-  to { opacity: 1; clip-path: inset(0); }
-}
-.tabs__panel.active .permit li { animation: rise 0.45s both; }
-.tabs__panel.active .permit li:nth-child(2) { animation-delay: 0.04s; }
-.tabs__panel.active .permit li:nth-child(3) { animation-delay: 0.08s; }
-.tabs__panel.active .permit li:nth-child(4) { animation-delay: 0.12s; }
-.tabs__panel.active .permit li:nth-child(5) { animation-delay: 0.16s; }
-.tabs__panel.active .permit li:nth-child(6) { animation-delay: 0.2s; }
-@keyframes rise {
-  from { opacity: 0; transform: translateY(8px); }
+/* ---------- переход между вкладками: содержимое проявляется целиком ----------
+   Раньше панель открывалась кровавой шторкой (clip-path), из-за чего слова
+   на секунду разрезались пополам. Теперь панель мягко всплывает, а строки
+   появляются целиком, одна за другой. */
+.tabs__panel.active { animation: panelIn 0.5s cubic-bezier(0.22, 1, 0.36, 1); }
+@keyframes panelIn {
+  from { opacity: 0; transform: translateY(14px); }
   to { opacity: 1; transform: none; }
+}
+.tabs__panel.active .rolehead { animation: rise 0.5s 0.04s both; }
+.tabs__panel.active .rolehead .k { animation: sealIn 0.7s 0.08s cubic-bezier(0.22, 1, 0.36, 1) both; }
+@keyframes sealIn {
+  from { transform: scale(0.72); opacity: 0; box-shadow: 0 0 0 rgba(211, 19, 42, 0); }
+  to { transform: none; opacity: 1; }
+}
+.tabs__panel.active .permit__col { animation: rise 0.55s 0.1s both; }
+.tabs__panel.active .permit__col--no { animation-delay: 0.15s; }
+.tabs__panel.active .permit li { animation: rise 0.5s both; }
+.tabs__panel.active .permit li:nth-child(1) { animation-delay: 0.16s; }
+.tabs__panel.active .permit li:nth-child(2) { animation-delay: 0.2s; }
+.tabs__panel.active .permit li:nth-child(3) { animation-delay: 0.24s; }
+.tabs__panel.active .permit li:nth-child(4) { animation-delay: 0.28s; }
+.tabs__panel.active .permit li:nth-child(5) { animation-delay: 0.32s; }
+.tabs__panel.active .permit li:nth-child(6) { animation-delay: 0.36s; }
+@keyframes rise {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+.tabs__btn.active .k { animation: sealGlow 3.2s ease-in-out infinite; }
+@keyframes sealGlow {
+  0%, 100% { box-shadow: 0 0 22px -6px rgba(211, 19, 42, 0.95); }
+  50% { box-shadow: 0 0 34px -4px rgba(211, 19, 42, 1); }
 }
 .rolehead {
   display: flex;
@@ -2134,9 +2198,16 @@ body.embed .hero__crest { display: none; }
   body:not(.ready) .hero__crest { opacity: 1; }
   .hero__plain span,
   body:not(.ready) .hero__title .ch { transform: none; }
-  .creed { clip-path: none; }
+  .faction { clip-path: none; transition: none; }
   .mooncol.in .moonrow,
+  .faction.in .traits__cap,
+  .faction.in .trait,
+  .faction.in .creed__sign,
+  .tabs__btn.active .k,
   .tabs__panel.active,
+  .tabs__panel.active .rolehead,
+  .tabs__panel.active .rolehead .k,
+  .tabs__panel.active .permit__col,
   .tabs__panel.active .permit li,
   body.leaving .veil { animation: none; }
 }
@@ -2334,7 +2405,7 @@ body.embed .hero__crest { display: none; }
 </head>
 <body id="top" class="page-court embed" data-sigil="裁">
 <div class="veil" aria-hidden="true"></div>
-<section class="hero hero--inner"><div class="hero__media"><img class="bg" src="assets/img/blood-moon.jpg" alt="" fetchpriority="high"></div><div class="hero__shade"></div><div class="hero__kanji"><span class="v">裁</span><span class="line"></span><span class="t">Суд</span></div><div class="hero__crest" aria-hidden="true"><span>裁</span></div><div class="hero__in"><p class="hero__eyebrow">裁&nbsp;&nbsp;yufu · свиток</p><h1 class="hero__title"><span class="hero__plain"><span>Суд</span></span></h1></div><a class="hero__cue" href="#content"><span>Читать свиток</span><span>﹀</span></a></section><div class="marquee" aria-hidden="true"><div class="marquee__track"><div class="marquee__row"><span class="marquee__item"><span class="marquee__q">«Я — живое существо, бесконечно близкое к совершенству.»</span><span class="marquee__a">— Мудзан Кибуцуджи · Прародитель демонов</span><span class="marquee__dot"></span></span><span class="marquee__item"><span class="marquee__q">«Будь благодарен за кровь. Не пролей на землю ни капли — иначе голова и тело расстанутся.»</span><span class="marquee__a">— Кокушибо · Первая Высшая Луна</span><span class="marquee__dot"></span></span><span class="marquee__item"><span class="marquee__q">«Я люблю людей. Всё, чего я хочу, — быть рядом с ними.»</span><span class="marquee__a">— Доума · Вторая Высшая Луна</span><span class="marquee__dot"></span></span><span class="marquee__item"><span class="marquee__q">«Стань демоном, Кёджуро. Мы сможем сражаться вечно.»</span><span class="marquee__a">— Аказа · Третья Высшая Луна</span><span class="marquee__dot"></span></span><span class="marquee__item"><span class="marquee__q">«Мы не брат и сестра. Мы — одна Шестая Высшая Луна.»</span><span class="marquee__a">— Гютаро · Шестая Высшая Луна</span><span class="marquee__dot"></span></span><span class="marquee__item"><span class="marquee__q">«Тот, кто красивее меня, не заслуживает жить.»</span><span class="marquee__a">— Даки · Шестая Высшая Луна</span><span class="marquee__dot"></span></span><span class="marquee__item"><span class="marquee__q">«Почему я? Почему Прародитель выбрал именно меня?»</span><span class="marquee__a">— Энму · Первая Низшая Луна</span><span class="marquee__dot"></span></span><span class="marquee__item"><span class="marquee__q">«Семья должна быть вместе. Семейные узы — это всё.»</span><span class="marquee__a">— Руи · Пятая Низшая Луна</span><span class="marquee__dot"></span></span></div><div class="marquee__row"><span class="marquee__item"><span class="marquee__q">«Я — живое существо, бесконечно близкое к совершенству.»</span><span class="marquee__a">— Мудзан Кибуцуджи · Прародитель демонов</span><span class="marquee__dot"></span></span><span class="marquee__item"><span class="marquee__q">«Будь благодарен за кровь. Не пролей на землю ни капли — иначе голова и тело расстанутся.»</span><span class="marquee__a">— Кокушибо · Первая Высшая Луна</span><span class="marquee__dot"></span></span><span class="marquee__item"><span class="marquee__q">«Я люблю людей. Всё, чего я хочу, — быть рядом с ними.»</span><span class="marquee__a">— Доума · Вторая Высшая Луна</span><span class="marquee__dot"></span></span><span class="marquee__item"><span class="marquee__q">«Стань демоном, Кёджуро. Мы сможем сражаться вечно.»</span><span class="marquee__a">— Аказа · Третья Высшая Луна</span><span class="marquee__dot"></span></span><span class="marquee__item"><span class="marquee__q">«Мы не брат и сестра. Мы — одна Шестая Высшая Луна.»</span><span class="marquee__a">— Гютаро · Шестая Высшая Луна</span><span class="marquee__dot"></span></span><span class="marquee__item"><span class="marquee__q">«Тот, кто красивее меня, не заслуживает жить.»</span><span class="marquee__a">— Даки · Шестая Высшая Луна</span><span class="marquee__dot"></span></span><span class="marquee__item"><span class="marquee__q">«Почему я? Почему Прародитель выбрал именно меня?»</span><span class="marquee__a">— Энму · Первая Низшая Луна</span><span class="marquee__dot"></span></span><span class="marquee__item"><span class="marquee__q">«Семья должна быть вместе. Семейные узы — это всё.»</span><span class="marquee__a">— Руи · Пятая Низшая Луна</span><span class="marquee__dot"></span></span></div></div></div><main id="content" class="article">
+<section class="hero hero--inner"><div class="hero__media"><img class="bg" src="assets/img/blood-moon.jpg" alt="" fetchpriority="high"></div><div class="hero__shade"></div><div class="hero__kanji"><span class="v">裁</span><span class="line"></span><span class="t">Суд</span></div><div class="hero__crest" aria-hidden="true"><span>裁</span></div><div class="hero__in"><p class="hero__eyebrow">裁&nbsp;&nbsp;Пакт крови</p><h1 class="hero__title"><span class="hero__plain"><span>Суд</span></span></h1></div><a class="hero__cue" href="#content"><span>Читать свиток</span><span>﹀</span></a></section><div class="marquee" aria-hidden="true"><div class="marquee__track"><div class="marquee__row"><span class="marquee__item"><span class="marquee__q">«Я — живое существо, бесконечно близкое к совершенству.»</span><span class="marquee__a">— Мудзан Кибуцуджи · Прародитель демонов</span><span class="marquee__dot"></span></span><span class="marquee__item"><span class="marquee__q">«Будь благодарен за кровь. Не пролей на землю ни капли — иначе голова и тело расстанутся.»</span><span class="marquee__a">— Кокушибо · Первая Высшая Луна</span><span class="marquee__dot"></span></span><span class="marquee__item"><span class="marquee__q">«Я люблю людей. Всё, чего я хочу, — быть рядом с ними.»</span><span class="marquee__a">— Доума · Вторая Высшая Луна</span><span class="marquee__dot"></span></span><span class="marquee__item"><span class="marquee__q">«Стань демоном, Кёджуро. Мы сможем сражаться вечно.»</span><span class="marquee__a">— Аказа · Третья Высшая Луна</span><span class="marquee__dot"></span></span><span class="marquee__item"><span class="marquee__q">«Мы не брат и сестра. Мы — одна Шестая Высшая Луна.»</span><span class="marquee__a">— Гютаро · Шестая Высшая Луна</span><span class="marquee__dot"></span></span><span class="marquee__item"><span class="marquee__q">«Тот, кто красивее меня, не заслуживает жить.»</span><span class="marquee__a">— Даки · Шестая Высшая Луна</span><span class="marquee__dot"></span></span><span class="marquee__item"><span class="marquee__q">«Почему я? Почему Прародитель выбрал именно меня?»</span><span class="marquee__a">— Энму · Первая Низшая Луна</span><span class="marquee__dot"></span></span><span class="marquee__item"><span class="marquee__q">«Семья должна быть вместе. Семейные узы — это всё.»</span><span class="marquee__a">— Руи · Пятая Низшая Луна</span><span class="marquee__dot"></span></span></div><div class="marquee__row"><span class="marquee__item"><span class="marquee__q">«Я — живое существо, бесконечно близкое к совершенству.»</span><span class="marquee__a">— Мудзан Кибуцуджи · Прародитель демонов</span><span class="marquee__dot"></span></span><span class="marquee__item"><span class="marquee__q">«Будь благодарен за кровь. Не пролей на землю ни капли — иначе голова и тело расстанутся.»</span><span class="marquee__a">— Кокушибо · Первая Высшая Луна</span><span class="marquee__dot"></span></span><span class="marquee__item"><span class="marquee__q">«Я люблю людей. Всё, чего я хочу, — быть рядом с ними.»</span><span class="marquee__a">— Доума · Вторая Высшая Луна</span><span class="marquee__dot"></span></span><span class="marquee__item"><span class="marquee__q">«Стань демоном, Кёджуро. Мы сможем сражаться вечно.»</span><span class="marquee__a">— Аказа · Третья Высшая Луна</span><span class="marquee__dot"></span></span><span class="marquee__item"><span class="marquee__q">«Мы не брат и сестра. Мы — одна Шестая Высшая Луна.»</span><span class="marquee__a">— Гютаро · Шестая Высшая Луна</span><span class="marquee__dot"></span></span><span class="marquee__item"><span class="marquee__q">«Тот, кто красивее меня, не заслуживает жить.»</span><span class="marquee__a">— Даки · Шестая Высшая Луна</span><span class="marquee__dot"></span></span><span class="marquee__item"><span class="marquee__q">«Почему я? Почему Прародитель выбрал именно меня?»</span><span class="marquee__a">— Энму · Первая Низшая Луна</span><span class="marquee__dot"></span></span><span class="marquee__item"><span class="marquee__q">«Семья должна быть вместе. Семейные узы — это всё.»</span><span class="marquee__a">— Руи · Пятая Низшая Луна</span><span class="marquee__dot"></span></span></div></div></div><main id="content" class="article">
 <section class="s">
   <h3>Основания для созыва суда</h3>
   <ul>
@@ -2389,14 +2460,17 @@ body.embed .hero__crest { display: none; }
     el.textContent = new Date().getFullYear();
   });
 
-  /* ---------- Прелоадер (только главная, ~1.5 сек) ---------- */
+  /* ---------- Экран загрузки (только главная и только раз за сеанс) ----------
+     Если человек уже открывал какую-то страницу сайта, экран пропускается:
+     при переходе с другой страницы остаётся только шторка, без второй анимации. */
   (function () {
     var pre = document.querySelector(".preloader");
     if (!pre) return;
+    if (document.documentElement.classList.contains("bp-seen")) { pre.remove(); return; }
     var num = pre.querySelector("[data-count]");
     var fill = pre.querySelector(".preloader__fill");
     document.body.style.overflow = "hidden";
-    var start = performance.now(), dur = 1400;
+    var start = performance.now(), dur = 1200;
     function tick(t) {
       var p = Math.min(1, (t - start) / dur);
       if (num) num.textContent = Math.round(p * 100) + "%";
@@ -2406,8 +2480,8 @@ body.embed .hero__crest { display: none; }
         pre.classList.add("done");
         document.body.classList.add("ready");
         document.body.style.overflow = "";
-        setTimeout(function () { pre.remove(); }, 1000);
-      }, 350);
+        setTimeout(function () { pre.remove(); }, 1300);
+      }, 300);
     }
     requestAnimationFrame(tick);
   })();
@@ -2622,7 +2696,7 @@ body.embed .hero__crest { display: none; }
     if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     e.preventDefault();
     document.body.classList.add("leaving");
-    setTimeout(function () { location.href = a.href; }, 420);
+    setTimeout(function () { location.href = a.href; }, 540);
   });
   window.addEventListener("pageshow", function () {
     document.body.classList.remove("leaving");

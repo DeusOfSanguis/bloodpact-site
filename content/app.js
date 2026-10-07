@@ -11,14 +11,17 @@
     el.textContent = new Date().getFullYear();
   });
 
-  /* ---------- Прелоадер (только главная, ~1.5 сек) ---------- */
+  /* ---------- Экран загрузки (только главная и только раз за сеанс) ----------
+     Если человек уже открывал какую-то страницу сайта, экран пропускается:
+     при переходе с другой страницы остаётся только шторка, без второй анимации. */
   (function () {
     var pre = document.querySelector(".preloader");
     if (!pre) return;
+    if (document.documentElement.classList.contains("bp-seen")) { pre.remove(); return; }
     var num = pre.querySelector("[data-count]");
     var fill = pre.querySelector(".preloader__fill");
     document.body.style.overflow = "hidden";
-    var start = performance.now(), dur = 1400;
+    var start = performance.now(), dur = 1200;
     function tick(t) {
       var p = Math.min(1, (t - start) / dur);
       if (num) num.textContent = Math.round(p * 100) + "%";
@@ -28,8 +31,8 @@
         pre.classList.add("done");
         document.body.classList.add("ready");
         document.body.style.overflow = "";
-        setTimeout(function () { pre.remove(); }, 1000);
-      }, 350);
+        setTimeout(function () { pre.remove(); }, 1300);
+      }, 300);
     }
     requestAnimationFrame(tick);
   })();
@@ -244,7 +247,7 @@
     if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     e.preventDefault();
     document.body.classList.add("leaving");
-    setTimeout(function () { location.href = a.href; }, 420);
+    setTimeout(function () { location.href = a.href; }, 540);
   });
   window.addEventListener("pageshow", function () {
     document.body.classList.remove("leaving");
