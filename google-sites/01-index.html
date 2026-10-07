@@ -8,7 +8,7 @@
 <meta property="og:type" content="website">
 <meta property="og:title" content="Пакт крови — beta 0.1">
 <meta property="og:description" content="Пакт Крови — фракция демонов YUFU. Иерархия, законы, Двенадцать лун и привилегии должностей.">
-<meta property="og:image" content="https://bloodpact.su/assets/img/og-image.png">
+<meta property="og:image" content="https://bloodpact.su/assets/img/blood-moon.jpg">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%A9%B8%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -397,7 +397,18 @@ a { color: inherit; }
   font-style: italic;
   font-size: clamp(16px, 2.6vw, 21px);
   line-height: 1.6;
-  color: rgba(237, 228, 214, 0.7);
+  color: rgba(237, 228, 214, 0.78);
+}
+.quote__author {
+  display: block;
+  margin-top: 9px;
+  font-family: var(--font-sans);
+  font-style: normal;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  line-height: 1.5;
+  text-transform: uppercase;
+  color: var(--blood);
 }
 .hero__btns {
   margin-top: 36px;
@@ -477,50 +488,6 @@ a { color: inherit; }
 }
 .hero__cue span:last-child { color: var(--blood); font-size: 20px; animation: cueY 1.6s ease-in-out infinite; }
 @keyframes cueY { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(8px); } }
-
-/* кнопка видео на обложке (фасад: грузится по клику, а не сразу) */
-.hero__watch {
-  position: absolute;
-  bottom: 36px; right: 24px;
-  z-index: 3;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  border: 1px solid rgba(211, 19, 42, 0.5);
-  background: rgba(6, 3, 9, 0.6);
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
-  color: var(--bone);
-  border-radius: 999px;
-  padding: 10px 20px 10px 14px;
-  font-family: var(--font-sans);
-  font-size: 11px;
-  letter-spacing: 0.25em;
-  text-transform: uppercase;
-  cursor: pointer;
-  transition: background 0.3s, box-shadow 0.3s;
-}
-.hero__watch:hover { background: var(--blood); box-shadow: 0 0 30px -5px rgba(211, 19, 42, 0.8); }
-.hero__watch .play {
-  display: grid;
-  place-items: center;
-  width: 28px; height: 28px;
-  border-radius: 50%;
-  background: var(--blood);
-  font-size: 12px;
-}
-.hero__watch:hover .play { background: rgba(0, 0, 0, 0.3); }
-.hero__video {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  display: none;
-}
-.hero__video.on { display: block; }
-.hero__video iframe {
-  width: 100%; height: 100%;
-  border: 0;
-}
 
 /* =====================================================================
    БЕГУЩАЯ СТРОКА
@@ -618,29 +585,69 @@ a { color: inherit; }
 .reveal.in { opacity: 1; transform: none; }
 
 /* =====================================================================
-   01 ФРАКЦИЯ: портрет + карточки
+   01 ФРАКЦИЯ: печать Прародителя + карточки свойств
    ===================================================================== */
 .faction { display: grid; gap: 48px; }
 @media (min-width: 1024px) { .faction { grid-template-columns: 1fr 1fr; gap: 80px; align-items: start; } }
 
-.portrait { position: relative; }
-@media (min-width: 1024px) { .portrait { position: sticky; top: 112px; } }
-.portrait__frame {
+.lordcard { position: relative; }
+@media (min-width: 1024px) { .lordcard { position: sticky; top: 112px; } }
+.lordcard__frame {
   position: relative;
+  isolation: isolate;
+  display: grid;
+  place-items: center;
+  min-height: 420px;
   overflow: hidden;
   border-radius: var(--radius);
-  border: 1px solid rgba(211, 19, 42, 0.25);
-  box-shadow: 0 0 60px -10px rgba(211, 19, 42, 0.55), 0 0 140px -30px rgba(211, 19, 42, 0.4);
+  border: 1px solid rgba(211, 19, 42, 0.32);
+  background:
+    radial-gradient(ellipse at 50% 38%, rgba(92, 10, 18, 0.48), transparent 58%),
+    linear-gradient(145deg, #190b12, #0d0810 56%, #07050a);
+  box-shadow: 0 0 60px -10px rgba(211, 19, 42, 0.45), 0 0 140px -30px rgba(211, 19, 42, 0.35);
 }
-.portrait__frame img { width: 100%; height: 420px; object-fit: cover; object-position: top; }
-@media (min-width: 768px) { .portrait__frame img { height: 600px; } }
-.portrait__shade { position: absolute; inset: 0; background: linear-gradient(180deg, transparent 40%, var(--void) 100%); }
-.portrait__cap { position: absolute; bottom: 0; left: 0; right: 0; padding: 24px; text-align: left; }
-.portrait__cap .who { font-size: 10px; letter-spacing: 0.4em; text-transform: uppercase; color: var(--blood); margin: 0 0 8px; }
-.portrait__cap .name { font-family: var(--font-display); font-weight: 700; font-size: clamp(18px, 3vw, 24px); margin: 0; }
-.portrait__cap .note { font-family: var(--font-serif); font-style: italic; font-size: 14px; color: rgba(237, 228, 214, 0.6); margin: 8px 0 0; max-width: 380px; }
-.portrait__seal {
+@media (min-width: 768px) { .lordcard__frame { min-height: 600px; } }
+.lordcard__art { position: absolute; inset: 0; display: grid; place-items: center; overflow: hidden; }
+.lordcard__ring {
   position: absolute;
+  aspect-ratio: 1;
+  border: 1px solid rgba(211, 19, 42, 0.24);
+  border-radius: 50%;
+}
+.lordcard__ring--outer {
+  width: min(76%, 390px);
+  box-shadow: 0 0 0 18px rgba(211, 19, 42, 0.035), 0 0 90px rgba(211, 19, 42, 0.12);
+}
+.lordcard__ring--inner { width: min(58%, 300px); transform: rotate(45deg); border-radius: 42%; }
+.lordcard__kanji {
+  position: relative;
+  z-index: 1;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(150px, 22vw, 280px);
+  line-height: 1;
+  color: rgba(211, 19, 42, 0.17);
+  text-shadow: 0 0 70px rgba(211, 19, 42, 0.3);
+  user-select: none;
+}
+.lordcard__stamp {
+  position: absolute;
+  top: 18%;
+  left: 50%;
+  transform: translateX(-50%);
+  color: rgba(237, 228, 214, 0.45);
+  font-size: 9px;
+  letter-spacing: 0.32em;
+  white-space: nowrap;
+}
+.lordcard__shade { position: absolute; z-index: 1; inset: 0; background: linear-gradient(180deg, transparent 24%, rgba(6, 3, 9, 0.2) 48%, var(--void) 100%); }
+.lordcard__cap { position: absolute; z-index: 2; bottom: 0; left: 0; right: 0; padding: 24px; text-align: left; }
+.lordcard__cap .who { font-size: 10px; letter-spacing: 0.4em; text-transform: uppercase; color: var(--blood); margin: 0 0 8px; }
+.lordcard__cap .name { font-family: var(--font-display); font-weight: 700; font-size: clamp(18px, 3vw, 24px); margin: 0; }
+.lordcard__cap .note { font-family: var(--font-serif); font-style: italic; font-size: 14px; color: rgba(237, 228, 214, 0.68); margin: 8px 0 0; max-width: 380px; }
+.lordcard__seal {
+  position: absolute;
+  z-index: 3;
   top: -20px; right: -8px;
   display: grid;
   place-items: center;
@@ -868,9 +875,29 @@ a { color: inherit; }
    04 ОБРАЩЕНИЕ
    ===================================================================== */
 .trans { position: relative; overflow: hidden; }
-.trans__bg { position: absolute; inset: 0; }
-.trans__bg img { width: 100%; height: 100%; object-fit: cover; opacity: 0.4; }
-.trans__shade { position: absolute; inset: 0; background: linear-gradient(180deg, var(--void), rgba(6,3,9,0.7) 50%, var(--void)); }
+.trans__bg {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse at 18% 34%, rgba(211, 19, 42, 0.12), transparent 34%),
+    radial-gradient(ellipse at 82% 68%, rgba(92, 10, 18, 0.3), transparent 42%),
+    linear-gradient(135deg, #0c070d, #13080e 52%, #08050a);
+}
+.trans__bg::before {
+  content: "血";
+  position: absolute;
+  right: clamp(-40px, 5vw, 90px);
+  top: 50%;
+  transform: translateY(-56%);
+  font-family: var(--font-display);
+  font-size: clamp(250px, 50vw, 620px);
+  line-height: 1;
+  color: rgba(211, 19, 42, 0.045);
+  text-shadow: 0 0 100px rgba(211, 19, 42, 0.1);
+  user-select: none;
+}
+.trans__shade { position: absolute; inset: 0; background: linear-gradient(180deg, var(--void), rgba(6,3,9,0.56) 50%, var(--void)); }
 .trans .wrap { position: relative; }
 .trans__grid { display: grid; gap: 24px; }
 @media (min-width: 1024px) { .trans__grid { grid-template-columns: 1fr 1fr; gap: 40px; } }
@@ -1166,13 +1193,35 @@ figure.img img {
 }
 
 /* чемпион */
-.champion figure.avatar { margin: 0 auto 20px; width: 300px; max-width: 100%; }
-.champion figure.avatar img {
-  width: 300px; height: 300px; max-width: 100%;
-  object-fit: cover; border-radius: 50%;
-  border: 2px solid rgba(211, 19, 42, 0.5);
-  box-shadow: 0 0 60px -10px rgba(211, 19, 42, 0.55);
+.champion .avatar-mark {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  place-items: center;
+  gap: 5px;
+  width: 220px;
+  aspect-ratio: 1;
+  max-width: 100%;
+  margin: 0 auto 20px;
+  overflow: hidden;
+  border: 1px solid rgba(211, 19, 42, 0.5);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(211, 19, 42, 0.15), transparent 62%), #0d0810;
+  box-shadow: 0 0 60px -10px rgba(211, 19, 42, 0.45);
 }
+.champion .avatar-mark::before,
+.champion .avatar-mark::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  aspect-ratio: 1;
+  border: 1px solid rgba(211, 19, 42, 0.28);
+  border-radius: 50%;
+}
+.champion .avatar-mark::before { inset: 12%; }
+.champion .avatar-mark::after { inset: 22%; border-style: dashed; }
+.avatar-mark__kanji { color: rgba(211, 19, 42, 0.68); font-family: var(--font-display); font-size: 88px; line-height: 1; }
+.avatar-mark__label { color: var(--ash); font-size: 9px; letter-spacing: 0.28em; text-transform: uppercase; }
 .champion .name { font-size: 24px; font-weight: 600; margin: 0; }
 
 /* =====================================================================
@@ -1250,7 +1299,7 @@ body.embed .tabs__btns { display: none; }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   .marquee__track, .hero__cue span:last-child,
-  .portrait__seal, .preloader__kanji { animation: none; }
+  .lordcard__seal, .preloader__kanji { animation: none; }
   .veil, body.leaving .veil { animation: none; }
   .reveal { opacity: 1; transform: none; transition: none; }
   .hero__title .ch { animation: none; transform: none; }
@@ -1290,8 +1339,7 @@ body:not(.ready) .hero__quote,
 body:not(.ready) .hero__btns,
 body:not(.ready) .hero__kanji,
 body:not(.ready) .hero__cue,
-body:not(.ready) .hero__crest,
-body:not(.ready) .hero__watch { opacity: 0; }
+body:not(.ready) .hero__crest { opacity: 0; }
 
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(16px); }
@@ -1304,8 +1352,7 @@ body.ready .hero__quote { animation: fadeUp 0.9s 1.45s both; }
 body.ready .hero__btns { animation: fadeUp 0.7s 1.75s both; }
 body.ready .hero__kanji,
 body.ready .hero__cue,
-body.ready .hero__crest,
-body.ready .hero__watch { animation: fadeIn 1s 1.15s both; }
+body.ready .hero__crest { animation: fadeIn 1s 1.15s both; }
 
 .hero:not(.hero--inner) .hero__in::before {
   content: "";
@@ -1348,12 +1395,11 @@ body.ready .hero__watch { animation: fadeIn 1s 1.15s both; }
 .btn--blood:hover::after { transform: none; }
 .btn--blood:hover { transform: scale(1.04); background: var(--blood); }
 
-.portrait__frame {
-  clip-path: inset(9% 9% 9% 9%);
+.lordcard__frame {
+  clip-path: inset(7% 7% 7% 7%);
   transition: clip-path 1.05s cubic-bezier(0.22, 1, 0.36, 1);
 }
-.portrait.in .portrait__frame { clip-path: inset(0); }
-.portrait__frame img { transform: scale(1.08); }
+.lordcard.in .lordcard__frame { clip-path: inset(0); }
 
 .traits .trait:nth-child(2) { transition-delay: 0.08s; }
 .traits .trait:nth-child(3) { transition-delay: 0.16s; }
@@ -2061,11 +2107,10 @@ body.embed .hero__crest { display: none; }
   body:not(.ready) .hero__btns,
   body:not(.ready) .hero__kanji,
   body:not(.ready) .hero__cue,
-  body:not(.ready) .hero__crest,
-  body:not(.ready) .hero__watch { opacity: 1; }
+  body:not(.ready) .hero__crest { opacity: 1; }
   .hero__plain span,
   body:not(.ready) .hero__title .ch { transform: none; }
-  .portrait__frame { clip-path: none; }
+  .lordcard__frame { clip-path: none; }
   .mooncol.in .moonrow,
   .tabs__panel.active,
   .tabs__panel.active .permit li,
@@ -2081,15 +2126,12 @@ body.embed .hero__crest { display: none; }
   -webkit-mask: var(--m) center / contain no-repeat;
   mask: var(--m) center / contain no-repeat;
 }
-@media (max-width: 640px) {
-  .hero--inner .hero__watch { bottom: 84px; }
-}
 
 </style>
 </head>
 <body id="top" class="page-index embed" data-sigil="血">
 <div class="veil" aria-hidden="true"></div>
-<section class="hero hero--inner"><div class="hero__media"><img class="bg" src="assets/img/blood-moon.jpg" alt="" fetchpriority="high"></div><div class="hero__shade"></div><div class="hero__kanji"><span class="v">血</span><span class="line"></span><span class="t">YUFU · Фракция демонов</span></div><div class="hero__crest" aria-hidden="true"><span>血</span></div><div class="hero__in"><p class="hero__eyebrow">血&nbsp;&nbsp;YUFU · Фракция демонов · свиток</p><h1 class="hero__title"><span class="hero__plain"><span>Фракция демонов</span></span></h1></div><a class="hero__cue" href="#content"><span>Читать свиток</span><span>﹀</span></a><div class="hero__video"></div><button class="hero__watch" data-yt="2P6JSigJ7xo" aria-label="Смотреть видео"><span class="play">▶</span><span>Видео</span></button></section><div class="marquee" aria-hidden="true"><div class="marquee__track"><div class="marquee__row"><span><span class="marquee__w">КРОВЬ</span><span class="marquee__dot"></span></span><span><span class="marquee__w k">血</span><span class="marquee__dot"></span></span><span><span class="marquee__w">ЛУНА</span><span class="marquee__dot"></span></span><span><span class="marquee__w k">月</span><span class="marquee__dot"></span></span><span><span class="marquee__w">ВЕЧНОСТЬ</span><span class="marquee__dot"></span></span><span><span class="marquee__w k">鬼</span><span class="marquee__dot"></span></span><span><span class="marquee__w">ПАКТ</span><span class="marquee__dot"></span></span><span><span class="marquee__w k">約</span><span class="marquee__dot"></span></span><span><span class="marquee__w">ТЬМА</span><span class="marquee__dot"></span></span><span><span class="marquee__w k">闇</span><span class="marquee__dot"></span></span><span><span class="marquee__w">СИЛА</span><span class="marquee__dot"></span></span><span><span class="marquee__w k">力</span><span class="marquee__dot"></span></span></div><div class="marquee__row"><span><span class="marquee__w">КРОВЬ</span><span class="marquee__dot"></span></span><span><span class="marquee__w k">血</span><span class="marquee__dot"></span></span><span><span class="marquee__w">ЛУНА</span><span class="marquee__dot"></span></span><span><span class="marquee__w k">月</span><span class="marquee__dot"></span></span><span><span class="marquee__w">ВЕЧНОСТЬ</span><span class="marquee__dot"></span></span><span><span class="marquee__w k">鬼</span><span class="marquee__dot"></span></span><span><span class="marquee__w">ПАКТ</span><span class="marquee__dot"></span></span><span><span class="marquee__w k">約</span><span class="marquee__dot"></span></span><span><span class="marquee__w">ТЬМА</span><span class="marquee__dot"></span></span><span><span class="marquee__w k">闇</span><span class="marquee__dot"></span></span><span><span class="marquee__w">СИЛА</span><span class="marquee__dot"></span></span><span><span class="marquee__w k">力</span><span class="marquee__dot"></span></span></div></div></div><main id="content">
+<section class="hero hero--inner"><div class="hero__media"><img class="bg" src="assets/img/blood-moon.jpg" alt="" fetchpriority="high"></div><div class="hero__shade"></div><div class="hero__kanji"><span class="v">血</span><span class="line"></span><span class="t">YUFU · Фракция демонов</span></div><div class="hero__crest" aria-hidden="true"><span>血</span></div><div class="hero__in"><p class="hero__eyebrow">血&nbsp;&nbsp;YUFU · Фракция демонов · свиток</p><h1 class="hero__title"><span class="hero__plain"><span>Фракция демонов</span></span></h1></div><a class="hero__cue" href="#content"><span>Читать свиток</span><span>﹀</span></a></section><div class="marquee" aria-hidden="true"><div class="marquee__track"><div class="marquee__row"><span><span class="marquee__w">КРОВЬ</span><span class="marquee__dot"></span></span><span><span class="marquee__w k">血</span><span class="marquee__dot"></span></span><span><span class="marquee__w">ЛУНА</span><span class="marquee__dot"></span></span><span><span class="marquee__w k">月</span><span class="marquee__dot"></span></span><span><span class="marquee__w">ВЕЧНОСТЬ</span><span class="marquee__dot"></span></span><span><span class="marquee__w k">鬼</span><span class="marquee__dot"></span></span><span><span class="marquee__w">ПАКТ</span><span class="marquee__dot"></span></span><span><span class="marquee__w k">約</span><span class="marquee__dot"></span></span><span><span class="marquee__w">ТЬМА</span><span class="marquee__dot"></span></span><span><span class="marquee__w k">闇</span><span class="marquee__dot"></span></span><span><span class="marquee__w">СИЛА</span><span class="marquee__dot"></span></span><span><span class="marquee__w k">力</span><span class="marquee__dot"></span></span></div><div class="marquee__row"><span><span class="marquee__w">КРОВЬ</span><span class="marquee__dot"></span></span><span><span class="marquee__w k">血</span><span class="marquee__dot"></span></span><span><span class="marquee__w">ЛУНА</span><span class="marquee__dot"></span></span><span><span class="marquee__w k">月</span><span class="marquee__dot"></span></span><span><span class="marquee__w">ВЕЧНОСТЬ</span><span class="marquee__dot"></span></span><span><span class="marquee__w k">鬼</span><span class="marquee__dot"></span></span><span><span class="marquee__w">ПАКТ</span><span class="marquee__dot"></span></span><span><span class="marquee__w k">約</span><span class="marquee__dot"></span></span><span><span class="marquee__w">ТЬМА</span><span class="marquee__dot"></span></span><span><span class="marquee__w k">闇</span><span class="marquee__dot"></span></span><span><span class="marquee__w">СИЛА</span><span class="marquee__dot"></span></span><span><span class="marquee__w k">力</span><span class="marquee__dot"></span></span></div></div></div><main id="content">
 <!-- =====================================================================
      ГЛАВНАЯ СТРАНИЦА. Как править (для тупых):
      - Меняй только ТЕКСТ между тегами, сами теги не трогай.
@@ -2113,17 +2155,22 @@ body.embed .hero__crest { display: none; }
     </div>
 
     <div class="faction">
-      <div class="portrait reveal">
-        <div class="portrait__frame">
-          <img src="assets/img/progenitor.jpg" alt="Прародитель демонов" loading="lazy">
-          <div class="portrait__shade"></div>
-          <div class="portrait__cap">
+      <div class="lordcard reveal">
+        <div class="lordcard__frame">
+          <div class="lordcard__art" aria-hidden="true">
+            <span class="lordcard__ring lordcard__ring--outer"></span>
+            <span class="lordcard__ring lordcard__ring--inner"></span>
+            <span class="lordcard__kanji">鬼</span>
+            <span class="lordcard__stamp">YUFU&nbsp; · &nbsp;血の契約</span>
+          </div>
+          <div class="lordcard__shade"></div>
+          <div class="lordcard__cap">
             <p class="who">Наш Господин</p>
             <p class="name">Прародитель демонов</p>
             <p class="note">Демоны под страхом мучительной смерти не способны произнести имя и фамилию нашего Господина, а также любую информацию, способную привести к Прародителю всех демонов.</p>
           </div>
         </div>
-        <span class="portrait__seal">血</span>
+        <span class="lordcard__seal" aria-hidden="true">血</span>
       </div>
 
       <div class="traits">
@@ -2334,8 +2381,7 @@ body.embed .hero__crest { display: none; }
 
 <!-- ==================== 04 ОБРАЩЕНИЕ В ДЕМОНА ==================== -->
 <section class="trans" id="rebirth">
-  <div class="trans__bg">
-    <img src="assets/img/transformation.jpg" alt="Обращение в демона" loading="lazy">
+  <div class="trans__bg" aria-hidden="true">
     <div class="trans__shade"></div>
   </div>
   <div class="section">
@@ -2861,28 +2907,6 @@ body.embed .hero__crest { display: none; }
             p.classList.toggle("active", on);
           });
         });
-      });
-    });
-  })();
-
-  /* ---------- Видео на обложке: грузится ТОЛЬКО по клику ----------
-     (Пока не нажали ▶ — видна картинка, поэтому обложка не бывает чёрной,
-     даже если YouTube заблокирован или не грузится.) */
-  (function () {
-    document.querySelectorAll("[data-yt]").forEach(function (btn) {
-      btn.addEventListener("click", function () {
-        var id = btn.getAttribute("data-yt");
-        var scope = btn.closest(".hero");
-        var slot = scope ? scope.querySelector(".hero__video") : null;
-        if (!id || !slot) return;
-        var src = "https://www.youtube-nocookie.com/embed/" + id +
-          "?autoplay=1&mute=1&controls=1&loop=1&playlist=" + id +
-          "&rel=0&modestbranding=1&playsinline=1";
-        slot.innerHTML = '<iframe src="' + src + '" title="Видео" ' +
-          'allow="autoplay; encrypted-media; fullscreen" allowfullscreen ' +
-          'referrerpolicy="strict-origin-when-cross-origin"></iframe>';
-        slot.classList.add("on");
-        btn.style.display = "none";
       });
     });
   })();
