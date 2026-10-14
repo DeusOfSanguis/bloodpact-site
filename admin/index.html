@@ -566,14 +566,22 @@ async function loadSquads() {
     state.models.squads = JSON.parse(f.text) || {};
     const m = state.models.squads;
     if (!Array.isArray(m.squads)) m.squads = [];
-    m.squads.forEach(sq => { if (!Array.isArray(sq.subs)) sq.subs = []; });
+    // Миграция владельца: старое одиночное поле owner → звание + имя демона.
+    const migrateOwner = sq => {
+      if (!Array.isArray(sq.subs)) sq.subs = [];
+      if (sq.owner_name === undefined) sq.owner_name = sq.owner || "";
+      if (sq.owner_rank === undefined) sq.owner_rank = "";
+      delete sq.owner;
+      sq.subs.forEach(migrateOwner);
+    };
+    m.squads.forEach(migrateOwner);
   }
   renderSquads();
 }
 
 function emptySquad(name) {
   return {
-    name: name || "Новый отряд", parent_label: "", parent: "", owner: "",
+    name: name || "Новый отряд", parent_label: "", parent: "", owner_rank: "", owner_name: "",
     overseers: [], description: "", tasks_label: "Задачи отряда:", tasks: [],
     note_label: "", note_text: "", subs: [],
   };
@@ -635,8 +643,16 @@ function squadFieldsHtml(p, sq, parentName) {
         <input type="text" data-path="${p}.parent" value="${escapeAttr(sq.parent || "")}" placeholder="${parentName ? escapeAttr(parentName) : ""}">
       </div>
     </div>
-    <label>Владелец отряда</label>
-    <input type="text" data-path="${p}.owner" value="${escapeAttr(sq.owner || "")}">
+    <div class="row">
+      <div>
+        <label>Владелец: звание (например «Лорд Хаоса»)</label>
+        <input type="text" data-path="${p}.owner_rank" value="${escapeAttr(sq.owner_rank || "")}">
+      </div>
+      <div>
+        <label>Владелец: имя демона</label>
+        <input type="text" data-path="${p}.owner_name" value="${escapeAttr(sq.owner_name || sq.owner || "")}">
+      </div>
+    </div>
     <label>Описание</label>
     <textarea data-path="${p}.description">${escapeHtml(sq.description || "")}</textarea>
     <div class="pair">

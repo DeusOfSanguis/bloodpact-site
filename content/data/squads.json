@@ -4,7 +4,8 @@
       "name": "Полумесяц",
       "parent_label": "",
       "parent": "",
-      "owner": "",
+      "owner_rank": "",
+      "owner_name": "",
       "overseers": [
         {
           "role": "Смотрящая высшая луна",
@@ -34,7 +35,8 @@
           "name": "Мрак",
           "parent_label": "",
           "parent": "",
-          "owner": "Мрачный жнец Мрака",
+          "owner_rank": "Мрачный жнец Мрака",
+          "owner_name": "Мрачный жнец Мрака",
           "overseers": [
             {
               "role": "Смотрящая высшая луна",
@@ -62,7 +64,8 @@
           "name": "Песок",
           "parent_label": "",
           "parent": "",
-          "owner": "Владыка Песка",
+          "owner_rank": "Владыка Песка",
+          "owner_name": "Владыка Песка",
           "overseers": [
             {
               "role": "Смотрящая высшая луна",
@@ -85,7 +88,8 @@
           "name": "Цербер",
           "parent_label": "",
           "parent": "",
-          "owner": "Полковник",
+          "owner_rank": "Полковник",
+          "owner_name": "Полковник",
           "overseers": [
             {
               "role": "Смотрящая низшая луна",
@@ -112,7 +116,8 @@
       "name": "Ямигири",
       "parent_label": "",
       "parent": "",
-      "owner": "",
+      "owner_rank": "",
+      "owner_name": "",
       "overseers": [
         {
           "role": "Смотрящая высшая луна",
@@ -144,7 +149,8 @@
           "name": "Хаос",
           "parent_label": "",
           "parent": "",
-          "owner": "Лорд Хаоса",
+          "owner_rank": "Лорд Хаоса",
+          "owner_name": "Лорд Хаоса",
           "overseers": [
             {
               "role": "Смотрящая высшая луна",
@@ -174,7 +180,8 @@
           "name": "Лисья угодья",
           "parent_label": "",
           "parent": "",
-          "owner": "Первородный белый лис",
+          "owner_rank": "Первородный белый лис",
+          "owner_name": "Первородный белый лис",
           "overseers": [
             {
               "role": "Смотрящая Высшая луна",
@@ -207,7 +214,8 @@
       "name": "Обигири",
       "parent_label": "",
       "parent": "",
-      "owner": "",
+      "owner_rank": "",
+      "owner_name": "",
       "overseers": [
         {
           "role": "Смотрящая высшая луна",
@@ -231,7 +239,8 @@
       "name": "Раншики",
       "parent_label": "",
       "parent": "",
-      "owner": "",
+      "owner_rank": "",
+      "owner_name": "",
       "overseers": [
         {
           "role": "Смотрящая высшая луна",
@@ -260,7 +269,8 @@
           "name": "Отрёкшиеся",
           "parent_label": "",
           "parent": "",
-          "owner": "Редзо Гоку",
+          "owner_rank": "Редзо Гоку",
+          "owner_name": "Редзо Гоку",
           "overseers": [
             {
               "role": "Смотрящая высшая луна",
@@ -292,7 +302,8 @@
       "name": "Сакуран/Джингу",
       "parent_label": "Под руководством",
       "parent": "Даки и Гютаро",
-      "owner": "",
+      "owner_rank": "",
+      "owner_name": "",
       "overseers": [
         {
           "role": "Смотрящая высшая луна",
@@ -319,7 +330,8 @@
       "name": "Семейство пауков",
       "parent_label": "",
       "parent": "",
-      "owner": "",
+      "owner_rank": "",
+      "owner_name": "",
       "overseers": [
         {
           "role": "Смотрящая высшая луна",

@@ -356,14 +356,19 @@ def render_squad_card(sq, parent_name=None, is_sub=False):
         parts.append(
             f'<p class="squad-parent"><strong>{html.escape(label)}:</strong> {html.escape(parent)}</p>'
         )
-    owner = str(sq.get("owner", "") or "").strip()
-    if owner:
+    # Владелец отряда — как луны: мелко звание, крупно имя демона.
+    # (owner — старое одиночное поле, поддерживается для совместимости.)
+    rank = str(sq.get("owner_rank", "") or "").strip()
+    name = str(sq.get("owner_name", "") or "").strip() or str(sq.get("owner", "") or "").strip()
+    if rank or name:
+        big = name or rank
+        small = rank if rank and rank != big else "Владелец отряда"
         parts.append(
             '<div class="squad-owner">\n'
             '<span class="squad-owner__sigil" aria-hidden="true">主</span>\n'
             '<div class="squad-owner__body">\n'
-            '<p class="squad-owner__role">Владелец отряда</p>\n'
-            f'<p class="squad-owner__name">{html.escape(owner)}</p>\n'
+            f'<p class="squad-owner__role">{html.escape(small)}</p>\n'
+            f'<p class="squad-owner__name">{html.escape(big)}</p>\n'
             "</div>\n</div>"
         )
     # Смотрящие луны — выделенным блоком: печать луны, роль и имена.
