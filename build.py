@@ -161,7 +161,6 @@ def render_fragment(fragment, data, prefix="", asset_base=None, kind="site"):
     out = re.sub(r"\{\{page:([a-z0-9_-]+)\}\}", repl_page, out)
     out = out.replace("{{marquee}}", render_marquee(data, False))
     out = out.replace("{{marquee:reverse}}", render_marquee(data, True))
-    out = out.replace("{{squad-updates}}", render_squad_updates(data))
     out = out.replace("{{squads}}", render_squads(data))
     out = out.replace("{{ranking-top}}", render_ranking_top(data))
     return out
@@ -346,19 +345,6 @@ def render_marquee(data=None, reverse=False):
 
 
 # ------------------------------------------------------- списки из data/ ---
-
-def render_squad_updates(data):
-    """«Изменения в отрядах» — список строк из content/data/squads.json."""
-    updates = ((data.get("lists") or {}).get("squads") or {}).get("updates") or []
-    items = [str(u).strip() for u in updates if str(u).strip()]
-    body = "".join(f"<p><strong>{html.escape(u)}</strong></p>" for u in items)
-    return (
-        '<section class="s squad-updates" aria-labelledby="squad-updates-title">\n'
-        '<h2 id="squad-updates-title">Изменения в отрядах</h2>\n'
-        f'<blockquote class="squad-updates__quote">\n{body}\n</blockquote>\n'
-        "</section>"
-    )
-
 
 def render_squad_card(sq, parent_name=None):
     """Карточка отряда/подотряда из content/data/squads.json.

@@ -559,7 +559,7 @@ async function loadSquads() {
   if (!state.models.squads) {
     const f = await getFileOrDefault(
       CONFIG.files.squads,
-      JSON.stringify({ updates: [], squads: [] }, null, 2) + "\n"
+      JSON.stringify({ squads: [] }, null, 2) + "\n"
     );
     state.shas.squads = f.sha;
     state.raw.squads = f.text;
