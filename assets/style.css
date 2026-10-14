@@ -2312,6 +2312,71 @@ body.embed .hero__crest { display: none; }
 }
 .article .s p.squad-parent strong { color: var(--ember); }
 
+/* Смотрящие луны в карточке отряда — выделенный блок с печатью луны:
+   высшие луны подсвечены кровью, низшие — приглушены. */
+.article .s .squad-moons {
+  display: grid;
+  gap: 10px;
+  margin: 16px 0 20px;
+}
+.article .s .squad-moon {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  max-width: 74ch;
+  padding: 13px 16px;
+  border: 1px solid rgba(211, 19, 42, 0.35);
+  border-left: 3px solid var(--blood);
+  border-radius: 12px;
+  background: linear-gradient(90deg, rgba(211, 19, 42, 0.14), rgba(211, 19, 42, 0.03) 55%, rgba(8, 5, 12, 0.3));
+}
+.article .s .squad-moon__sigil {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border: 1px solid rgba(211, 19, 42, 0.55);
+  border-radius: 10px;
+  background: rgba(211, 19, 42, 0.2);
+  box-shadow: 0 0 18px rgba(211, 19, 42, 0.35);
+  color: var(--ember);
+  font-family: var(--font-display);
+  font-size: 19px;
+  font-weight: 800;
+  line-height: 1;
+}
+.article .s .squad-moon__body { min-width: 0; padding-top: 1px; }
+.article .s .squad-moon__role {
+  margin: 0 0 3px;
+  color: var(--ember);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+}
+.article .s .squad-moon__name {
+  margin: 0;
+  color: var(--bone);
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1.45;
+}
+.article .s .squad-moon__name + .squad-moon__name { margin-top: 3px; }
+.article .s .squad-moon--lower {
+  border-color: rgba(237, 228, 214, 0.16);
+  border-left-color: rgba(237, 228, 214, 0.4);
+  background: linear-gradient(90deg, rgba(237, 228, 214, 0.07), rgba(8, 5, 12, 0.3));
+}
+.article .s .squad-moon--lower .squad-moon__sigil {
+  border-color: rgba(237, 228, 214, 0.3);
+  background: rgba(237, 228, 214, 0.06);
+  box-shadow: none;
+  color: var(--bone);
+}
+.article .s .squad-moon--lower .squad-moon__role { color: var(--ash); }
+.article .s .squad-moon--lower .squad-moon__name { color: rgba(237, 228, 214, 0.88); font-weight: 700; }
+
 /* Отряды сгруппированы как в админке: основной отряд — отдельная секция,
    сразу под ним вложенным блоком — его подотряды, затем следующий основной. */
 .article .s + .s { margin-top: 26px; }
@@ -2332,28 +2397,31 @@ body.embed .hero__crest { display: none; }
 }
 .article .s .squad-card--sub {
   position: relative;
-  margin-top: 16px;
+  margin-top: 20px;
   padding: 18px 20px 6px;
-  border: 1px solid rgba(237, 228, 214, 0.09);
-  border-left: 2px solid rgba(211, 19, 42, 0.55);
+  border: 1px solid rgba(237, 228, 214, 0.16);
+  border-left: 2px solid rgba(211, 19, 42, 0.6);
   border-radius: 14px;
-  background: linear-gradient(180deg, rgba(237, 228, 214, 0.04), rgba(8, 5, 12, 0.35));
+  background: linear-gradient(180deg, rgba(237, 228, 214, 0.055), rgba(8, 5, 12, 0.4));
+  box-shadow: 0 16px 34px -22px rgba(0, 0, 0, 0.85);
 }
 .article .s .squad-card--sub::before {
   content: "";
   position: absolute;
   left: calc(-1 * clamp(14px, 2.8vw, 28px) - 1px);
-  top: 38px;
+  top: 32px;
   width: clamp(14px, 2.8vw, 28px);
   height: 1px;
-  background: rgba(211, 19, 42, 0.35);
+  background: rgba(211, 19, 42, 0.4);
 }
 .article .s .squad-card--sub p { font-size: 15px; }
 .article .s h4.squad {
   position: relative;
-  margin: 0 0 12px;
-  padding: 2px 0 11px 38px;
-  border-bottom: 1px solid rgba(211, 19, 42, 0.25);
+  margin: -18px -20px 14px;
+  padding: 13px 20px 12px 60px;
+  border-bottom: 1px solid rgba(211, 19, 42, 0.32);
+  border-radius: 13px 13px 0 0;
+  background: linear-gradient(90deg, rgba(211, 19, 42, 0.18), rgba(211, 19, 42, 0.02) 70%);
   font-family: var(--font-display);
   font-weight: 800;
   font-size: clamp(15px, 1.8vw, 18px);
@@ -2365,14 +2433,14 @@ body.embed .hero__crest { display: none; }
 .article .s h4.squad::before {
   content: "↳";
   position: absolute;
-  left: 0;
+  left: 20px;
   top: 50%;
-  transform: translateY(-58%);
+  transform: translateY(-52%);
   width: 26px;
   height: 26px;
   border: 1px solid rgba(211, 19, 42, 0.45);
   border-radius: 8px;
-  background: rgba(211, 19, 42, 0.12);
+  background: rgba(211, 19, 42, 0.14);
   color: var(--ember);
   font-family: var(--font-display);
   font-size: 15px;

@@ -359,14 +359,26 @@ def render_squad_card(sq, parent_name=None, is_sub=False):
     owner = str(sq.get("owner", "") or "").strip()
     if owner:
         parts.append(f"<p><strong>Владелец отряда</strong> - {html.escape(owner)}</p>")
+    # Смотрящие луны — выделенным блоком: печать луны, роль и имена.
+    moons = []
     for ov in sq.get("overseers") or []:
         role = str(ov.get("role", "") or "").strip()
+        people = [str(p).strip() for p in (ov.get("people") or []) if str(p).strip()]
+        if not role and not people:
+            continue
+        low = role.lower()
+        kind = "upper" if "высш" in low else "lower" if "низш" in low else ""
+        cls = "squad-moon" + (f" squad-moon--{kind}" if kind else "")
+        block = [f'<div class="{cls}">', '<span class="squad-moon__sigil" aria-hidden="true">月</span>',
+                 '<div class="squad-moon__body">']
         if role:
-            parts.append(f"<p><strong>{html.escape(role)}</strong></p>")
-        for person in ov.get("people") or []:
-            person = str(person).strip()
-            if person:
-                parts.append(f"<p>{html.escape(person)}</p>")
+            block.append(f'<p class="squad-moon__role">{html.escape(role)}</p>')
+        for person in people:
+            block.append(f'<p class="squad-moon__name">{html.escape(person)}</p>')
+        block += ["</div>", "</div>"]
+        moons.append("\n".join(block))
+    if moons:
+        parts.append('<div class="squad-moons">\n' + "\n".join(moons) + "\n</div>")
     desc = str(sq.get("description", "") or "").strip()
     if desc:
         parts.append(f"<p>{html.escape(desc)}</p>")
