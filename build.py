@@ -346,10 +346,12 @@ def render_marquee(data=None, reverse=False):
 
 # ------------------------------------------------------- списки из data/ ---
 
-def render_squad_card(sq, parent_name=None):
+def render_squad_card(sq, parent_name=None, is_sub=False):
     """Карточка отряда/подотряда из content/data/squads.json.
-    parent_name — название родительского отряда (для подотрядов)."""
-    parts = [f'<h3 class="squad">{html.escape(str(sq.get("name", "")).strip())}</h3>']
+    parent_name — название родительского отряда (для подотрядов);
+    is_sub — подотряд: заголовок уровнем ниже (h4) и подчинённое оформление."""
+    tag = "h4" if is_sub else "h3"
+    parts = [f'<{tag} class="squad">{html.escape(str(sq.get("name", "")).strip())}</{tag}>']
     parent = str(sq.get("parent", "") or "").strip()
     label = str(sq.get("parent_label", "") or "").strip()
     if parent_name and not parent:
@@ -386,21 +388,32 @@ def render_squad_card(sq, parent_name=None):
         parts.append(
             f'<p class="note note--exception">{strong}{html.escape(note_text)}</p>'
         )
-    return "\n".join(parts)
+    cls = "squad-card squad-card--sub" if is_sub else "squad-card squad-card--main"
+    return f'<div class="{cls}">\n' + "\n".join(parts) + "\n</div>"
 
 
 def render_squads(data):
-    """{{squads}} — основной отряд, следом его подотряды, следующий основной и т.д.
-    (дерево из content/data/squads.json: у каждого отряда есть subs)."""
+    """{{squads}} — как в меню админки: основной отряд, под ним его подотряды,
+    затем следующий основной отряд и его подотряды, и так далее
+    (порядок и вложенность — из content/data/squads.json: у отряда есть subs).
+    Каждый основной отряд выводится отдельной группой (секцией), подотряды —
+    вложенным блоком внутри неё."""
     squads = ((data.get("lists") or {}).get("squads") or {}).get("squads") or []
-    cards = []
+    groups = []
     for sq in squads:
-        cards.append(render_squad_card(sq))
-        for sub in sq.get("subs") or []:
-            cards.append(render_squad_card(sub, parent_name=sq.get("name")))
-    if not cards:
+        group = ['<section class="s squad-group">', render_squad_card(sq)]
+        subs = sq.get("subs") or []
+        if subs:
+            group.append('<div class="squad-subs">')
+            group.append('<p class="squad-subs__cap">Подотряды</p>')
+            for sub in subs:
+                group.append(render_squad_card(sub, parent_name=sq.get("name"), is_sub=True))
+            group.append("</div>")
+        group.append("</section>")
+        groups.append("\n".join(group))
+    if not groups:
         return ""
-    return '<section class="s">\n' + "\n".join(cards) + "\n</section>"
+    return "\n".join(groups)
 
 
 def render_ranking_top(data):

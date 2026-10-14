@@ -2329,6 +2329,52 @@ body.embed .hero__crest { display: none; }
 }
 .article .s p.squad-parent strong { color: var(--ember); }
 
+/* Отряды сгруппированы как в админке: основной отряд — отдельная секция,
+   сразу под ним вложенным блоком — его подотряды, затем следующий основной. */
+.article .s + .s { margin-top: 26px; }
+.article .squad-group .squad-card--main > h3.squad { margin-top: 0; }
+.article .s .squad-subs {
+  margin: 28px 0 2px;
+  margin-left: clamp(10px, 3vw, 34px);
+  padding-left: clamp(12px, 2.6vw, 26px);
+  border-left: 1px solid rgba(211, 19, 42, 0.35);
+}
+.article .s .squad-subs__cap {
+  margin: 0 0 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--blood);
+}
+.article .s .squad-card--sub { margin-top: 26px; }
+.article .s h4.squad {
+  position: relative;
+  margin: 0 0 12px;
+  padding: 12px 14px 12px 52px;
+  border: 1px solid rgba(211, 19, 42, 0.3);
+  border-radius: 10px;
+  background: linear-gradient(90deg, rgba(211, 19, 42, 0.13), rgba(211, 19, 42, 0.02));
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(15px, 1.9vw, 19px);
+  letter-spacing: 0.045em;
+  text-transform: uppercase;
+  line-height: 1.3;
+  text-wrap: balance;
+}
+.article .s h4.squad::before {
+  content: "↳";
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-52%);
+  color: var(--blood);
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 800;
+}
+
 /* Уточнения находятся прямо под тем правом, к которому относятся. */
 .permit li { font-size: 15px; line-height: 1.72; }
 @media (min-width: 768px) { .permit li { font-size: 16px; } }
@@ -2362,7 +2408,8 @@ body.embed .hero__crest { display: none; }
   <p class="lead"><strong>Отряды демонов</strong> — это различные формирования, действующие под руководством Высшей Луны. У каждого отряда есть свои цели и задачи; отряды делятся на основные и подотряды.</p>
 </section>
 
-<section class="s">
+<section class="s squad-group">
+<div class="squad-card squad-card--main">
 <h3 class="squad">Полумесяц</h3>
 <p><strong>Смотрящая высшая луна</strong></p>
 <p>Кокушибо - Первая Высшая Луна</p>
@@ -2373,7 +2420,11 @@ body.embed .hero__crest { display: none; }
 <p><strong>Задачи отряда:</strong></p>
 <ul><li>Пресечение нарушений демонических законов</li><li>Проведение пыток и допросов</li><li>Контроль дисциплины во фракции демонов</li></ul>
 <p class="note note--exception"><strong>Исключение к праву наказывать:</strong> Прародитель и демоны 12 лун.</p>
-<h3 class="squad">Мрак</h3>
+</div>
+<div class="squad-subs">
+<p class="squad-subs__cap">Подотряды</p>
+<div class="squad-card squad-card--sub">
+<h4 class="squad">Мрак</h4>
 <p class="squad-parent"><strong>Подотряд:</strong> Полумесяц</p>
 <p><strong>Владелец отряда</strong> - Мрачный жнец Мрака</p>
 <p><strong>Смотрящая высшая луна</strong></p>
@@ -2381,7 +2432,9 @@ body.embed .hero__crest { display: none; }
 <p>Мрак - это боевой подотряд Полумесяца, что занимается защитой культа от внешних угроз и выполнением боевых задач.</p>
 <p><strong>Задачи отряда:</strong></p>
 <ul><li>Защита культа</li><li>Выполнение боевых задач</li><li>Работа в культе</li><li>Сбор и подготовка особой крови для продажи демонами на аукционе</li><li>Проведение специальных ритуалов направленных на осквернение и очищение чего либо.</li><li>Продажа специальных ритуалов</li><li>Наложение кровавой печати</li></ul>
-<h3 class="squad">Песок</h3>
+</div>
+<div class="squad-card squad-card--sub">
+<h4 class="squad">Песок</h4>
 <p class="squad-parent"><strong>Подотряд:</strong> Полумесяц</p>
 <p><strong>Владелец отряда</strong> - Владыка Песка</p>
 <p><strong>Смотрящая высшая луна</strong></p>
@@ -2389,7 +2442,9 @@ body.embed .hero__crest { display: none; }
 <p>Песок - подотряд Полумесяца, занимающийся наёмной и контрактной деятельностью. Он может заключать «Кровавые контракты» с другими отрядами.</p>
 <p><strong>Задачи отряда:</strong></p>
 <ul><li>Выполнение контрактов</li><li>Заказные убийства</li></ul>
-<h3 class="squad">Цербер</h3>
+</div>
+<div class="squad-card squad-card--sub">
+<h4 class="squad">Цербер</h4>
 <p class="squad-parent"><strong>Подотряд:</strong> Полумесяц</p>
 <p><strong>Владелец отряда</strong> - Полковник</p>
 <p><strong>Смотрящая низшая луна</strong></p>
@@ -2397,6 +2452,11 @@ body.embed .hero__crest { display: none; }
 <p>Цербер - это элитный отряд Полумесяцев. Отряд Цербер представляет собой карательное подразделение быстрого реагирования, нацеленное на цели обладающие большой силой. Его члены - высокомотивированные субъекты, только прямые ученики Первой Высшей Луны - Кокушибо имеют право перевестись в Церберы. История церберов насчитывает уже несколько веков и ходят слухи, что даже некоторые луны с трепетом относятся к верхушке этого отряда.</p>
 <p><strong>Задачи отряда:</strong></p>
 <ul><li>Подавление особо опасных целей</li><li>Пресечение нарушений демонических законов</li><li>Проведение пыток и допросов</li><li>Контроль дисциплины во фракции демонов</li></ul>
+</div>
+</div>
+</section>
+<section class="s squad-group">
+<div class="squad-card squad-card--main">
 <h3 class="squad">Ямигири</h3>
 <p><strong>Смотрящая высшая луна</strong></p>
 <p>Доума - Вторая Высшая Луна</p>
@@ -2406,7 +2466,11 @@ body.embed .hero__crest { display: none; }
 <p>Ямигири - это отряд демонов - культистов, что работают в культе вечного рая и занимаются распространением своей веры под руководством своей смотрящей высшей луны.</p>
 <p><strong>Задачи отряда:</strong></p>
 <ul><li>Работа в культе</li><li>Распространение веры культа</li><li>Проведение испытаний для всех демонов</li><li>Проведение пира лун</li><li>Проведение битв крови на повышение</li></ul>
-<h3 class="squad">Хаос</h3>
+</div>
+<div class="squad-subs">
+<p class="squad-subs__cap">Подотряды</p>
+<div class="squad-card squad-card--sub">
+<h4 class="squad">Хаос</h4>
 <p class="squad-parent"><strong>Подотряд:</strong> Ямигири</p>
 <p><strong>Владелец отряда</strong> - Лорд Хаоса</p>
 <p><strong>Смотрящая высшая луна</strong></p>
@@ -2416,7 +2480,9 @@ body.embed .hero__crest { display: none; }
 <p>Хаос - Атакующий подотряд Ямигири, изучающий древнюю магию и выполняющий заказы демонического рода.</p>
 <p><strong>Задачи отряда:</strong></p>
 <ul><li>Проведение мероприятий по зачистке истребителей</li><li>Внутренняя и внешняя разведка</li><li>Выполнение боевых задач</li></ul>
-<h3 class="squad">Лисья угодья</h3>
+</div>
+<div class="squad-card squad-card--sub">
+<h4 class="squad">Лисья угодья</h4>
 <p class="squad-parent"><strong>Подотряд:</strong> Ямигири</p>
 <p><strong>Владелец отряда</strong> - Первородный белый лис</p>
 <p><strong>Смотрящая Высшая луна</strong></p>
@@ -2426,12 +2492,21 @@ body.embed .hero__crest { display: none; }
 <p>Лисьи угодья - это подотряд Ямигири, члены которые показывали хорошие результаты своего развития, вследствие чего были выбраны как боевое формирование Культа Вечного Рая и были избранны для защиты угодий Второй Высшей Луны.</p>
 <p><strong>Задачи отряда:</strong></p>
 <ul><li>Защита храма в зимнем лесу</li><li>Распространение веры культа</li><li>Работа в культе</li><li>Развития боевого потенциала всего отряда</li></ul>
+</div>
+</div>
+</section>
+<section class="s squad-group">
+<div class="squad-card squad-card--main">
 <h3 class="squad">Обигири</h3>
 <p><strong>Смотрящая высшая луна</strong></p>
 <p>Накиме - четвертая высшая луна</p>
 <p>Обигири - это элитный отряд демонов - инструкторов, что занимаются вербовкой скитальцев, тренировками и управлением демонами.</p>
 <p><strong>Задачи отряда:</strong></p>
 <ul><li>Вербовка скитальцев</li><li>Обучение и тренировка демонов</li><li>Слежка за демонами</li></ul>
+</div>
+</section>
+<section class="s squad-group">
+<div class="squad-card squad-card--main">
 <h3 class="squad">Раншики</h3>
 <p><strong>Смотрящая высшая луна</strong></p>
 <p>Аказа - третья высшая луна</p>
@@ -2440,7 +2515,11 @@ body.embed .hero__crest { display: none; }
 <p>Раншики - это отряд демонов, что изучают боевое искусство сорю, смешанное с демоническим искусством крови демонов.</p>
 <p><strong>Задачи отряда:</strong></p>
 <ul><li>Проведение битв крови на повышение</li><li>Проведение особых тренировок</li><li>Проведение турниров</li></ul>
-<h3 class="squad">Отрёкшиеся</h3>
+</div>
+<div class="squad-subs">
+<p class="squad-subs__cap">Подотряды</p>
+<div class="squad-card squad-card--sub">
+<h4 class="squad">Отрёкшиеся</h4>
 <p class="squad-parent"><strong>Подотряд:</strong> Раншики</p>
 <p><strong>Владелец отряда</strong> - Редзо Гоку</p>
 <p><strong>Смотрящая высшая луна</strong></p>
@@ -2450,6 +2529,11 @@ body.embed .hero__crest { display: none; }
 <p>Отрёкшиеся - подотряд Раншики. Элитные демоны, которые смогли принять кровь Редзо Гоку. Они придерживаются кодекса чести и отваги, который обязывает каждого члена отряда быть адекватным, сдержанным и хладнокровным воином. Отрёкшиеся являются нейтральными как к истребителям, так и к демонам во время выполнения деятельности в Поместье Кото. Они могут создать и продать что угодно, лишь найдя материалы для этого.</p>
 <p><strong>Задачи отряда:</strong></p>
 <ul><li>Выполнение заказов</li><li>Пополнение казны демонов</li><li>Работа в Поместье Кото</li></ul>
+</div>
+</div>
+</section>
+<section class="s squad-group">
+<div class="squad-card squad-card--main">
 <h3 class="squad">Сакуран/Джингу</h3>
 <p class="squad-parent"><strong>Под руководством:</strong> Даки и Гютаро</p>
 <p><strong>Смотрящая высшая луна</strong></p>
@@ -2458,6 +2542,10 @@ body.embed .hero__crest { display: none; }
 <p>Сакуран и Джингу - подотряды, который находиться под руководством Даки и Гютаро. Главной задачей для данных отрядов являются заработок денег для фракции, а также добычей информации. Как подотряды, они имеют право находиться как и в других отрядах фракции, так и в Сакуран/Джингу, так-как их деятельность не регулярная.</p>
 <p><strong>Задачи отрядов:</strong></p>
 <ul><li>Добыча крови</li><li>Пополнение казны демонов</li><li>Работа в квартале красных фонарей</li><li>Охрана Сакуран</li><li>Выбивание долгов за выговоры</li></ul>
+</div>
+</section>
+<section class="s squad-group">
+<div class="squad-card squad-card--main">
 <h3 class="squad">Семейство пауков</h3>
 <p><strong>Смотрящая высшая луна</strong></p>
 <p>Гютаро и Даки - Шестая высшая луна</p>
@@ -2466,6 +2554,7 @@ body.embed .hero__crest { display: none; }
 <p>Семейство пауков - это клан демонов - пауков, что находятся под руководством пятой низшей луны.</p>
 <p><strong>Задачи семейства пауков:</strong></p>
 <ul><li>Отыгрыш членов семьи</li><li>Защита семьи</li><li>Поддержка десциплины внутри семьи</li><li>Изготовление ядов и спонсирование ими демонов</li><li>Проведение особых пыток</li></ul>
+</div>
 </section>
 </main>
 

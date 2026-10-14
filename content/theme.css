@@ -2312,6 +2312,52 @@ body.embed .hero__crest { display: none; }
 }
 .article .s p.squad-parent strong { color: var(--ember); }
 
+/* Отряды сгруппированы как в админке: основной отряд — отдельная секция,
+   сразу под ним вложенным блоком — его подотряды, затем следующий основной. */
+.article .s + .s { margin-top: 26px; }
+.article .squad-group .squad-card--main > h3.squad { margin-top: 0; }
+.article .s .squad-subs {
+  margin: 28px 0 2px;
+  margin-left: clamp(10px, 3vw, 34px);
+  padding-left: clamp(12px, 2.6vw, 26px);
+  border-left: 1px solid rgba(211, 19, 42, 0.35);
+}
+.article .s .squad-subs__cap {
+  margin: 0 0 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--blood);
+}
+.article .s .squad-card--sub { margin-top: 26px; }
+.article .s h4.squad {
+  position: relative;
+  margin: 0 0 12px;
+  padding: 12px 14px 12px 52px;
+  border: 1px solid rgba(211, 19, 42, 0.3);
+  border-radius: 10px;
+  background: linear-gradient(90deg, rgba(211, 19, 42, 0.13), rgba(211, 19, 42, 0.02));
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(15px, 1.9vw, 19px);
+  letter-spacing: 0.045em;
+  text-transform: uppercase;
+  line-height: 1.3;
+  text-wrap: balance;
+}
+.article .s h4.squad::before {
+  content: "↳";
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-52%);
+  color: var(--blood);
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 800;
+}
+
 /* Уточнения находятся прямо под тем правом, к которому относятся. */
 .permit li { font-size: 15px; line-height: 1.72; }
 @media (min-width: 768px) { .permit li { font-size: 16px; } }
