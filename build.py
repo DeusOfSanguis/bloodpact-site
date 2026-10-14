@@ -360,12 +360,17 @@ def render_squad_updates(data):
     )
 
 
-def render_squad_card(sq):
-    """Карточка отряда/подотряда из content/data/squads.json."""
+def render_squad_card(sq, parent_name=None):
+    """Карточка отряда/подотряда из content/data/squads.json.
+    parent_name — название родительского отряда (для подотрядов)."""
     parts = [f'<h3 class="squad">{html.escape(str(sq.get("name", "")).strip())}</h3>']
     parent = str(sq.get("parent", "") or "").strip()
+    label = str(sq.get("parent_label", "") or "").strip()
+    if parent_name and not parent:
+        parent = str(parent_name).strip()
+        label = label or "Подотряд"
     if parent:
-        label = str(sq.get("parent_label", "") or "Подотряд").strip() or "Подотряд"
+        label = label or "Подотряд"
         parts.append(
             f'<p class="squad-parent"><strong>{html.escape(label)}:</strong> {html.escape(parent)}</p>'
         )
@@ -399,17 +404,17 @@ def render_squad_card(sq):
 
 
 def render_squads(data):
-    """Все группы отрядов ({{squads}}) из content/data/squads.json."""
-    groups = ((data.get("lists") or {}).get("squads") or {}).get("groups") or []
-    blocks = []
-    for g in groups:
-        title = str(g.get("title", "") or "").strip()
-        cards = [render_squad_card(s) for s in (g.get("squads") or [])]
-        if not title and not cards:
-            continue
-        head = f"<h2>{html.escape(title)}</h2>\n" if title else ""
-        blocks.append(f'<section class="s">\n{head}' + "\n".join(cards) + "\n</section>")
-    return "\n<hr>\n".join(blocks)
+    """{{squads}} — основной отряд, следом его подотряды, следующий основной и т.д.
+    (дерево из content/data/squads.json: у каждого отряда есть subs)."""
+    squads = ((data.get("lists") or {}).get("squads") or {}).get("squads") or []
+    cards = []
+    for sq in squads:
+        cards.append(render_squad_card(sq))
+        for sub in sq.get("subs") or []:
+            cards.append(render_squad_card(sub, parent_name=sq.get("name")))
+    if not cards:
+        return ""
+    return '<section class="s">\n' + "\n".join(cards) + "\n</section>"
 
 
 def render_ranking_top(data):

@@ -128,6 +128,13 @@
   }
   details.block > summary::before { content: "▸ "; color: var(--red2); }
   details.block[open] > summary::before { content: "▾ "; }
+  details.block.sub-card {
+    margin: 10px 0 10px 18px;
+    border-left: 3px solid var(--red);
+    background: rgba(184, 30, 44, 0.06);
+  }
+  details.block.sub-card > summary::before { content: "▸ "; color: var(--gold); }
+  details.block.sub-card[open] > summary::before { content: "▾ "; }
   .grp-toolbar, .item-toolbar { display: flex; gap: 8px; flex-wrap: wrap; margin: 10px 0 4px; }
   .divider { border: 0; border-top: 1px solid var(--line); margin: 18px 0; }
   .pair { border: 1px dashed var(--line); border-radius: 8px; padding: 10px; margin: 8px 0; }
@@ -207,16 +214,11 @@
     <!-- ---------- ОТРЯДЫ ---------- -->
     <div class="tab-page" id="tab-squads">
       <div class="card">
-        <h2>Изменения в отрядах</h2>
-        <p class="hint">Одна строка — одно изменение.</p>
-        <textarea id="updates-lines" data-lines="updates" placeholder="Одна строка — одно изменение"></textarea>
-      </div>
-
-      <div class="card">
-        <h2>Группы отрядов</h2>
-        <p class="hint">В каждой группе — заголовок и карточки отрядов (состав, владельцы, смотрящие, задачи).</p>
-        <div id="squads-groups"></div>
-        <button class="ghost" id="add-group">+ Добавить группу</button>
+        <h2>Отряды</h2>
+        <p class="hint">Основной отряд, под ним — его подотряды; следующий основной отряд и его подотряды — и так далее.
+          «↑/↓» меняют порядок, «+ Подотряд» добавляет вложенный отряд, «Вынести в основные» делает подотряд самостоятельным.</p>
+        <div id="squads-list"></div>
+        <button class="ghost" id="add-squad">+ Добавить отряд</button>
       </div>
     </div>
 
@@ -557,59 +559,80 @@ async function loadSquads() {
   if (!state.models.squads) {
     const f = await getFileOrDefault(
       CONFIG.files.squads,
-      JSON.stringify({ updates: [], groups: [] }, null, 2) + "\n"
+      JSON.stringify({ updates: [], squads: [] }, null, 2) + "\n"
     );
     state.shas.squads = f.sha;
     state.raw.squads = f.text;
-    state.models.squads = JSON.parse(f.text);
-    if (!state.models.squads.groups) state.models.squads.groups = [];
-    if (!state.models.squads.updates) state.models.squads.updates = [];
+    state.models.squads = JSON.parse(f.text) || {};
+    const m = state.models.squads;
+    if (!Array.isArray(m.squads)) m.squads = [];
+    m.squads.forEach(sq => { if (!Array.isArray(sq.subs)) sq.subs = []; });
   }
   renderSquads();
 }
 
+function emptySquad(name) {
+  return {
+    name: name || "Новый отряд", parent_label: "", parent: "", owner: "",
+    overseers: [], description: "", tasks_label: "Задачи отряда:", tasks: [],
+    note_label: "", note_text: "", subs: [],
+  };
+}
+
 function renderSquads() {
   const m = state.models.squads;
-  $("#updates-lines").value = (m.updates || []).join("\n");
-  const root = $("#squads-groups");
+  const root = $("#squads-list");
   root.innerHTML = "";
-  (m.groups || []).forEach((g, gi) => {
+  (m.squads || []).forEach((sq, gi) => {
     const det = document.createElement("details");
     det.className = "block";
-    det.open = true;
     det.innerHTML = `
-      <summary>Группа ${gi + 1}${g.title ? ": " + escapeHtml(g.title) : ""}</summary>
-      <label>Заголовок группы</label>
-      <input type="text" data-path="groups.${gi}.title" value="${escapeAttr(g.title || "")}">
-      <div class="grp-toolbar">
-        <button class="ghost mini" data-act="group-up" data-i="${gi}">↑ Выше</button>
-        <button class="ghost mini" data-act="group-down" data-i="${gi}">↓ Ниже</button>
-        <button class="ghost mini" data-act="group-del" data-i="${gi}">Удалить группу</button>
+      <summary>Отряд: ${escapeHtml(sq.name || "Без названия")}${(sq.subs || []).length ? " · подотрядов: " + sq.subs.length : ""}</summary>
+      ${squadFieldsHtml(`squads.${gi}`, sq)}
+      <div class="pair">
+        <b style="font-size:13px;letter-spacing:.04em">Подотряды</b>
+        <div data-subs="${gi}"></div>
+        <button class="ghost mini" data-act="sub-add" data-g="${gi}">+ Добавить подотряд</button>
       </div>
-      <div data-squads="${gi}"></div>
-      <button class="ghost mini" data-act="squad-add" data-i="${gi}">+ Добавить отряд</button>`;
-    const holder = det.querySelector(`[data-squads="${gi}"]`);
-    (g.squads || []).forEach((sq, si) => holder.appendChild(renderSquadCard(gi, si, sq)));
+      <div class="item-toolbar">
+        <button class="ghost mini" data-act="squad-up" data-g="${gi}">↑ Выше</button>
+        <button class="ghost mini" data-act="squad-down" data-g="${gi}">↓ Ниже</button>
+        <button class="ghost mini" data-act="squad-del" data-g="${gi}">Удалить отряд</button>
+      </div>`;
+    const subsHolder = det.querySelector(`[data-subs="${gi}"]`);
+    (sq.subs || []).forEach((sub, si) => subsHolder.appendChild(renderSubCard(gi, si, sub, sq.name)));
     root.appendChild(det);
   });
 }
 
-function renderSquadCard(gi, si, sq) {
-  const p = `groups.${gi}.squads.${si}`;
+function renderSubCard(gi, si, sub, parentName) {
   const det = document.createElement("details");
-  det.className = "block";
+  det.className = "block sub-card";
   det.innerHTML = `
-    <summary>${escapeHtml(sq.name || "Без названия")}${sq.owner ? " · " + escapeHtml(sq.owner) : ""}</summary>
+    <summary>Подотряд: ${escapeHtml(sub.name || "Без названия")}</summary>
+    ${squadFieldsHtml(`squads.${gi}.subs.${si}`, sub, parentName)}
+    <div class="item-toolbar">
+      <button class="ghost mini" data-act="sub-up" data-g="${gi}" data-s="${si}">↑ Выше</button>
+      <button class="ghost mini" data-act="sub-down" data-g="${gi}" data-s="${si}">↓ Ниже</button>
+      <button class="ghost mini" data-act="sub-promote" data-g="${gi}" data-s="${si}">Вынести в основные</button>
+      <button class="ghost mini" data-act="sub-del" data-g="${gi}" data-s="${si}">Удалить</button>
+    </div>`;
+  return det;
+}
+
+function squadFieldsHtml(p, sq, parentName) {
+  const ovRows = (sq.overseers || []).map((ov, oi) => overseerHtml(p, oi, ov)).join("");
+  return `
     <label>Название</label>
     <input type="text" data-path="${p}.name" value="${escapeAttr(sq.name || "")}">
     <div class="row">
       <div>
-        <label>Подчинение (подпись, «Подотряд» / «Под руководством»)</label>
+        <label>Подпись подчинения (пусто = «Подотряд»)</label>
         <input type="text" data-path="${p}.parent_label" value="${escapeAttr(sq.parent_label || "")}" placeholder="Подотряд">
       </div>
       <div>
-        <label>Чему подчинён</label>
-        <input type="text" data-path="${p}.parent" value="${escapeAttr(sq.parent || "")}" placeholder="Полумесяц">
+        <label>Чему подчинён (пусто = ${parentName ? escapeAttr(parentName) : "не указано"})</label>
+        <input type="text" data-path="${p}.parent" value="${escapeAttr(sq.parent || "")}" placeholder="${parentName ? escapeAttr(parentName) : ""}">
       </div>
     </div>
     <label>Владелец отряда</label>
@@ -618,8 +641,8 @@ function renderSquadCard(gi, si, sq) {
     <textarea data-path="${p}.description">${escapeHtml(sq.description || "")}</textarea>
     <div class="pair">
       <b style="font-size:13px;letter-spacing:.04em">Смотрящие</b>
-      <div data-ov="${p}"></div>
-      <button class="ghost mini" data-act="ov-add" data-g="${gi}" data-s="${si}">+ Добавить смотрящего</button>
+      <div data-ov="${p}">${ovRows}</div>
+      <button class="ghost mini" data-act="ov-add" data-p="${p}">+ Добавить смотрящего</button>
     </div>
     <div class="row">
       <div>
@@ -638,35 +661,24 @@ function renderSquadCard(gi, si, sq) {
         <label>Примечание (текст)</label>
         <input type="text" data-path="${p}.note_text" value="${escapeAttr(sq.note_text || "")}">
       </div>
-    </div>
-    <div class="item-toolbar">
-      <button class="ghost mini" data-act="squad-up" data-g="${gi}" data-s="${si}">↑ Выше</button>
-      <button class="ghost mini" data-act="squad-down" data-g="${gi}" data-s="${si}">↓ Ниже</button>
-      <button class="ghost mini" data-act="squad-del" data-g="${gi}" data-s="${si}">Удалить отряд</button>
     </div>`;
-  const ovHolder = det.querySelector(`[data-ov="${p}"]`);
-  (sq.overseers || []).forEach((ov, oi) => ovHolder.appendChild(renderOverseer(gi, si, oi, ov)));
-  return det;
 }
 
-function renderOverseer(gi, si, oi, ov) {
-  const p = `groups.${gi}.squads.${si}.overseers.${oi}`;
-  const div = document.createElement("div");
-  div.className = "pair";
-  div.innerHTML = `
-    <label>Должность (например «Смотрящая высшая луна»)</label>
-    <input type="text" data-path="${p}.role" value="${escapeAttr(ov.role || "")}">
-    <label>Люди (одна строка — один человек)</label>
-    <textarea data-lines="${p}.people">${escapeHtml((ov.people || []).join("\n"))}</textarea>
-    <div class="item-toolbar">
-      <button class="ghost mini" data-act="ov-del" data-g="${gi}" data-s="${si}" data-o="${oi}">Удалить</button>
+function overseerHtml(p, oi, ov) {
+  return `
+    <div class="pair">
+      <label>Должность (например «Смотрящая высшая луна»)</label>
+      <input type="text" data-path="${p}.overseers.${oi}.role" value="${escapeAttr(ov.role || "")}">
+      <label>Люди (одна строка — один человек)</label>
+      <textarea data-lines="${p}.overseers.${oi}.people">${escapeHtml((ov.people || []).join("\n"))}</textarea>
+      <div class="item-toolbar">
+        <button class="ghost mini" data-act="ov-del" data-p="${p}" data-o="${oi}">Удалить</button>
+      </div>
     </div>`;
-  return div;
 }
 
-$("#squads-groups").addEventListener("click", onListAction);
-$("#add-group").addEventListener("click", () => {
-  state.models.squads.groups.push({ title: "Новая группа", squads: [] });
+$("#add-squad").addEventListener("click", () => {
+  state.models.squads.squads.push(emptySquad());
   renderSquads();
   markDirty();
 });
@@ -683,8 +695,8 @@ async function loadRanking() {
     );
     state.shas.ranking = f.sha;
     state.raw.ranking = f.text;
-    state.models.ranking = JSON.parse(f.text);
-    if (!state.models.ranking.entries) state.models.ranking.entries = [];
+    state.models.ranking = JSON.parse(f.text) || {};
+    if (!Array.isArray(state.models.ranking.entries)) state.models.ranking.entries = [];
     if (!state.models.ranking.champion) state.models.ranking.champion = {};
   }
   renderRanking();
@@ -724,7 +736,6 @@ function renderRanking() {
   });
 }
 
-$("#ranking-entries").addEventListener("click", onListAction);
 $("#add-entry").addEventListener("click", () => {
   state.models.ranking.entries.push({ label: (state.models.ranking.entries.length + 1) + " место", name: "", highlight: false });
   renderRanking();
@@ -746,8 +757,12 @@ async function loadQuotes() {
     }
     state.shas.pages = f.sha;
     state.raw.pages = f.text;
-    const pages = JSON.parse(f.text);
+    const pages = JSON.parse(f.text) || {};
     state.models.quotes = pages.quotes || {};
+    if (!Array.isArray(state.models.quotes.marquee)) state.models.quotes.marquee = [];
+    if (!state.models.quotes.footer) state.models.quotes.footer = { text: "", author: "" };
+    if (!state.models.quotes.not_found) state.models.quotes.not_found = { text: "", author: "" };
+    pages.quotes = state.models.quotes;
     state.models._pages = pages;
   }
   renderQuotes();
@@ -784,7 +799,6 @@ function renderQuotes() {
   $('[data-path="not_found.author"]').value = (m.not_found && m.not_found.author) || "";
 }
 
-$("#marquee-quotes").addEventListener("click", onListAction);
 $("#add-marquee").addEventListener("click", () => {
   if (!state.models.quotes.marquee) state.models.quotes.marquee = [];
   state.models.quotes.marquee.push({ text: "Новая цитата", author: "Автор" });
@@ -805,27 +819,41 @@ function onListAction(e) {
     const [x] = arr.splice(from, 1);
     arr.splice(to, 0, x);
   };
+  // отряд по ссылке: data-p вида "squads.2" или "squads.2.subs.1"
+  const squadByPath = (p) => getPath(m, p);
 
-  if (act === "group-up") move(m.groups, i, i - 1);
-  else if (act === "group-down") move(m.groups, i, i + 1);
-  else if (act === "group-del") { if (confirm("Удалить группу со всеми отрядами?")) m.groups.splice(i, 1); else return; }
-  else if (act === "squad-add") {
-    m.groups[g].squads = m.groups[g].squads || [];
-    m.groups[g].squads.push({
-      name: "Новый отряд", parent_label: "", parent: "", owner: "",
-      overseers: [], description: "", tasks_label: "Задачи отряда:", tasks: [],
-      note_label: "", note_text: "",
-    });
+  if (act === "squad-up") move(m.squads, g, g - 1);
+  else if (act === "squad-down") move(m.squads, g, g + 1);
+  else if (act === "squad-del") {
+    const sq = m.squads[g];
+    const n = (sq.subs || []).length;
+    if (confirm("Удалить отряд «" + (sq.name || "") + "»" + (n ? " вместе с " + n + " подотрядами" : "") + "?")) m.squads.splice(g, 1);
+    else return;
   }
-  else if (act === "squad-up") move(m.groups[g].squads, s, s - 1);
-  else if (act === "squad-down") move(m.groups[g].squads, s, s + 1);
-  else if (act === "squad-del") { if (confirm("Удалить отряд?")) m.groups[g].squads.splice(s, 1); else return; }
+  else if (act === "sub-add") {
+    m.squads[g].subs = m.squads[g].subs || [];
+    m.squads[g].subs.push(emptySquad("Новый подотряд"));
+  }
+  else if (act === "sub-up") move(m.squads[g].subs, s, s - 1);
+  else if (act === "sub-down") move(m.squads[g].subs, s, s + 1);
+  else if (act === "sub-del") {
+    if (confirm("Удалить подотряд?")) m.squads[g].subs.splice(s, 1);
+    else return;
+  }
+  else if (act === "sub-promote") {
+    const [sub] = m.squads[g].subs.splice(s, 1);
+    sub.parent_label = ""; sub.parent = "";
+    m.squads.splice(g + 1, 0, sub);   // сразу после родителя
+  }
   else if (act === "ov-add") {
-    const sq = m.groups[g].squads[s];
+    const sq = squadByPath(btn.dataset.p);
     sq.overseers = sq.overseers || [];
     sq.overseers.push({ role: "Смотрящая высшая луна", people: [] });
   }
-  else if (act === "ov-del") m.groups[g].squads[s].overseers.splice(o, 1);
+  else if (act === "ov-del") {
+    const sq = squadByPath(btn.dataset.p);
+    sq.overseers.splice(o, 1);
+  }
   else if (act === "entry-up") move(m.entries, i, i - 1);
   else if (act === "entry-down") move(m.entries, i, i + 1);
   else if (act === "entry-del") m.entries.splice(i, 1);
@@ -839,6 +867,10 @@ function onListAction(e) {
   else if (state.tab === "quotes") renderQuotes();
   markDirty();
 }
+
+document.addEventListener("click", (e) => {
+  if (e.target.closest("button[data-act]")) onListAction(e);
+});
 
 /* ================== привязка полей ================== */
 document.addEventListener("input", (e) => {
@@ -858,8 +890,12 @@ document.addEventListener("input", (e) => {
     setPath(model, el.dataset.path, val);
     markDirty();
     if (el.dataset.path.endsWith(".name") && el.closest("details.block")) {
-      const sum = el.closest("details.block").querySelector("summary");
-      if (sum) sum.textContent = el.value || "Без названия";
+      const det = el.closest("details.block");
+      const sum = det.querySelector("summary");
+      if (sum) {
+        const prefix = det.classList.contains("sub-card") ? "Подотряд: " : "Отряд: ";
+        sum.textContent = prefix + (el.value || "Без названия");
+      }
     }
   }
 });
@@ -932,6 +968,10 @@ $("#save-btn").addEventListener("click", async () => {
   s.textContent = "Сохранение…";
   try {
     let path, text, message, sha, key;
+    const model = currentModel();
+    if (state.tab !== "files" && !model) {
+      throw new Error("Данные ещё не загрузились — подождите пару секунд и нажмите «Сохранить» снова.");
+    }
     if (state.tab === "files") {
       if (!state.filePath) throw new Error("Сначала выберите файл.");
       path = state.filePath;
