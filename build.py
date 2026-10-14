@@ -89,7 +89,22 @@ def load():
         css = f.read()
     with open(os.path.join(CONTENT, "app.js"), encoding="utf-8") as f:
         js = f.read()
+    data["lists"] = load_lists()
     return data, css, js
+
+
+def load_lists():
+    """Часто меняющиеся списки из content/data/*.json (правятся в админке /admin/)."""
+    lists = {}
+    data_dir = os.path.join(CONTENT, "data")
+    for name in ("squads", "ranking"):
+        path = os.path.join(data_dir, name + ".json")
+        if os.path.exists(path):
+            with open(path, encoding="utf-8") as f:
+                lists[name] = json.load(f)
+        else:
+            lists[name] = {}
+    return lists
 
 
 def page_href(page):
@@ -146,6 +161,9 @@ def render_fragment(fragment, data, prefix="", asset_base=None, kind="site"):
     out = re.sub(r"\{\{page:([a-z0-9_-]+)\}\}", repl_page, out)
     out = out.replace("{{marquee}}", render_marquee(data, False))
     out = out.replace("{{marquee:reverse}}", render_marquee(data, True))
+    out = out.replace("{{squad-updates}}", render_squad_updates(data))
+    out = out.replace("{{squads}}", render_squads(data))
+    out = out.replace("{{ranking-top}}", render_ranking_top(data))
     return out
 
 
@@ -327,6 +345,107 @@ def render_marquee(data=None, reverse=False):
     return f'<div class="{cls}" aria-hidden="true"><div class="marquee__track">{row}{row}</div></div>'
 
 
+# ------------------------------------------------------- списки из data/ ---
+
+def render_squad_updates(data):
+    """«Изменения в отрядах» — список строк из content/data/squads.json."""
+    updates = ((data.get("lists") or {}).get("squads") or {}).get("updates") or []
+    items = [str(u).strip() for u in updates if str(u).strip()]
+    body = "".join(f"<p><strong>{html.escape(u)}</strong></p>" for u in items)
+    return (
+        '<section class="s squad-updates" aria-labelledby="squad-updates-title">\n'
+        '<h2 id="squad-updates-title">Изменения в отрядах</h2>\n'
+        f'<blockquote class="squad-updates__quote">\n{body}\n</blockquote>\n'
+        "</section>"
+    )
+
+
+def render_squad_card(sq):
+    """Карточка отряда/подотряда из content/data/squads.json."""
+    parts = [f'<h3 class="squad">{html.escape(str(sq.get("name", "")).strip())}</h3>']
+    parent = str(sq.get("parent", "") or "").strip()
+    if parent:
+        label = str(sq.get("parent_label", "") or "Подотряд").strip() or "Подотряд"
+        parts.append(
+            f'<p class="squad-parent"><strong>{html.escape(label)}:</strong> {html.escape(parent)}</p>'
+        )
+    owner = str(sq.get("owner", "") or "").strip()
+    if owner:
+        parts.append(f"<p><strong>Владелец отряда</strong> - {html.escape(owner)}</p>")
+    for ov in sq.get("overseers") or []:
+        role = str(ov.get("role", "") or "").strip()
+        if role:
+            parts.append(f"<p><strong>{html.escape(role)}</strong></p>")
+        for person in ov.get("people") or []:
+            person = str(person).strip()
+            if person:
+                parts.append(f"<p>{html.escape(person)}</p>")
+    desc = str(sq.get("description", "") or "").strip()
+    if desc:
+        parts.append(f"<p>{html.escape(desc)}</p>")
+    tasks = [str(t).strip() for t in (sq.get("tasks") or []) if str(t).strip()]
+    if tasks:
+        label = str(sq.get("tasks_label", "") or "Задачи отряда:").strip() or "Задачи отряда:"
+        parts.append(f"<p><strong>{html.escape(label)}</strong></p>")
+        parts.append("<ul>" + "".join(f"<li>{html.escape(t)}</li>" for t in tasks) + "</ul>")
+    note_label = str(sq.get("note_label", "") or "").strip()
+    note_text = str(sq.get("note_text", "") or "").strip()
+    if note_label or note_text:
+        strong = f"<strong>{html.escape(note_label)}</strong> " if note_label else ""
+        parts.append(
+            f'<p class="note note--exception">{strong}{html.escape(note_text)}</p>'
+        )
+    return "\n".join(parts)
+
+
+def render_squads(data):
+    """Все группы отрядов ({{squads}}) из content/data/squads.json."""
+    groups = ((data.get("lists") or {}).get("squads") or {}).get("groups") or []
+    blocks = []
+    for g in groups:
+        title = str(g.get("title", "") or "").strip()
+        cards = [render_squad_card(s) for s in (g.get("squads") or [])]
+        if not title and not cards:
+            continue
+        head = f"<h2>{html.escape(title)}</h2>\n" if title else ""
+        blocks.append(f'<section class="s">\n{head}' + "\n".join(cards) + "\n</section>")
+    return "\n<hr>\n".join(blocks)
+
+
+def render_ranking_top(data):
+    """Чемпион и таблица мест ({{ranking-top}}) из content/data/ranking.json."""
+    rk = (data.get("lists") or {}).get("ranking") or {}
+    champ = rk.get("champion") or {}
+    name = str(champ.get("name", "") or "").strip() or "Пока нет чемпиона"
+    free = bool(champ.get("free", True))
+    status = str(champ.get("status", "") or "").strip() or ("Место свободно" if free else "")
+    aria = "Место чемпиона пока свободно" if free else "Печать чемпиона"
+    champion = (
+        '<section class="s narrow center champion">\n'
+        '<h2 class="xl c-gold">Чемпион</h2>\n'
+        f'<div class="avatar-mark" role="img" aria-label="{html.escape(aria)}">\n'
+        '<span class="avatar-mark__kanji" aria-hidden="true">位</span>\n'
+        f'<span class="avatar-mark__label">{html.escape(status)}</span>\n'
+        "</div>\n"
+        f'<p class="name c-darkred">{html.escape(name)}</p>\n'
+        "</section>"
+    )
+    rows = []
+    for e in rk.get("entries") or []:
+        label = str(e.get("label", "") or "").strip()
+        ename = str(e.get("name", "") or "").strip()
+        if not label and not ename:
+            continue
+        if e.get("highlight"):
+            span = f'<span class="c-darkred">{html.escape(label)} - </span>' if label else ""
+            rows.append(f"<p><strong>{span}{html.escape(ename)}</strong></p>")
+        else:
+            tail = f" - {html.escape(ename)}" if ename else " -"
+            rows.append(f"<p>▶ {html.escape(label)}{tail}</p>")
+    table = '<section class="s narrow center">\n' + "\n".join(rows) + "\n</section>"
+    return champion + "\n<hr>\n" + table
+
+
 # --------------------------------------------------------------- подвал ---
 
 def render_footer(data, current_page):
@@ -471,7 +590,7 @@ def write_cheatsheet(data):
 # Исходники и служебные файлы в корне репозитория — сборка их не удаляет.
 PROTECTED = {
     ".git", ".gitignore", ".nojekyll", "CNAME", "README.md", "LICENSE",
-    "build.py", "content", "scripts", "google-sites", "assets",
+    ".github", "admin", "build.py", "content", "scripts", "google-sites", "assets",
 }
 
 
