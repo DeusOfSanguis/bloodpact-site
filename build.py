@@ -6,16 +6,13 @@
 Результат (GitHub Pages этого репозитория публикует КОРЕНЬ ветки main):
   ./                 — полноценный статический сайт: index.html, law/, squads/, … , 404.html
   ./embed/           — те же страницы без верхнего меню (для «Встроить → По URL» в Google Sites)
-  google-sites/      — автономные HTML-сниппеты по одной странице
-                       (для «Вставка → Встроить → Код для встраивания» в Google Sites)
 
 Сборка пишет в корень репозитория, но удаляет только свои артефакты:
 CNAME, .nojekyll, assets/img/, content/, scripts/, build.py и т. п. не трогаются.
 
-Запуск:  python3 build.py [--asset-base https://.../assets/img/]
+Запуск:  python3 build.py
 Зависимостей нет — только стандартная библиотека Python 3.
 """
-import argparse
 import html
 import json
 import os
@@ -27,7 +24,6 @@ CONTENT = os.path.join(ROOT, "content")
 # Сайт собирается в корень репозитория: Pages публикует main / (root).
 SITE = ROOT
 EMBED = os.path.join(SITE, "embed")
-GS = os.path.join(ROOT, "google-sites")
 IMG_DIR = os.path.join(SITE, "assets", "img")
 
 FAVICON = (
@@ -125,31 +121,26 @@ def rel_prefix(page):
 
 def page_url(data, slug, kind, prefix=""):
     """Ссылка на раздел сайта для подстановки {{page:slug}} в текстах.
-    kind: site | embed | snippet."""
+    kind: site | embed."""
     if kind == "embed":
         return "index.html" if slug == "index" else slug + ".html"
-    if kind == "snippet":
-        base = (data["site"].get("pages_url") or "https://bloodpact.su/").rstrip("/")
-        return base + "/" if slug == "index" else base + "/" + slug + "/"
     return prefix + ("" if slug == "index" else slug + "/")
 
 
-def resolve_asset(name, data, prefix="", asset_base=None):
+def resolve_asset(name, data, prefix=""):
     """Локальный файл (если лежит в assets/img) → иначе запасной URL из pages.json."""
-    if asset_base:
-        return asset_base.rstrip("/") + "/" + name
     if os.path.exists(os.path.join(IMG_DIR, name)):
         return f"{prefix}assets/img/{name}"
     return data["assets"][name]
 
 
-def render_fragment(fragment, data, prefix="", asset_base=None, kind="site"):
+def render_fragment(fragment, data, prefix="", kind="site"):
     """Подставляет {{img:файл}} и {{page:раздел}} в тексте страницы."""
     def repl_img(m):
         name = m.group(1)
         if name not in data["assets"] and not os.path.exists(os.path.join(IMG_DIR, name)):
             return m.group(0)  # неизвестное имя — оставляем как есть (например, пример в комментарии)
-        return resolve_asset(name, data, prefix, asset_base)
+        return resolve_asset(name, data, prefix)
 
     def repl_page(m):
         slug = m.group(1)
@@ -161,7 +152,6 @@ def render_fragment(fragment, data, prefix="", asset_base=None, kind="site"):
     out = re.sub(r"\{\{page:([a-z0-9_-]+)\}\}", repl_page, out)
     out = out.replace("{{marquee}}", render_marquee(data, False))
     out = out.replace("{{marquee:reverse}}", render_marquee(data, True))
-    out = out.replace("{{squad-updates}}", render_squad_updates(data))
     out = out.replace("{{squads}}", render_squads(data))
     out = out.replace("{{ranking-top}}", render_ranking_top(data))
     return out
@@ -272,10 +262,10 @@ def render_quote(text, author, css_class):
     return f'<p class="{css_class}">{quote}{cite}</p>'
 
 
-def render_hero(page, data, prefix="", asset_base=None, kind="site", compact=False):
+def render_hero(page, data, prefix="", kind="site", compact=False):
     """Обложка со статичной картинкой; встроенные видеоплееры отключены."""
     is_index = page["slug"] == "index" and not compact
-    bg = resolve_asset(page.get("cover_image") or "cover.jpg", data, prefix, asset_base)
+    bg = resolve_asset(page.get("cover_image") or "cover.jpg", data, prefix)
     media = f'<img class="bg" src="{bg}" alt="" fetchpriority="high">'
 
     if is_index:
@@ -347,44 +337,60 @@ def render_marquee(data=None, reverse=False):
 
 # ------------------------------------------------------- списки из data/ ---
 
-def render_squad_updates(data):
-    """«Изменения в отрядах» — список строк из content/data/squads.json."""
-    updates = ((data.get("lists") or {}).get("squads") or {}).get("updates") or []
-    items = [str(u).strip() for u in updates if str(u).strip()]
-    body = "".join(f"<p><strong>{html.escape(u)}</strong></p>" for u in items)
-    return (
-        '<section class="s squad-updates" aria-labelledby="squad-updates-title">\n'
-        '<h2 id="squad-updates-title">Изменения в отрядах</h2>\n'
-        f'<blockquote class="squad-updates__quote">\n{body}\n</blockquote>\n'
-        "</section>"
-    )
-
-
-def render_squad_card(sq, parent_name=None):
+def render_squad_card(sq, parent_name=None, is_sub=False):
     """Карточка отряда/подотряда из content/data/squads.json.
-    parent_name — название родительского отряда (для подотрядов)."""
-    parts = [f'<h3 class="squad">{html.escape(str(sq.get("name", "")).strip())}</h3>']
+    parent_name — название родительского отряда (для подотрядов);
+    is_sub — подотряд: заголовок уровнем ниже (h4) и подчинённое оформление."""
+    tag = "h4" if is_sub else "h3"
+    parts = [f'<{tag} class="squad">{html.escape(str(sq.get("name", "")).strip())}</{tag}>']
     parent = str(sq.get("parent", "") or "").strip()
     label = str(sq.get("parent_label", "") or "").strip()
     if parent_name and not parent:
         parent = str(parent_name).strip()
         label = label or "Подотряд"
-    if parent:
+    # У вложенного подотряда родителя не повторяем: он и так показан внутри
+    # группы своего основного отряда. Плашка нужна только самостоятельным
+    # отрядам с явно указанным руководством (например, Сакуран/Джингу).
+    if parent and not is_sub:
         label = label or "Подотряд"
         parts.append(
             f'<p class="squad-parent"><strong>{html.escape(label)}:</strong> {html.escape(parent)}</p>'
         )
-    owner = str(sq.get("owner", "") or "").strip()
-    if owner:
-        parts.append(f"<p><strong>Владелец отряда</strong> - {html.escape(owner)}</p>")
+    # Владелец отряда — как луны: мелко звание, крупно имя демона.
+    # (owner — старое одиночное поле, поддерживается для совместимости.)
+    rank = str(sq.get("owner_rank", "") or "").strip()
+    name = str(sq.get("owner_name", "") or "").strip() or str(sq.get("owner", "") or "").strip()
+    if rank or name:
+        big = name or rank
+        small = rank if rank and rank != big else "Владелец отряда"
+        parts.append(
+            '<div class="squad-owner">\n'
+            '<span class="squad-owner__sigil" aria-hidden="true">主</span>\n'
+            '<div class="squad-owner__body">\n'
+            f'<p class="squad-owner__role">{html.escape(small)}</p>\n'
+            f'<p class="squad-owner__name">{html.escape(big)}</p>\n'
+            "</div>\n</div>"
+        )
+    # Смотрящие луны — выделенным блоком: печать луны, роль и имена.
+    moons = []
     for ov in sq.get("overseers") or []:
         role = str(ov.get("role", "") or "").strip()
+        people = [str(p).strip() for p in (ov.get("people") or []) if str(p).strip()]
+        if not role and not people:
+            continue
+        low = role.lower()
+        kind = "upper" if "высш" in low else "lower" if "низш" in low else ""
+        cls = "squad-moon" + (f" squad-moon--{kind}" if kind else "")
+        block = [f'<div class="{cls}">', '<span class="squad-moon__sigil" aria-hidden="true">月</span>',
+                 '<div class="squad-moon__body">']
         if role:
-            parts.append(f"<p><strong>{html.escape(role)}</strong></p>")
-        for person in ov.get("people") or []:
-            person = str(person).strip()
-            if person:
-                parts.append(f"<p>{html.escape(person)}</p>")
+            block.append(f'<p class="squad-moon__role">{html.escape(role)}</p>')
+        for person in people:
+            block.append(f'<p class="squad-moon__name">{html.escape(person)}</p>')
+        block += ["</div>", "</div>"]
+        moons.append("\n".join(block))
+    if moons:
+        parts.append('<div class="squad-moons">\n' + "\n".join(moons) + "\n</div>")
     desc = str(sq.get("description", "") or "").strip()
     if desc:
         parts.append(f"<p>{html.escape(desc)}</p>")
@@ -400,21 +406,32 @@ def render_squad_card(sq, parent_name=None):
         parts.append(
             f'<p class="note note--exception">{strong}{html.escape(note_text)}</p>'
         )
-    return "\n".join(parts)
+    cls = "squad-card squad-card--sub" if is_sub else "squad-card squad-card--main"
+    return f'<div class="{cls}">\n' + "\n".join(parts) + "\n</div>"
 
 
 def render_squads(data):
-    """{{squads}} — основной отряд, следом его подотряды, следующий основной и т.д.
-    (дерево из content/data/squads.json: у каждого отряда есть subs)."""
+    """{{squads}} — как в меню админки: основной отряд, под ним его подотряды,
+    затем следующий основной отряд и его подотряды, и так далее
+    (порядок и вложенность — из content/data/squads.json: у отряда есть subs).
+    Каждый основной отряд выводится отдельной группой (секцией), подотряды —
+    вложенным блоком внутри неё."""
     squads = ((data.get("lists") or {}).get("squads") or {}).get("squads") or []
-    cards = []
+    groups = []
     for sq in squads:
-        cards.append(render_squad_card(sq))
-        for sub in sq.get("subs") or []:
-            cards.append(render_squad_card(sub, parent_name=sq.get("name")))
-    if not cards:
+        group = ['<section class="s squad-group">', render_squad_card(sq)]
+        subs = sq.get("subs") or []
+        if subs:
+            group.append('<div class="squad-subs">')
+            group.append('<p class="squad-subs__cap">Подотряды</p>')
+            for sub in subs:
+                group.append(render_squad_card(sub, parent_name=sq.get("name"), is_sub=True))
+            group.append("</div>")
+        group.append("</section>")
+        groups.append("\n".join(group))
+    if not groups:
         return ""
-    return '<section class="s">\n' + "\n".join(cards) + "\n</section>"
+    return "\n".join(groups)
 
 
 def render_ranking_top(data):
@@ -550,52 +567,10 @@ def render_document(page, data, body, css_link=None, css_inline=None,
 """
 
 
-def write_cheatsheet(data):
-    """google-sites/ASSETS.md — шпаргалка для ручного переноса страниц и картинок."""
-    lines = [
-        "# Шпаргалка для переноса в Google Sites",
-        "",
-        "Файл генерируется автоматически (`python3 build.py`) из `content/pages.json`.",
-        "",
-        "## Страницы",
-        "",
-        "| № | Страница в Google Sites | Заголовок на обложке | Файл с текстом | Исходник на Tilda |",
-        "|---|---|---|---|---|",
-    ]
-    for i, p in enumerate(data["pages"], 1):
-        lines.append(
-            f"| {i} | {p['title']} | {p['cover_uptitle'].upper()} / {p['cover_title']} | "
-            f"`google-sites/{i:02d}-{p['slug']}.html` | {p['source']} |"
-        )
-    lines += [
-        "",
-        "## Картинки",
-        "",
-        "Картинки лежат локально в `assets/img/`; `blood-moon.jpg` используется на обложках и в превью ссылки.",
-        "",
-        "| Файл | Где используется | Запасная ссылка |",
-        "|---|---|---|",
-    ]
-    usage = {
-        "cover.jpg": "резервная обложка",
-        "blood-moon.jpg": "обложки и превью ссылки (og:image)",
-        "territory-1.png": "Территории — после «Зал высших лун»",
-        "territory-2.png": "Территории — после «Зал Доумы»",
-        "territory-3.png": "Территории — после «Зал низших лун»",
-        "territory-4.png": "Территории — после «Отрядные помещения» (1)",
-        "territory-5.png": "Территории — после «Отрядные помещения» (2)",
-    }
-    for name, url in data["assets"].items():
-        lines.append(f"| `{name}` | {usage.get(name, '')} | {url} |")
-    lines += ["", "Обложки сайта используют статичные изображения; видеоплеера нет.", ""]
-    with open(os.path.join(GS, "ASSETS.md"), "w", encoding="utf-8") as f:
-        f.write("\n".join(lines))
-
-
 # Исходники и служебные файлы в корне репозитория — сборка их не удаляет.
 PROTECTED = {
     ".git", ".gitignore", ".nojekyll", "CNAME", "README.md", "LICENSE",
-    ".github", "admin", "build.py", "content", "scripts", "google-sites", "assets",
+    ".github", "admin", "build.py", "content", "scripts", "assets",
 }
 
 
@@ -614,28 +589,15 @@ def clean_site(page_slugs):
             os.remove(p)
 
 
-def clean_dir(path):
-    """Полностью очищает каталог, состоящий только из сгенерированных файлов."""
-    if os.path.isdir(path):
-        for name in os.listdir(path):
-            p = os.path.join(path, name)
-            if os.path.isdir(p):
-                shutil.rmtree(p)
-            else:
-                os.remove(p)
-
-
-def build(asset_base=None):
+def build():
     data, css, js = load()
 
     # чистим только свои артефакты и создаём выходные папки
     # (CNAME, .nojekyll, assets/img/, content/, scripts/ и build.py не трогаем)
     clean_site(p["slug"] for p in data["pages"])
-    clean_dir(GS)
     os.makedirs(os.path.join(SITE, "assets"), exist_ok=True)
     os.makedirs(IMG_DIR, exist_ok=True)
     os.makedirs(EMBED, exist_ok=True)
-    os.makedirs(GS, exist_ok=True)
 
     with open(os.path.join(SITE, "assets", "style.css"), "w", encoding="utf-8") as f:
         f.write(css)
@@ -693,21 +655,7 @@ def build(asset_base=None):
         with open(os.path.join(EMBED, page_href(page)), "w", encoding="utf-8") as f:
             f.write(out)
 
-        # 3) автономный сниппет для «Код для встраивания» (все стили и скрипты внутри файла)
-        base = asset_base  # None → запасные ссылки из pages.json
-        main_cls_g = ' id="content"' if is_index else ' id="content" class="article"'
-        body = (
-            render_hero(page, data, asset_base=base, kind="snippet", compact=True)
-            + render_marquee(data)
-            + f"<main{main_cls_g}>\n" + render_fragment(fragment, data, asset_base=base, kind="snippet") + "\n</main>\n"
-        )
-        out = render_document(page, data, body, css_inline=css, js_inline=js, body_class="embed")
-        name = f"{i + 1:02d}-{page['slug']}.html"
-        with open(os.path.join(GS, name), "w", encoding="utf-8") as f:
-            f.write(out)
-
     write_404(data, css, js)
-    write_cheatsheet(data)
 
     # список страниц для README/проверки
     print("Собрано страниц:", len(data["pages"]))
@@ -740,10 +688,4 @@ def write_404(data, css, js):
 
 
 if __name__ == "__main__":
-    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--asset-base", default=None,
-                    help="абсолютный URL папки с картинками для сниппетов google-sites/ "
-                         "(например https://bloodpact.su/assets/img). "
-                         "По умолчанию используются запасные ссылки из content/pages.json.")
-    args = ap.parse_args()
-    build(asset_base=args.asset_base)
+    build()
