@@ -22,7 +22,8 @@
 (не видна в меню, адрес нужно знать). Админка работает через GitHub: вход по
 [Personal Access Token](https://github.com/settings/personal-access-tokens/new?name=bloodpact-admin&permissions=contents:read_write)
 (Fine-grained → Repository access: только `DeusOfSanguis/bloodpact-site` → Permissions → Contents: **Read and write**).
-Токен хранится только в браузере админа.
+Токен хранится только в браузере админа. Поле «Ветка» на входе — обычно **main**;
+для тестов можно указать другую ветку (или `?branch=имя-ветки` в адресе).
 
 Что можно менять прямо на сайте (вкладки админки):
 

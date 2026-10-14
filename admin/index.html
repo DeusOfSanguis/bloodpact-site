@@ -171,7 +171,12 @@
       </p>
       <label for="token">Токен GitHub (Personal Access Token)</label>
       <input type="password" id="token" placeholder="github_pat_... или ghp_..." autocomplete="off">
+      <label for="branch">Ветка репозитория</label>
+      <input type="text" id="branch" placeholder="main" autocomplete="off">
       <p class="hint" style="margin:10px 0 14px">
+        Обычно <b>main</b> — в неё пишутся правки и её публикует GitHub Pages.
+        Для тестов до слияния можно указать другую ветку (например, ветку PR) —
+        или добавить <code>?branch=имя-ветки</code> к адресу страницы.<br>
         Токен нужен один раз и хранится только в вашем браузере (localStorage), никуда больше не отправляется,
         кроме api.github.com.<br>
         Как создать: <a href="https://github.com/settings/personal-access-tokens/new?name=bloodpact-admin&permissions=contents:read_write" target="_blank" rel="noopener">Fine-grained token</a> →
@@ -300,7 +305,7 @@
 const CONFIG = {
   owner: "DeusOfSanguis",
   repo: "bloodpact-site",
-  branch: "main",
+  defaultBranch: "main",
   actionsUrl: "https://github.com/DeusOfSanguis/bloodpact-site/actions",
   files: {
     squads: "content/data/squads.json",
@@ -308,6 +313,19 @@ const CONFIG = {
     pages: "content/pages.json",
   },
 };
+
+/* Ветка, в которую пишем: main после слияния PR; для тестов можно указать свою
+   (поле на экране входа или ?branch=имя-ветки в адресе). */
+const BRANCH_KEY = "bp_admin_branch";
+function getBranch() {
+  try { return localStorage.getItem(BRANCH_KEY) || CONFIG.defaultBranch; }
+  catch (e) { return CONFIG.defaultBranch; }
+}
+function setBranch(b) {
+  b = (b || "").trim() || CONFIG.defaultBranch;
+  try { localStorage.setItem(BRANCH_KEY, b); } catch (e) {}
+  return b;
+}
 
 const $ = (sel, root) => (root || document).querySelector(sel);
 const $$ = (sel, root) => Array.from((root || document).querySelectorAll(sel));
@@ -362,33 +380,61 @@ async function gh(path, opts) {
 }
 
 async function getFile(path) {
-  const data = await gh(`/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${path}?ref=${CONFIG.branch}`);
+  const data = await gh(`/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${path}?ref=${encodeURIComponent(state.branch || getBranch())}`);
   return { sha: data.sha, text: data.content ? b64decode(data.content) : "" };
 }
 
-async function saveFile(path, text, message) {
+/** Файл с подсказкой: если его ещё нет на ветке — вернуть defaultText и создадим при сохранении. */
+async function getFileOrDefault(path, defaultText) {
+  try {
+    return await getFile(path);
+  } catch (e) {
+    if (e.status === 404) {
+      noteMissing(path);
+      return { sha: "", text: defaultText };
+    }
+    throw e;
+  }
+}
+
+function noteMissing(path) {
+  if (state.missingNoted[path]) return;
+  state.missingNoted[path] = true;
+  const s = $("#save-status");
+  s.className = "status";
+  s.style.color = "#e8b34b";
+  s.textContent = "Файла " + path + " нет на ветке «" + (state.branch || getBranch()) +
+    "» — он будет создан при первом сохранении.";
+}
+
+async function saveFile(path, text, message, sha) {
+  const body = {
+    message: message,
+    content: b64encode(text),
+    branch: state.branch || getBranch(),
+  };
+  // sha обязателен при ОБНОВЛЕНИИ существующего файла; без него файл создаётся заново
+  if (sha) body.sha = sha;
   return gh(`/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${path}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      message: message,
-      content: b64encode(text),
-      branch: CONFIG.branch,
-    }),
+    body: JSON.stringify(body),
   });
 }
 
 /* ================== состояние ================== */
 const state = {
   user: null,
+  branch: "",
   tab: "squads",
   models: { squads: null, ranking: null, quotes: null },
   raw: { squads: "", ranking: "", pages: "" },   // исходные тексты файлов (для «отмены»)
-  shas: { squads: "", ranking: "", pages: "" },
+  shas: { squads: "", ranking: "", pages: "" },  // версии файлов (sha обязателен при сохранении)
   dirty: false,
   filePath: null,     // для вкладки «файлы»
   fileSha: "",
   fileDirty: false,
+  missingNoted: {},   // уже показанные предупреждения о создаваемых файлах
 };
 
 function markDirty() {
@@ -426,6 +472,12 @@ function showApp() {
 
 /* ================== инициализация ================== */
 async function boot() {
+  // ?branch=... в адресе перекрывает сохранённую ветку (удобно для тестов)
+  const urlBranch = new URLSearchParams(location.search).get("branch");
+  if (urlBranch) setBranch(urlBranch);
+  state.branch = getBranch();
+  const bi = $("#branch");
+  if (bi) bi.value = state.branch;
   const token = getToken();
   if (!token) { showLogin(); return; }
   try {
@@ -450,6 +502,7 @@ $("#login-btn").addEventListener("click", async () => {
     return;
   }
   setToken(token);
+  state.branch = setBranch($("#branch").value);
   const btn = $("#login-btn");
   btn.disabled = true;
   try {
@@ -502,7 +555,10 @@ async function loadTab(tab) {
 /* ================== ОТРЯДЫ ================== */
 async function loadSquads() {
   if (!state.models.squads) {
-    const f = await getFile(CONFIG.files.squads);
+    const f = await getFileOrDefault(
+      CONFIG.files.squads,
+      JSON.stringify({ updates: [], groups: [] }, null, 2) + "\n"
+    );
     state.shas.squads = f.sha;
     state.raw.squads = f.text;
     state.models.squads = JSON.parse(f.text);
@@ -618,7 +674,13 @@ $("#add-group").addEventListener("click", () => {
 /* ================== РЕЙТИНГ ================== */
 async function loadRanking() {
   if (!state.models.ranking) {
-    const f = await getFile(CONFIG.files.ranking);
+    const f = await getFileOrDefault(
+      CONFIG.files.ranking,
+      JSON.stringify({
+        champion: { name: "Пока нет чемпиона", status: "Место свободно", free: true },
+        entries: [],
+      }, null, 2) + "\n"
+    );
     state.shas.ranking = f.sha;
     state.raw.ranking = f.text;
     state.models.ranking = JSON.parse(f.text);
@@ -672,7 +734,16 @@ $("#add-entry").addEventListener("click", () => {
 /* ================== ЦИТАТЫ ================== */
 async function loadQuotes() {
   if (!state.models.quotes) {
-    const f = await getFile(CONFIG.files.pages);
+    let f;
+    try {
+      f = await getFile(CONFIG.files.pages);
+    } catch (e) {
+      if (e.status === 404) {
+        throw new Error("Не найден " + CONFIG.files.pages + " на ветке «" + state.branch +
+          "». Проверьте ветку на экране входа (для сайта это должна быть main).");
+      }
+      throw e;
+    }
     state.shas.pages = f.sha;
     state.raw.pages = f.text;
     const pages = JSON.parse(f.text);
@@ -807,7 +878,7 @@ async function loadFiles() {
   const paths = [];
   for (const dir of ["content", "content/data"]) {
     try {
-      const items = await gh(`/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${dir}?ref=${CONFIG.branch}`);
+      const items = await gh(`/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${dir}?ref=${encodeURIComponent(state.branch || getBranch())}`);
       for (const it of items) if (it.type === "file") paths.push(it.path);
     } catch (e) { /* папки может не быть — не критично */ }
   }
@@ -856,38 +927,53 @@ $("#save-btn").addEventListener("click", async () => {
   const btn = $("#save-btn");
   const s = $("#save-status");
   btn.disabled = true;
+  s.style.color = "";
   s.className = "status";
   s.textContent = "Сохранение…";
   try {
-    let path, text, message;
+    let path, text, message, sha, key;
     if (state.tab === "files") {
       if (!state.filePath) throw new Error("Сначала выберите файл.");
       path = state.filePath;
       text = $("#file-text").value;
       message = "Админка: правка " + path;
+      sha = state.fileSha;
     } else if (state.tab === "squads") {
+      key = "squads";
       path = CONFIG.files.squads;
       text = JSON.stringify(state.models.squads, null, 2) + "\n";
       message = "Админка: обновлены отряды";
+      sha = state.shas.squads;
     } else if (state.tab === "ranking") {
+      key = "ranking";
       path = CONFIG.files.ranking;
       text = JSON.stringify(state.models.ranking, null, 2) + "\n";
       message = "Админка: обновлён рейтинг";
+      sha = state.shas.ranking;
     } else if (state.tab === "quotes") {
+      key = "pages";
       path = CONFIG.files.pages;
       state.models._pages.quotes = state.models.quotes;
       text = JSON.stringify(state.models._pages, null, 2) + "\n";
       message = "Админка: обновлены цитаты";
+      sha = state.shas.pages;
     }
-    await saveFile(path, text, message);
+    const res = await saveFile(path, text, message, sha);
+    // запоминаем новую версию файла — без неё следующее сохранение снова получит 422
+    const newSha = res && res.content && res.content.sha ? res.content.sha : "";
+    if (state.tab === "files") {
+      state.fileSha = newSha;
+      state.fileDirty = false;
+    } else {
+      state.shas[key] = newSha;
+      state.raw[key] = text;
+      if (key === "squads") { state.models.squads = JSON.parse(text); renderSquads(); }
+      if (key === "ranking") { state.models.ranking = JSON.parse(text); renderRanking(); }
+    }
     state.dirty = false;
-    if (state.tab === "files") state.fileDirty = false;
-    // обновляем sha/сырой текст после сохранения
-    if (state.tab === "squads") { state.raw.squads = text; state.models.squads = JSON.parse(text); renderSquads(); }
-    if (state.tab === "ranking") { state.raw.ranking = text; state.models.ranking = JSON.parse(text); renderRanking(); }
-    if (state.tab === "quotes") { state.raw.pages = text; }
+    state.missingNoted = {};
     s.className = "status ok";
-    s.innerHTML = "Сохранено! Сайт пересоберётся автоматически и обновится на bloodpact.su за 1–2 минуты. " +
+    s.innerHTML = "Сохранено в ветку «" + (state.branch || getBranch()) + "»! Сайт пересоберётся автоматически и обновится на bloodpact.su за 1–2 минуты. " +
       `<a href="${CONFIG.actionsUrl}" target="_blank" rel="noopener">Смотреть сборку →</a>`;
   } catch (e) {
     s.className = "status err";
@@ -895,6 +981,10 @@ $("#save-btn").addEventListener("click", async () => {
       s.textContent = "Нет прав на запись. Нужен доступ на запись к репозиторию (админ или коллаборатор) и токен с правами Contents: Read and write.";
     } else if (e.status === 409) {
       s.textContent = "Конфликт версий: файл изменился с момента загрузки. Обновите страницу и повторите.";
+    } else if (e.status === 404) {
+      s.textContent = "Файл или ветка не найдены (404). Проверьте ветку на экране входа (обычно main) — сейчас выбрана «" + (state.branch || getBranch()) + "».";
+    } else if (e.status === 422) {
+      s.textContent = "GitHub отклонил запрос (422): " + e.message + ". Нажмите «Отменить изменения», перезагрузите страницу и повторите.";
     } else {
       s.textContent = "Ошибка сохранения: " + e.message;
     }
