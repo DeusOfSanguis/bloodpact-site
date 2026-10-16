@@ -1,12 +1,12 @@
 {
   "site": {
-    "name": "Пакт крови — beta 0.2",
+    "name": "Пакт крови",
     "short": "yufu",
     "domain": "bloodpact.su",
     "pages_url": "https://bloodpact.su/",
     "home_label": "ПАКТ·КРОВИ",
     "lang": "ru",
-    "description": "Пакт крови — фракция демонов: иерархия, законы, Двенадцать лун и привилегии должностей."
+    "description": "Пакт крови демонов 1 yufu"
   },
   "assets": {
     "cover.jpg": "https://static.tildacdn.pub/tild3736-3037-4334-b863-353562353039/d946dbce69a24e0288d5.jpg",
