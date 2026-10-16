@@ -5,11 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
 <title>Админка — Пакт крови</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0a0708;
-    --panel: #120d0f;
-    --panel2: #1a1215;
+    --bg: #090607;
+    --panel: #130d10;
+    --panel2: #1b1216;
+    --panel3: #22161b;
     --line: rgba(237, 228, 214, 0.14);
     --text: #ede4d6;
     --muted: #9b8f84;
@@ -24,13 +28,12 @@
   body {
     background: var(--bg);
     color: var(--text);
-    font: 15px/1.55 Manrope, "Segoe UI", Roboto, Arial, sans-serif;
+    font: 14.5px/1.55 Manrope, "Segoe UI", Roboto, Arial, sans-serif;
     min-height: 100vh;
   }
-  .wrap { max-width: 980px; margin: 0 auto; padding: 24px 18px 120px; }
-  h1 { font: 600 26px/1.2 Unbounded, Manrope, sans-serif; margin: 0 0 6px; letter-spacing: .04em; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 24px 18px 140px; }
+  h1 { font: 600 24px/1.2 Unbounded, Manrope, sans-serif; margin: 0 0 6px; letter-spacing: .04em; }
   h1 .kanji { color: var(--red2); }
-  .sub { color: var(--muted); margin: 0 0 22px; }
   .card {
     background: var(--panel);
     border: 1px solid var(--line);
@@ -39,18 +42,19 @@
     margin: 0 0 16px;
   }
   .card h2 { margin: 0 0 12px; font-size: 17px; letter-spacing: .03em; }
-  .card h3 { margin: 18px 0 8px; font-size: 15px; color: var(--gold); }
-  label { display: block; font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin: 10px 0 4px; }
+  .card h3 { margin: 16px 0 8px; font-size: 14.5px; color: var(--gold); }
+  label { display: block; font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin: 10px 0 4px; }
   input[type=text], input[type=password], textarea, select {
     width: 100%;
     background: var(--panel2);
     border: 1px solid var(--line);
     color: var(--text);
     border-radius: 8px;
-    padding: 9px 11px;
+    padding: 8px 11px;
     font: inherit;
+    font-size: 13.5px;
   }
-  textarea { min-height: 90px; resize: vertical; }
+  textarea { min-height: 80px; resize: vertical; }
   input:focus, textarea:focus, select:focus { outline: 1px solid var(--red2); border-color: var(--red2); }
   .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; }
   .row > div { flex: 1 1 200px; min-width: 160px; }
@@ -60,11 +64,12 @@
     color: #fff;
     border: 0;
     border-radius: 8px;
-    padding: 10px 16px;
-    font: 600 13px/1 Manrope, sans-serif;
-    letter-spacing: .05em;
+    padding: 8px 14px;
+    font: 600 12px/1 Manrope, sans-serif;
+    letter-spacing: .04em;
     text-transform: uppercase;
     cursor: pointer;
+    transition: all .2s;
   }
   button:hover { background: var(--red2); }
   button.ghost, .btn.ghost {
@@ -73,27 +78,73 @@
     color: var(--text);
   }
   button.ghost:hover { border-color: var(--red2); color: var(--red2); }
-  button.mini { padding: 6px 10px; font-size: 11px; }
+  button.mini { padding: 5px 9px; font-size: 11px; }
   button:disabled { opacity: .45; cursor: not-allowed; }
-  .hint { font-size: 12.5px; color: var(--muted); }
+  .hint { font-size: 12.5px; color: var(--muted); line-height: 1.5; }
   .hint a { color: var(--red2); }
   .status { margin: 12px 0 0; font-size: 13.5px; min-height: 20px; }
   .status.ok { color: var(--ok); }
   .status.err { color: var(--err); }
   .status a { color: var(--red2); }
-  .tabs { display: flex; gap: 8px; flex-wrap: wrap; margin: 0 0 18px; }
-  .tabs button {
-    background: transparent;
+  
+  /* Группы вкладок навигации */
+  .nav-groups {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin: 0 0 20px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 14px;
+  }
+  .nav-group { display: flex; flex-direction: column; gap: 6px; }
+  .nav-group__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 700;
+  }
+  .nav-group__btns { display: flex; gap: 6px; flex-wrap: wrap; }
+  .nav-group__btns button {
+    background: var(--panel2);
     border: 1px solid var(--line);
     color: var(--muted);
+    padding: 6px 12px;
+    font-size: 12px;
+    border-radius: 6px;
+    text-transform: none;
+    font-weight: 500;
   }
-  .tabs button.on { background: var(--red); border-color: var(--red); color: #fff; }
+  .nav-group__btns button:hover {
+    border-color: var(--red2);
+    color: var(--text);
+  }
+  .nav-group__btns button.on {
+    background: var(--red);
+    border-color: var(--red);
+    color: #fff;
+    font-weight: 700;
+    box-shadow: 0 0 14px rgba(184, 30, 44, 0.45);
+  }
+  .nav-group__btns button i {
+    font-style: normal;
+    color: var(--gold);
+    margin-right: 4px;
+    font-weight: 700;
+  }
+  .nav-group__btns button.on i { color: #fff; }
+
   .topbar {
     display: flex;
     justify-content: space-between;
     align-items: center;
     gap: 12px;
-    margin: 0 0 18px;
+    margin: 0 0 16px;
     flex-wrap: wrap;
   }
   .who { color: var(--muted); font-size: 13px; }
@@ -101,7 +152,10 @@
   .savebar {
     position: fixed;
     left: 0; right: 0; bottom: 0;
-    background: rgba(10, 7, 8, 0.94);
+    z-index: 90;
+    background: rgba(9, 6, 7, 0.96);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
     border-top: 1px solid var(--line);
     padding: 12px 18px;
     display: flex;
@@ -110,7 +164,7 @@
     justify-content: center;
     flex-wrap: wrap;
   }
-  .savebar .status { margin: 0; flex: 1 1 260px; }
+  .savebar .status { margin: 0; flex: 1 1 260px; font-size: 13px; }
   details.block {
     border: 1px solid var(--line);
     border-radius: 10px;
@@ -137,27 +191,112 @@
   details.block.sub-card[open] > summary::before { content: "▾ "; }
   .grp-toolbar, .item-toolbar { display: flex; gap: 8px; flex-wrap: wrap; margin: 10px 0 4px; }
   .divider { border: 0; border-top: 1px solid var(--line); margin: 18px 0; }
-  .pair { border: 1px dashed var(--line); border-radius: 8px; padding: 10px; margin: 8px 0; }
+  .pair { border: 1px dashed var(--line); border-radius: 8px; padding: 10px; margin: 8px 0; background: var(--panel3); }
   .pair .item-toolbar { margin: 6px 0 0; }
   .checkline { display: flex; gap: 8px; align-items: center; margin: 10px 0; color: var(--muted); font-size: 13px; }
   .checkline input { width: auto; }
   .hidden { display: none !important; }
-  .file-preview {
-    white-space: pre-wrap;
+  
+  /* Переключатель режимов редактора страницы */
+  .mode-switch {
+    display: flex;
+    gap: 6px;
+    margin: 0 0 16px;
+    align-items: center;
+    background: var(--panel2);
+    padding: 6px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+  }
+  .mode-switch button {
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--muted);
+    padding: 5px 12px;
+    font-size: 11.5px;
+    border-radius: 6px;
+  }
+  .mode-switch button.on {
+    background: var(--red);
+    border-color: var(--red);
+    color: #fff;
+  }
+  .html-code-area {
+    font-family: ui-monospace, Menlo, Consolas, monospace;
+    font-size: 12.5px;
+    line-height: 1.5;
+    min-height: 420px;
+    white-space: pre;
+    tab-size: 2;
+  }
+  .toolbar-chips {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin: 6px 0 12px;
+  }
+  .toolbar-chips button {
     background: var(--panel2);
     border: 1px solid var(--line);
-    border-radius: 8px;
-    padding: 12px;
-    font: 12.5px/1.5 ui-monospace, Menlo, Consolas, monospace;
-    max-height: 40vh;
-    overflow: auto;
     color: var(--muted);
+    padding: 4px 8px;
+    font-size: 11px;
+    text-transform: none;
+    font-family: ui-monospace, monospace;
+  }
+  .toolbar-chips button:hover {
+    border-color: var(--gold);
+    color: var(--gold);
+  }
+  .badge-sigil {
+    display: inline-grid;
+    place-items: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: rgba(184, 30, 44, 0.25);
+    color: var(--red2);
+    font-weight: 700;
+    font-size: 13px;
+    margin-right: 6px;
   }
   .brand-line { color: var(--muted); font-size: 13px; margin: 0 0 18px; }
   .brand-line .kanji { color: var(--red2); }
+  
+  /* Встроенный предпросмотр вкладки */
+  .live-preview {
+    background: #000;
+    border: 1px solid rgba(211, 19, 42, 0.35);
+    border-radius: 10px;
+    padding: 24px 20px;
+    color: #ede4d6;
+    font-family: Manrope, sans-serif;
+    min-height: 280px;
+    max-height: 600px;
+    overflow-y: auto;
+  }
+  .live-preview h2, .live-preview h3, .live-preview h4 {
+    font-family: Unbounded, sans-serif;
+    color: #ede4d6;
+    margin: 18px 0 8px;
+  }
+  .live-preview p.lead { font-size: 16px; font-weight: 500; color: #ede4d6; border-left: 2px solid var(--red); padding-left: 12px; }
+  .live-preview .note {
+    background: rgba(211, 19, 42, 0.08);
+    border-left: 2px solid var(--red);
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 13px;
+    color: #d8cec0;
+  }
+  .live-preview ul, .live-preview ol { padding-left: 20px; }
+  .live-preview li { margin-bottom: 4px; }
+  .live-preview hr { border: 0; border-top: 1px solid rgba(237, 228, 214, 0.12); margin: 20px 0; }
+  
   @media (max-width: 640px) {
-    h1 { font-size: 21px; }
+    h1 { font-size: 20px; }
     .row > div { flex: 1 1 100%; }
+    .nav-groups { padding: 10px; }
   }
 </style>
 </head>
@@ -167,28 +306,24 @@
   <!-- ===================== ВХОД ===================== -->
   <section id="login-view">
     <h1><span class="kanji">血</span> Админка «Пакт крови»</h1>
-    <p class="brand-line">Правка текстов сайта без кода · вход только для админов</p>
+    <p class="brand-line">Управление всеми вкладками и текстами сайта · вход только для админов</p>
 
     <div class="card">
       <h2>Вход через GitHub</h2>
       <p class="hint">
-        Админка работает через GitHub: изменения сохраняются в репозиторий, а сайт
+        Админка работает через GitHub API: изменения сохраняются прямо в репозиторий, а сайт
         пересобирается автоматически. Право на изменения есть только у тех, у кого есть
-        <b>доступ на запись</b> к репозиторию — это и есть проверка «только админ».
+        <b>доступ на запись</b> к репозиторию.
       </p>
       <label for="token">Токен GitHub (Personal Access Token)</label>
       <input type="password" id="token" placeholder="github_pat_... или ghp_..." autocomplete="off">
       <label for="branch">Ветка репозитория</label>
       <input type="text" id="branch" placeholder="main" autocomplete="off">
       <p class="hint" style="margin:10px 0 14px">
-        Обычно <b>main</b> — в неё пишутся правки и её публикует GitHub Pages.
-        Для тестов до слияния можно указать другую ветку (например, ветку PR) —
-        или добавить <code>?branch=имя-ветки</code> к адресу страницы.<br>
-        Токен нужен один раз и хранится только в вашем браузере (localStorage), никуда больше не отправляется,
-        кроме api.github.com.<br>
+        Обычно <b>main</b> — в неё пишутся правки и её публикует GitHub Pages.<br>
+        Токен хранится только в вашем браузере (localStorage) и не передаётся третьим лицам.<br>
         Как создать: <a href="https://github.com/settings/personal-access-tokens/new?name=bloodpact-admin&permissions=contents:read_write" target="_blank" rel="noopener">Fine-grained token</a> →
         Repository access: <b>только DeusOfSanguis/bloodpact-site</b> → Permissions → Contents: <b>Read and write</b>.
-        Альтернатива: <a href="https://github.com/settings/tokens/new?scopes=repo&description=bloodpact-admin" target="_blank" rel="noopener">классический токен</a> со scope <b>repo</b>.
       </p>
       <button id="login-btn">Войти</button>
       <p class="status" id="login-status"></p>
@@ -198,23 +333,85 @@
   <!-- ===================== ПРИЛОЖЕНИЕ ===================== -->
   <section id="app-view" class="hidden">
     <div class="topbar">
-      <h1><span class="kanji">血</span> Админка</h1>
+      <h1><span class="kanji">血</span> Админка сайта</h1>
       <div class="who">Вошли как: <b id="user-login">…</b> &nbsp;·&nbsp;
         <button class="ghost mini" id="logout-btn">Выйти</button>
       </div>
     </div>
 
-    <div class="tabs" id="tabs">
-      <button data-tab="squads" class="on">Отряды</button>
-      <button data-tab="ranking">Рейтинг</button>
-      <button data-tab="quotes">Цитаты</button>
-      <button data-tab="files">Файлы (тексты страниц)</button>
+    <!-- Навигация по всем вкладкам/разделам сайта (динамически строится из pages.json) -->
+    <div class="nav-groups" id="tabs">
+      <div class="nav-group">
+        <div class="nav-group__head">
+          <span>Списки и настройки</span>
+          <button class="ghost mini" id="open-new-tab-modal" style="padding:2px 8px;font-size:10.5px">+ Новая вкладка / страница</button>
+        </div>
+        <div class="nav-group__btns" id="nav-system-btns">
+          <button data-tab="squads" class="on"><i>隊</i> Отряды</button>
+          <button data-tab="ranking"><i>位</i> Рейтинг</button>
+          <button data-tab="quotes"><i>言</i> Цитаты</button>
+          <button data-tab="pages"><i>頁</i> Управление вкладками и обложками</button>
+        </div>
+      </div>
+      <div class="nav-group">
+        <span class="nav-group__head">Свитки и разделы сайта</span>
+        <div class="nav-group__btns" id="nav-pages-btns">
+          <!-- Генерируется динамически из pages.json -->
+        </div>
+      </div>
+      <div class="nav-group">
+        <span class="nav-group__head">Служебное</span>
+        <div class="nav-group__btns">
+          <button data-tab="files"><i>📁</i> Все файлы (код)</button>
+        </div>
+      </div>
     </div>
 
-    <!-- ---------- ОТРЯДЫ ---------- -->
+    <!-- Модальное окно создания новой вкладки -->
+    <div id="new-tab-modal" class="card hidden" style="border-color:var(--red2);box-shadow:0 0 30px rgba(184,30,44,0.35);margin-bottom:20px">
+      <h2>+ Создание новой вкладки / страницы сайта</h2>
+      <p class="hint">Новая страница сразу появится в верхнем меню сайта и станет доступна для редактирования.</p>
+      <div class="row">
+        <div>
+          <label>Слаг (адрес страницы, на латинице: <code>rules</code>, <code>events</code>)</label>
+          <input type="text" id="new-slug" placeholder="events">
+        </div>
+        <div>
+          <label>Название в верхнем меню (например «Ивенты»)</label>
+          <input type="text" id="new-nav" placeholder="Ивенты">
+        </div>
+        <div style="flex:0 0 80px;min-width:70px">
+          <label>Печать</label>
+          <input type="text" id="new-sigil" placeholder="祭" value="鬼">
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label>Заголовок страницы (title)</label>
+          <input type="text" id="new-title" placeholder="Ивенты фракции">
+        </div>
+        <div>
+          <label>Главный заголовок на обложке</label>
+          <input type="text" id="new-covertitle" placeholder="Ивенты и турниры">
+        </div>
+        <div>
+          <label>Подзаголовок на обложке</label>
+          <input type="text" id="new-uptitle" value="Пакт крови">
+        </div>
+      </div>
+      <div class="item-toolbar" style="margin-top:14px">
+        <button id="create-tab-btn">Создать страницу</button>
+        <button id="cancel-new-tab-btn" class="ghost">Отмена</button>
+      </div>
+    </div>
+
+    <!-- Контейнер динамических страниц (создаются на лету) -->
+    <div id="dynamic-tab-pages"></div>
+
+    <!-- ---------- 1. ОТРЯДЫ ---------- -->
     <div class="tab-page" id="tab-squads">
       <div class="card">
-        <h2>Отряды</h2>
+        <h2>Отряды (данные <code>content/data/squads.json</code>)</h2>
         <p class="hint">Основной отряд, под ним — его подотряды; следующий основной отряд и его подотряды — и так далее.
           «↑/↓» меняют порядок, «+ Подотряд» добавляет вложенный отряд, «Вынести в основные» делает подотряд самостоятельным.</p>
         <div id="squads-list"></div>
@@ -222,10 +419,10 @@
       </div>
     </div>
 
-    <!-- ---------- РЕЙТИНГ ---------- -->
+    <!-- ---------- 2. РЕЙТИНГ ---------- -->
     <div class="tab-page hidden" id="tab-ranking">
       <div class="card">
-        <h2>Чемпион</h2>
+        <h2>Чемпион (данные <code>content/data/ranking.json</code>)</h2>
         <div class="row">
           <div>
             <label>Имя чемпиона (или «Пока нет чемпиона»)</label>
@@ -243,22 +440,22 @@
       </div>
 
       <div class="card">
-        <h2>Таблица мест</h2>
+        <h2>Таблица мест рейтинга</h2>
         <div id="ranking-entries"></div>
         <button class="ghost" id="add-entry">+ Добавить место</button>
       </div>
     </div>
 
-    <!-- ---------- ЦИТАТЫ ---------- -->
+    <!-- ---------- 3. ЦИТАТЫ ---------- -->
     <div class="tab-page hidden" id="tab-quotes">
       <div class="card">
-        <h2>Бегущая строка</h2>
-        <p class="hint">Цитаты в строке по всему сайту. Можно добавлять, убирать и менять местами.</p>
+        <h2>Бегущая строка цитат (<code>content/pages.json</code>)</h2>
+        <p class="hint">Цитаты в бегущей строке по всему сайту. Можно добавлять, убирать и менять местами.</p>
         <div id="marquee-quotes"></div>
         <button class="ghost" id="add-marquee">+ Добавить цитату</button>
       </div>
       <div class="card">
-        <h2>Цитата в подвале</h2>
+        <h2>Цитата в подвале сайта</h2>
         <div class="row">
           <div><label>Текст</label><input type="text" data-path="footer.text"></div>
           <div><label>Автор</label><input type="text" data-path="footer.author"></div>
@@ -273,25 +470,46 @@
       </div>
     </div>
 
-    <!-- ---------- ФАЙЛЫ ---------- -->
+    <!-- ---------- 4. ОБЛОЖКИ И УПРАВЛЕНИЕ ВКЛАДКАМИ ---------- -->
+    <div class="tab-page hidden" id="tab-pages">
+      <div class="card">
+        <h2>Настройки сайта (<code>content/pages.json → site</code>)</h2>
+        <div class="row">
+          <div><label>Название сайта</label><input type="text" data-path="site.name"></div>
+          <div><label>Домен</label><input type="text" data-path="site.domain"></div>
+          <div><label>Надпись логотипа</label><input type="text" data-path="site.home_label"></div>
+        </div>
+        <label>Мета-описание (SEO)</label>
+        <textarea data-path="site.description"></textarea>
+      </div>
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+          <h2 style="margin:0">Все вкладки сайта (порядок, обложки, меню)</h2>
+          <button class="ghost mini" id="add-tab-from-manager">+ Добавить новую вкладку</button>
+        </div>
+        <p class="hint">Здесь можно переименовывать разделы, менять порядок кнопок в меню (↑/↓), скрывать их из меню или удалять.</p>
+        <div id="pages-list"></div>
+      </div>
+    </div>
+
+    <!-- ---------- 14. ФАЙЛЫ ---------- -->
     <div class="tab-page hidden" id="tab-files">
       <div class="card">
-        <h2>Тексты страниц (файлы)</h2>
+        <h2>Прямой редактор файлов (<code>content/**</code>)</h2>
         <p class="hint">
-          Здесь можно править любые файлы контента текстом: страницы (<code>content/*.html</code>),
-          данные списков, заголовки и цитаты (<code>content/pages.json</code>).
-          Это «запасной» способ — когда нужно поправить текст вне форм выше.
+          Здесь можно открыть и отредактировать любой файл напрямую в исходном коде.
         </p>
-        <label>Файл</label>
+        <label>Выберите файл</label>
         <select id="file-select"><option value="">— выберите файл —</option></select>
-        <label>Содержимое</label>
-        <textarea id="file-text" style="min-height:340px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px"></textarea>
+        <label>Содержимое файла</label>
+        <textarea id="file-text" style="min-height:380px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px"></textarea>
         <div class="item-toolbar">
           <button id="file-reload" class="ghost">Перезагрузить файл</button>
         </div>
       </div>
     </div>
 
+    <!-- Фиксированная нижняя панель сохранения -->
     <div class="savebar">
       <button id="save-btn">Сохранить</button>
       <button id="discard-btn" class="ghost">Отменить изменения</button>
@@ -313,11 +531,10 @@ const CONFIG = {
     squads: "content/data/squads.json",
     ranking: "content/data/ranking.json",
     pages: "content/pages.json",
+    quotes: "content/pages.json",
   },
 };
 
-/* Ветка, в которую пишем: main после слияния PR; для тестов можно указать свою
-   (поле на экране входа или ?branch=имя-ветки в адресе). */
 const BRANCH_KEY = "bp_admin_branch";
 function getBranch() {
   try { return localStorage.getItem(BRANCH_KEY) || CONFIG.defaultBranch; }
@@ -354,6 +571,13 @@ function b64decode(b64) {
   return new TextDecoder().decode(bytes);
 }
 
+function escapeHtml(s) {
+  return String(s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+function escapeAttr(s) {
+  return String(s || "").replace(/&/g, "&amp;").replace(/"/g, "&quot;");
+}
+
 /* ================== GitHub API ================== */
 async function gh(path, opts) {
   opts = opts || {};
@@ -386,7 +610,6 @@ async function getFile(path) {
   return { sha: data.sha, text: data.content ? b64decode(data.content) : "" };
 }
 
-/** Файл с подсказкой: если его ещё нет на ветке — вернуть defaultText и создадим при сохранении. */
 async function getFileOrDefault(path, defaultText) {
   try {
     return await getFile(path);
@@ -415,9 +638,8 @@ async function saveFile(path, text, message, sha) {
     content: b64encode(text),
     branch: state.branch || getBranch(),
   };
-  // sha обязателен при ОБНОВЛЕНИИ существующего файла; без него файл создаётся заново
   if (sha) body.sha = sha;
-  return gh(`/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${path}`, {
+  return await gh(`/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${path}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
@@ -429,23 +651,25 @@ const state = {
   user: null,
   branch: "",
   tab: "squads",
-  models: { squads: null, ranking: null, quotes: null },
-  raw: { squads: "", ranking: "", pages: "" },   // исходные тексты файлов (для «отмены»)
-  shas: { squads: "", ranking: "", pages: "" },  // версии файлов (sha обязателен при сохранении)
+  models: {},
+  raw: {},
+  shas: {},
+  pageModes: {}, // 'blocks' | 'code' | 'preview'
   dirty: false,
-  filePath: null,     // для вкладки «файлы»
+  dirtyFiles: new Set(),
+  filePath: null,
   fileSha: "",
   fileDirty: false,
-  missingNoted: {},   // уже показанные предупреждения о создаваемых файлах
+  missingNoted: {},
 };
 
-function markDirty() {
+function markDirty(key) {
   state.dirty = true;
+  if (key) state.dirtyFiles.add(key);
   $("#save-status").className = "status";
   $("#save-status").textContent = "Есть несохранённые изменения…";
 }
 
-/* ================== работа с путями в модели ================== */
 function getPath(obj, path) {
   return path.split(".").reduce((o, k) => (o == null ? o : o[k]), obj);
 }
@@ -474,7 +698,6 @@ function showApp() {
 
 /* ================== инициализация ================== */
 async function boot() {
-  // ?branch=... в адресе перекрывает сохранённую ветку (удобно для тестов)
   const urlBranch = new URLSearchParams(location.search).get("branch");
   if (urlBranch) setBranch(urlBranch);
   state.branch = getBranch();
@@ -492,7 +715,26 @@ async function boot() {
 
 async function enterApp() {
   showApp();
-  await loadTab("squads");
+  await ensurePagesJson();
+  renderNavPageButtons();
+  await loadTab(state.tab || "squads");
+}
+
+function renderNavPageButtons() {
+  const pData = state.models._pages;
+  const container = $("#nav-pages-btns");
+  if (!container || !pData || !pData.pages) return;
+  container.innerHTML = "";
+  pData.pages.forEach(p => {
+    const isIndex = p.slug === "index";
+    const label = p.nav || (isIndex ? "Главная" : p.slug);
+    const sigil = p.sigil || (isIndex ? "血" : "鬼");
+    const btn = document.createElement("button");
+    btn.dataset.tab = p.slug;
+    btn.className = (state.tab === p.slug) ? "on" : "";
+    btn.innerHTML = `<i>${escapeHtml(sigil)}</i> ${escapeHtml(label)}`;
+    container.appendChild(btn);
+  });
 }
 
 $("#login-btn").addEventListener("click", async () => {
@@ -527,7 +769,7 @@ $("#logout-btn").addEventListener("click", () => {
   location.reload();
 });
 
-/* ================== вкладки ================== */
+/* ================== переключение вкладок ================== */
 $("#tabs").addEventListener("click", async (e) => {
   const btn = e.target.closest("button[data-tab]");
   if (!btn) return;
@@ -536,17 +778,42 @@ $("#tabs").addEventListener("click", async (e) => {
   state.tab = btn.dataset.tab;
   $$("#tabs button").forEach(b => b.classList.toggle("on", b === btn));
   $$(".tab-page").forEach(p => p.classList.add("hidden"));
-  $("#tab-" + state.tab).classList.remove("hidden");
+  
+  ensureDynamicPageContainer(state.tab);
+  const targetPage = $("#tab-" + state.tab);
+  if (targetPage) targetPage.classList.remove("hidden");
   $("#save-status").textContent = "";
   await loadTab(state.tab);
 });
+
+function ensureDynamicPageContainer(slug) {
+  let p = $("#tab-" + slug);
+  if (!p) {
+    const root = $("#dynamic-tab-pages");
+    p = document.createElement("div");
+    p.className = "tab-page hidden";
+    p.id = "tab-" + slug;
+    p.innerHTML = `
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+          <h2 style="margin:0">Раздел «${escapeHtml(slug)}» (<code>content/${escapeHtml(slug)}.html</code>)</h2>
+          <button class="ghost mini" data-act="del-page" data-slug="${escapeHtml(slug)}" style="color:var(--err);border-color:rgba(255,92,92,0.4)">✕ Удалить страницу</button>
+        </div>
+        <div id="page-editor-${slug}"></div>
+      </div>
+    `;
+    root.appendChild(p);
+  }
+}
 
 async function loadTab(tab) {
   try {
     if (tab === "squads") await loadSquads();
     else if (tab === "ranking") await loadRanking();
     else if (tab === "quotes") await loadQuotes();
+    else if (tab === "pages") await loadPages();
     else if (tab === "files") await loadFiles();
+    else await loadHtmlPage(tab);
   } catch (e) {
     const s = $("#save-status");
     s.className = "status err";
@@ -554,7 +821,7 @@ async function loadTab(tab) {
   }
 }
 
-/* ================== ОТРЯДЫ ================== */
+/* ================== 1. ОТРЯДЫ ================== */
 async function loadSquads() {
   if (!state.models.squads) {
     const f = await getFileOrDefault(
@@ -566,7 +833,6 @@ async function loadSquads() {
     state.models.squads = JSON.parse(f.text) || {};
     const m = state.models.squads;
     if (!Array.isArray(m.squads)) m.squads = [];
-    // Миграция владельца: старое одиночное поле owner → звание + имя демона.
     const migrateOwner = sq => {
       if (!Array.isArray(sq.subs)) sq.subs = [];
       if (sq.owner_name === undefined) sq.owner_name = sq.owner || "";
@@ -658,23 +924,23 @@ function squadFieldsHtml(p, sq, parentName) {
     <div class="pair">
       <b style="font-size:13px;letter-spacing:.04em">Смотрящие</b>
       <div data-ov="${p}">${ovRows}</div>
-      <button class="ghost mini" data-act="ov-add" data-p="${p}">+ Добавить смотрящего</button>
+      <button class="ghost mini" data-act="ov-add" data-p="${p}">+ Добавить роль смотрящего</button>
     </div>
     <div class="row">
       <div>
-        <label>Подпись задач</label>
-        <input type="text" data-path="${p}.tasks_label" value="${escapeAttr(sq.tasks_label || "")}" placeholder="Задачи отряда:">
+        <label>Заголовок задач</label>
+        <input type="text" data-path="${p}.tasks_label" value="${escapeAttr(sq.tasks_label || "Задачи отряда:")}">
       </div>
     </div>
-    <label>Задачи (одна строка — одна задача)</label>
+    <label>Задачи (по одной на строку)</label>
     <textarea data-lines="${p}.tasks">${escapeHtml((sq.tasks || []).join("\n"))}</textarea>
     <div class="row">
       <div>
-        <label>Примечание (подпись)</label>
-        <input type="text" data-path="${p}.note_label" value="${escapeAttr(sq.note_label || "")}" placeholder="Исключение к праву наказывать:">
+        <label>Подпись примечания (например «Исключение»)</label>
+        <input type="text" data-path="${p}.note_label" value="${escapeAttr(sq.note_label || "")}">
       </div>
       <div>
-        <label>Примечание (текст)</label>
+        <label>Текст примечания</label>
         <input type="text" data-path="${p}.note_text" value="${escapeAttr(sq.note_text || "")}">
       </div>
     </div>`;
@@ -682,38 +948,41 @@ function squadFieldsHtml(p, sq, parentName) {
 
 function overseerHtml(p, oi, ov) {
   return `
-    <div class="pair">
-      <label>Должность (например «Смотрящая высшая луна»)</label>
-      <input type="text" data-path="${p}.overseers.${oi}.role" value="${escapeAttr(ov.role || "")}">
-      <label>Люди (одна строка — один человек)</label>
+    <div class="pair" style="margin:6px 0">
+      <div class="row">
+        <div>
+          <label>Роль (например «Смотрящая высшая луна»)</label>
+          <input type="text" data-path="${p}.overseers.${oi}.role" value="${escapeAttr(ov.role || "")}">
+        </div>
+      </div>
+      <label>Люди / демоны (по одной строке на демона, формат: <code>Звание: Имя</code> или просто <code>Имя</code>)</label>
       <textarea data-lines="${p}.overseers.${oi}.people">${escapeHtml((ov.people || []).join("\n"))}</textarea>
       <div class="item-toolbar">
-        <button class="ghost mini" data-act="ov-del" data-p="${p}" data-o="${oi}">Удалить</button>
+        <button class="ghost mini" data-act="ov-del" data-p="${p}" data-o="${oi}">Удалить роль</button>
       </div>
     </div>`;
 }
 
 $("#add-squad").addEventListener("click", () => {
-  state.models.squads.squads.push(emptySquad());
+  if (!state.models.squads.squads) state.models.squads.squads = [];
+  state.models.squads.squads.push(emptySquad("Новый отряд"));
   renderSquads();
-  markDirty();
+  markDirty("squads");
 });
 
-/* ================== РЕЙТИНГ ================== */
+/* ================== 2. РЕЙТИНГ ================== */
 async function loadRanking() {
   if (!state.models.ranking) {
     const f = await getFileOrDefault(
       CONFIG.files.ranking,
-      JSON.stringify({
-        champion: { name: "Пока нет чемпиона", status: "Место свободно", free: true },
-        entries: [],
-      }, null, 2) + "\n"
+      JSON.stringify({ champion: {}, entries: [] }, null, 2) + "\n"
     );
     state.shas.ranking = f.sha;
     state.raw.ranking = f.text;
     state.models.ranking = JSON.parse(f.text) || {};
-    if (!Array.isArray(state.models.ranking.entries)) state.models.ranking.entries = [];
-    if (!state.models.ranking.champion) state.models.ranking.champion = {};
+    const m = state.models.ranking;
+    m.champion = m.champion || {};
+    if (!Array.isArray(m.entries)) m.entries = [];
   }
   renderRanking();
 }
@@ -722,7 +991,8 @@ function renderRanking() {
   const m = state.models.ranking;
   $('[data-path="champion.name"]').value = (m.champion && m.champion.name) || "";
   $('[data-path="champion.status"]').value = (m.champion && m.champion.status) || "";
-  $("#champ-free").checked = !!(m.champion && m.champion.free);
+  $('[data-path="champion.free"]').checked = !!(m.champion && m.champion.free);
+
   const root = $("#ranking-entries");
   root.innerHTML = "";
   (m.entries || []).forEach((e, i) => {
@@ -730,18 +1000,28 @@ function renderRanking() {
     div.className = "pair";
     div.innerHTML = `
       <div class="row">
-        <div>
-          <label>Место / подпись</label>
-          <input type="text" data-path="entries.${i}.label" value="${escapeAttr(e.label || "")}" placeholder="2 место">
+        <div style="flex:0 0 70px;min-width:60px">
+          <label>Место</label>
+          <input type="text" data-path="entries.${i}.place" value="${escapeAttr(e.place || (i + 1))}">
         </div>
         <div>
-          <label>Имя демона (пусто = свободно)</label>
+          <label>Имя</label>
           <input type="text" data-path="entries.${i}.name" value="${escapeAttr(e.name || "")}">
         </div>
+        <div>
+          <label>Ранг / Отряд</label>
+          <input type="text" data-path="entries.${i}.rank" value="${escapeAttr(e.rank || "")}">
+        </div>
+        <div style="flex:0 0 110px;min-width:90px">
+          <label>Очки (баллы)</label>
+          <input type="text" data-path="entries.${i}.score" value="${escapeAttr(e.score || "")}">
+        </div>
       </div>
-      <div class="checkline">
-        <input type="checkbox" data-path="entries.${i}.highlight" data-type="bool" ${e.highlight ? "checked" : ""}>
-        <span>Выделить как «Претендент» (красным)</span>
+      <div class="row">
+        <div>
+          <label>Примечание / Статус (необязательно)</label>
+          <input type="text" data-path="entries.${i}.note" value="${escapeAttr(e.note || "")}">
+        </div>
       </div>
       <div class="item-toolbar">
         <button class="ghost mini" data-act="entry-up" data-i="${i}">↑ Выше</button>
@@ -753,39 +1033,35 @@ function renderRanking() {
 }
 
 $("#add-entry").addEventListener("click", () => {
-  state.models.ranking.entries.push({ label: (state.models.ranking.entries.length + 1) + " место", name: "", highlight: false });
+  if (!state.models.ranking.entries) state.models.ranking.entries = [];
+  const nextPlace = String(state.models.ranking.entries.length + 1);
+  state.models.ranking.entries.push({ place: nextPlace, name: "Имя демона", rank: "Ранг", score: "0", note: "" });
   renderRanking();
-  markDirty();
+  markDirty("ranking");
 });
 
-/* ================== ЦИТАТЫ ================== */
+/* ================== 3. ЦИТАТЫ ================== */
 async function loadQuotes() {
-  if (!state.models.quotes) {
-    let f;
-    try {
-      f = await getFile(CONFIG.files.pages);
-    } catch (e) {
-      if (e.status === 404) {
-        throw new Error("Не найден " + CONFIG.files.pages + " на ветке «" + state.branch +
-          "». Проверьте ветку на экране входа (для сайта это должна быть main).");
-      }
-      throw e;
-    }
-    state.shas.pages = f.sha;
-    state.raw.pages = f.text;
-    const pages = JSON.parse(f.text) || {};
-    state.models.quotes = pages.quotes || {};
-    if (!Array.isArray(state.models.quotes.marquee)) state.models.quotes.marquee = [];
-    if (!state.models.quotes.footer) state.models.quotes.footer = { text: "", author: "" };
-    if (!state.models.quotes.not_found) state.models.quotes.not_found = { text: "", author: "" };
-    pages.quotes = state.models.quotes;
-    state.models._pages = pages;
-  }
+  await ensurePagesJson();
   renderQuotes();
 }
 
+async function ensurePagesJson() {
+  if (!state.models._pages) {
+    const f = await getFileOrDefault(CONFIG.files.pages, "{}");
+    state.shas.pages = f.sha;
+    state.raw.pages = f.text;
+    state.models._pages = JSON.parse(f.text) || {};
+    state.models._pages.site = state.models._pages.site || {};
+    state.models._pages.quotes = state.models._pages.quotes || {};
+    state.models._pages.pages = state.models._pages.pages || [];
+    state.models.quotes = state.models._pages.quotes;
+    state.models.pages = state.models._pages;
+  }
+}
+
 function renderQuotes() {
-  const m = state.models.quotes;
+  const m = state.models.quotes || {};
   const root = $("#marquee-quotes");
   root.innerHTML = "";
   (m.marquee || []).forEach((q, i) => {
@@ -793,12 +1069,12 @@ function renderQuotes() {
     div.className = "pair";
     div.innerHTML = `
       <div class="row">
-        <div>
+        <div style="flex:2 1 300px">
           <label>Текст цитаты</label>
           <input type="text" data-path="marquee.${i}.text" value="${escapeAttr(q.text || "")}">
         </div>
-        <div>
-          <label>Автор</label>
+        <div style="flex:1 1 200px">
+          <label>Автор (например «Кокушибо · Первая Луна»)</label>
           <input type="text" data-path="marquee.${i}.author" value="${escapeAttr(q.author || "")}">
         </div>
       </div>
@@ -819,23 +1095,579 @@ $("#add-marquee").addEventListener("click", () => {
   if (!state.models.quotes.marquee) state.models.quotes.marquee = [];
   state.models.quotes.marquee.push({ text: "Новая цитата", author: "Автор" });
   renderQuotes();
-  markDirty();
+  markDirty("quotes");
 });
 
-/* ================== общие действия над списками ================== */
-function onListAction(e) {
-  const btn = e.target.closest("button[data-act]");
-  if (!btn) return;
-  const act = btn.dataset.act;
-  const m = state.models[state.tab];
-  const g = +btn.dataset.g, s = +btn.dataset.s, o = +btn.dataset.o, i = +btn.dataset.i;
+/* ================== 4. УПРАВЛЕНИЕ ВКЛАДКАМИ И ОБЛОЖКАМИ (pages.json) ================== */
+async function loadPages() {
+  await ensurePagesJson();
+  renderPagesList();
+}
 
+function renderPagesList() {
+  const pData = state.models._pages;
+  $('[data-path="site.name"]').value = (pData.site && pData.site.name) || "";
+  $('[data-path="site.domain"]').value = (pData.site && pData.site.domain) || "";
+  $('[data-path="site.home_label"]').value = (pData.site && pData.site.home_label) || "";
+  $('[data-path="site.description"]').value = (pData.site && pData.site.description) || "";
+
+  const root = $("#pages-list");
+  root.innerHTML = "";
+  (pData.pages || []).forEach((p, pi) => {
+    const isIndex = p.slug === "index";
+    const det = document.createElement("details");
+    det.className = "block";
+    det.innerHTML = `
+      <summary><span class="badge-sigil">${escapeHtml(p.sigil || (isIndex ? "血" : "鬼"))}</span> ${escapeHtml(p.title || p.slug)} (<code>/${escapeHtml(p.slug)}/</code>) ${p.nav ? `· меню: <b>${escapeHtml(p.nav)}</b>` : '· <i style="color:var(--muted)">скрыто из меню</i>'}</summary>
+      <div class="row">
+        <div>
+          <label>Заголовок страницы (title)</label>
+          <input type="text" data-path="pages.${pi}.title" value="${escapeAttr(p.title || "")}">
+        </div>
+        <div>
+          <label>Название в верхнем меню (пусто = скрыть из шапки)</label>
+          <input type="text" data-path="pages.${pi}.nav" value="${escapeAttr(p.nav || "")}" placeholder="Закон, Отряды...">
+        </div>
+        <div style="flex:0 0 90px;min-width:80px">
+          <label>Иероглиф</label>
+          <input type="text" data-path="pages.${pi}.sigil" value="${escapeAttr(p.sigil || "")}" placeholder="血">
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label>Подзаголовок на обложке</label>
+          <input type="text" data-path="pages.${pi}.cover_uptitle" value="${escapeAttr(p.cover_uptitle || "")}">
+        </div>
+        <div>
+          <label>Главный заголовок на обложке</label>
+          <input type="text" data-path="pages.${pi}.cover_title" value="${escapeAttr(p.cover_title || "")}">
+        </div>
+        <div>
+          <label>Картинка обложки (assets/img/... или URL)</label>
+          <input type="text" data-path="pages.${pi}.cover_image" value="${escapeAttr(p.cover_image || "blood-moon.jpg")}">
+        </div>
+      </div>
+      ${isIndex ? `
+      <div class="pair" style="margin-top:10px">
+        <b style="font-size:12.5px;color:var(--gold)">Настройки главного экрана (героя)</b>
+        <div class="row">
+          <div><label>Слово 1</label><input type="text" data-path="pages.${pi}.hero_title_1" value="${escapeAttr(p.hero_title_1 || "ПАКТ")}"></div>
+          <div><label>Слово 2</label><input type="text" data-path="pages.${pi}.hero_title_2" value="${escapeAttr(p.hero_title_2 || "КРОВИ")}"></div>
+        </div>
+        <div class="row">
+          <div style="flex:2 1 300px"><label>Цитата героя</label><input type="text" data-path="pages.${pi}.hero_quote" value="${escapeAttr(p.hero_quote || "")}"></div>
+          <div style="flex:1 1 200px"><label>Автор цитаты</label><input type="text" data-path="pages.${pi}.hero_quote_author" value="${escapeAttr(p.hero_quote_author || "")}"></div>
+        </div>
+      </div>` : ""}
+      <div class="item-toolbar" style="margin-top:12px">
+        <button class="ghost mini" data-act="page-up" data-pi="${pi}">↑ В меню выше</button>
+        <button class="ghost mini" data-act="page-down" data-pi="${pi}">↓ В меню ниже</button>
+        <button class="ghost mini" data-act="open-page-editor" data-slug="${escapeAttr(p.slug)}">Редактировать текст страницы →</button>
+        ${!isIndex ? `<button class="ghost mini" data-act="del-page" data-slug="${escapeAttr(p.slug)}" style="color:var(--err)">Удалить страницу</button>` : ""}
+      </div>`;
+    root.appendChild(det);
+  });
+}
+
+/* ================== СОЗДАНИЕ НОВОЙ СТРАНИЦЫ / ВКЛАДКИ ================== */
+function showNewTabModal() {
+  $("#new-tab-modal").classList.remove("hidden");
+  $("#new-slug").focus();
+}
+function hideNewTabModal() {
+  $("#new-tab-modal").classList.add("hidden");
+}
+
+$("#open-new-tab-modal").addEventListener("click", showNewTabModal);
+$("#add-tab-from-manager").addEventListener("click", showNewTabModal);
+$("#cancel-new-tab-btn").addEventListener("click", hideNewTabModal);
+
+$("#create-tab-btn").addEventListener("click", async () => {
+  const slug = ($("#new-slug").value || "").trim().toLowerCase().replace(/[^a-z0-9_-]/g, "");
+  const nav = ($("#new-nav").value || "").trim();
+  const sigil = ($("#new-sigil").value || "").trim() || "鬼";
+  const title = ($("#new-title").value || "").trim() || nav || slug;
+  const covertitle = ($("#new-covertitle").value || "").trim() || title;
+  const uptitle = ($("#new-uptitle").value || "").trim() || "Пакт крови";
+
+  if (!slug) {
+    alert("Укажите слаг страницы (латиницей, например events)");
+    return;
+  }
+  await ensurePagesJson();
+  if (state.models._pages.pages.some(p => p.slug === slug)) {
+    alert("Страница со слагом «" + slug + "» уже существует!");
+    return;
+  }
+
+  const newPageObj = {
+    slug: slug,
+    title: title,
+    nav: nav,
+    sigil: sigil,
+    cover_uptitle: uptitle,
+    cover_title: covertitle,
+    cover_image: "blood-moon.jpg"
+  };
+
+  state.models._pages.pages.push(newPageObj);
+  state.models[slug] = {
+    html: `<section class="s">\n  <p class="lead"><strong>${escapeHtml(title)}</strong> — новый раздел свитка.</p>\n  <p>Здесь можно разместить правила, условия и описание.</p>\n</section>\n`
+  };
+  CONFIG.files[slug] = `content/${slug}.html`;
+
+  hideNewTabModal();
+  $("#new-slug").value = "";
+  $("#new-nav").value = "";
+  $("#new-title").value = "";
+  $("#new-covertitle").value = "";
+
+  renderNavPageButtons();
+  renderPagesList();
+  markDirty("pages");
+  markDirty(slug);
+
+  // Переходим сразу на созданную страницу
+  state.tab = slug;
+  $$("#tabs button").forEach(b => b.classList.toggle("on", b.dataset.tab === slug));
+  $$(".tab-page").forEach(p => p.classList.add("hidden"));
+  ensureDynamicPageContainer(slug);
+  const target = $("#tab-" + slug);
+  if (target) target.classList.remove("hidden");
+  await loadTab(slug);
+});
+
+/* ================== РЕДАКТОР СВИТКОВ И РАЗДЕЛОВ (HTML) ================== */
+async function loadHtmlPage(slug) {
+  ensureDynamicPageContainer(slug);
+  if (!CONFIG.files[slug]) {
+    CONFIG.files[slug] = `content/${slug}.html`;
+  }
+  if (!state.models[slug]) {
+    const defaultHtml = `<section class="s">\n  <p class="lead">Раздел <strong>${escapeHtml(slug)}</strong>.</p>\n  <p>Текст раздела...</p>\n</section>\n`;
+    const f = await getFileOrDefault(CONFIG.files[slug], defaultHtml);
+    state.shas[slug] = f.sha;
+    state.raw[slug] = f.text;
+    state.models[slug] = { html: f.text };
+  }
+  renderPageEditor(slug);
+}
+
+function renderPageEditor(slug) {
+  const container = $("#page-editor-" + slug);
+  if (!container) return;
+  const mode = state.pageModes[slug] || "blocks";
+  const html = (state.models[slug] && state.models[slug].html) || "";
+
+  container.innerHTML = `
+    <div class="mode-switch">
+      <span style="font-size:12px;color:var(--muted);font-weight:600;margin-right:6px">Режим:</span>
+      <button class="${mode === 'blocks' ? 'on' : ''}" data-pagemode="blocks" data-slug="${slug}">📝 Конструктор блоков</button>
+      <button class="${mode === 'code' ? 'on' : ''}" data-pagemode="code" data-slug="${slug}">💻 HTML-код</button>
+      <button class="${mode === 'preview' ? 'on' : ''}" data-pagemode="preview" data-slug="${slug}">👁 Живой предпросмотр</button>
+    </div>
+    <div id="page-view-${slug}"></div>
+  `;
+
+  const view = $("#page-view-" + slug);
+  if (mode === "preview") {
+    view.innerHTML = `
+      <div class="card" style="padding:14px;background:var(--panel2);margin-bottom:12px">
+        <span style="font-size:12px;color:var(--muted)">Предпросмотр свитка (как отображается на сайте):</span>
+      </div>
+      <div class="live-preview">${html}</div>
+    `;
+  } else if (mode === "code") {
+    view.innerHTML = `
+      <div class="toolbar-chips" data-slug="${slug}">
+        <span style="font-size:11px;color:var(--muted);align-self:center">Быстрая вставка:</span>
+        <button data-ins="<h3>Заголовок</h3>">+ Заголовок H3</button>
+        <button data-ins="<p class=\\"lead\\">Вводный текст...</p>">+ Лид-абзац</button>
+        <button data-ins="<ul>\\n  <li>Пункт 1</li>\\n  <li>Пункт 2</li>\\n</ul>">+ Список UL</button>
+        <button data-ins="<p class=\\"note note--exception\\"><strong>Исключение:</strong> Текст...</p>">+ Исключение</button>
+        <button data-ins="<p class=\\"note\\"><strong>Примечание:</strong> Текст...</p>">+ Примечание</button>
+        <button data-ins="<hr>">+ Разделитель HR</button>
+      </div>
+      <textarea class="html-code-area" id="page-raw-${slug}">${escapeHtml(html)}</textarea>
+    `;
+    const ta = $("#page-raw-" + slug);
+    ta.addEventListener("input", () => {
+      state.models[slug].html = ta.value;
+      markDirty(slug);
+    });
+  } else {
+    const sections = parseHtmlSections(html);
+    view.innerHTML = `
+      <div id="sections-list-${slug}"></div>
+      <button class="ghost" data-act="add-section" data-slug="${slug}">+ Добавить секцию (раздел)</button>
+    `;
+    renderSectionsList(slug, sections);
+  }
+}
+
+function renderSectionsList(slug, sections) {
+  const root = $("#sections-list-" + slug);
+  if (!root) return;
+  root.innerHTML = "";
+  sections.forEach((sec, si) => {
+    if (sec.type === "hr") {
+      const hr = document.createElement("div");
+      hr.style.cssText = "display:flex;align-items:center;gap:10px;margin:12px 0";
+      hr.innerHTML = `<span style="flex:1;height:1px;background:var(--line)"></span><span style="font-size:11px;color:var(--muted)">Разделитель &lt;hr&gt;</span><button class="ghost mini" data-act="del-sec" data-slug="${slug}" data-si="${si}">✕</button><span style="flex:1;height:1px;background:var(--line)"></span>`;
+      root.appendChild(hr);
+      return;
+    }
+    const det = document.createElement("details");
+    det.className = "block";
+    det.open = true;
+    
+    let summaryText = `Секция ${si + 1}`;
+    const firstH = (sec.items || []).find(it => it.type === "h2" || it.type === "h3" || it.type === "h4");
+    if (firstH) summaryText += ": " + (firstH.text || "").replace(/<[^>]+>/g, "");
+    
+    det.innerHTML = `
+      <summary>${escapeHtml(summaryText)}</summary>
+      <div class="row">
+        <div style="flex:0 0 160px;min-width:140px">
+          <label>Класс секции</label>
+          <input type="text" data-sec-cls="${slug}.${si}" value="${escapeAttr(sec.cls || "s")}" placeholder="s, s center, s narrow">
+        </div>
+      </div>
+      <div class="sec-items" data-sec-items="${slug}.${si}"></div>
+      <div class="item-toolbar" style="margin-top:14px">
+        <button class="ghost mini" data-act="add-h" data-slug="${slug}" data-si="${si}">+ Заголовок</button>
+        <button class="ghost mini" data-act="add-p" data-slug="${slug}" data-si="${si}">+ Текст/Абзац</button>
+        <button class="ghost mini" data-act="add-list" data-slug="${slug}" data-si="${si}">+ Список пунктов</button>
+        <button class="ghost mini" data-act="sec-up" data-slug="${slug}" data-si="${si}">↑ Секцию выше</button>
+        <button class="ghost mini" data-act="sec-down" data-slug="${slug}" data-si="${si}">↓ Секцию ниже</button>
+        <button class="ghost mini" data-act="del-sec" data-slug="${slug}" data-si="${si}">Удалить секцию</button>
+      </div>
+    `;
+    const itemsHolder = det.querySelector(`[data-sec-items="${slug}.${si}"]`);
+    (sec.items || []).forEach((it, ii) => {
+      itemsHolder.appendChild(renderSectionItem(slug, si, ii, it));
+    });
+    root.appendChild(det);
+  });
+}
+
+function renderSectionItem(slug, si, ii, it) {
+  const div = document.createElement("div");
+  div.className = "pair";
+  if (it.type === "h2" || it.type === "h3" || it.type === "h4") {
+    div.innerHTML = `
+      <div class="row">
+        <div style="flex:0 0 90px;min-width:80px">
+          <label>Уровень</label>
+          <select data-item-field="type" data-slug="${slug}" data-si="${si}" data-ii="${ii}">
+            <option value="h2" ${it.type === 'h2' ? 'selected' : ''}>H2</option>
+            <option value="h3" ${it.type === 'h3' ? 'selected' : ''}>H3</option>
+            <option value="h4" ${it.type === 'h4' ? 'selected' : ''}>H4</option>
+          </select>
+        </div>
+        <div style="flex:2 1 200px">
+          <label>Текст заголовка</label>
+          <input type="text" data-item-field="text" data-slug="${slug}" data-si="${si}" data-ii="${ii}" value="${escapeAttr(it.text || "")}">
+        </div>
+      </div>
+      <div class="item-toolbar">
+        <button class="ghost mini" data-act="item-up" data-slug="${slug}" data-si="${si}" data-ii="${ii}">↑</button>
+        <button class="ghost mini" data-act="item-down" data-slug="${slug}" data-si="${si}" data-ii="${ii}">↓</button>
+        <button class="ghost mini" data-act="del-item" data-slug="${slug}" data-si="${si}" data-ii="${ii}">✕</button>
+      </div>`;
+  } else if (it.type === "p") {
+    div.innerHTML = `
+      <div class="row">
+        <div style="flex:0 0 160px;min-width:140px">
+          <label>Тип абзаца</label>
+          <select data-item-field="noteType" data-slug="${slug}" data-si="${si}" data-ii="${ii}">
+            <option value="" ${!it.noteType ? 'selected' : ''}>Обычный текст</option>
+            <option value="lead" ${it.noteType === 'lead' ? 'selected' : ''}>Лид (вводный жирный)</option>
+            <option value="note" ${it.noteType === 'note' ? 'selected' : ''}>Примечание</option>
+            <option value="exception" ${it.noteType === 'exception' ? 'selected' : ''}>Исключение</option>
+            <option value="addition" ${it.noteType === 'addition' ? 'selected' : ''}>Дополнение</option>
+            <option value="example" ${it.noteType === 'example' ? 'selected' : ''}>Пример</option>
+          </select>
+        </div>
+        <div style="flex:2 1 240px">
+          <label>Содержимое (поддерживается HTML-разметка &lt;strong&gt; и т.д.)</label>
+          <textarea data-item-field="text" data-slug="${slug}" data-si="${si}" data-ii="${ii}">${escapeHtml(it.text || "")}</textarea>
+        </div>
+      </div>
+      <div class="item-toolbar">
+        <button class="ghost mini" data-act="item-up" data-slug="${slug}" data-si="${si}" data-ii="${ii}">↑</button>
+        <button class="ghost mini" data-act="item-down" data-slug="${slug}" data-si="${si}" data-ii="${ii}">↓</button>
+        <button class="ghost mini" data-act="del-item" data-slug="${slug}" data-si="${si}" data-ii="${ii}">✕</button>
+      </div>`;
+  } else if (it.type === "list") {
+    const listItems = (it.items || []).map((li, liIndex) => `
+      <div style="display:flex;gap:6px;align-items:center;margin:4px 0">
+        <span style="color:var(--gold);font-weight:700">•</span>
+        <input type="text" data-li-input="${slug}.${si}.${ii}.${liIndex}" value="${escapeAttr(li || '')}" style="flex:1">
+        <button class="ghost mini" data-act="li-del" data-slug="${slug}" data-si="${si}" data-ii="${ii}" data-li="${liIndex}">✕</button>
+      </div>
+    `).join("");
+    div.innerHTML = `
+      <label>${it.ordered ? 'Нумерованный список (OL)' : 'Маркированный список (UL)'}</label>
+      <div class="list-items-box">${listItems}</div>
+      <div class="item-toolbar" style="margin-top:6px">
+        <button class="ghost mini" data-act="li-add" data-slug="${slug}" data-si="${si}" data-ii="${ii}">+ Добавить пункт списка</button>
+        <button class="ghost mini" data-act="item-up" data-slug="${slug}" data-si="${si}" data-ii="${ii}">↑</button>
+        <button class="ghost mini" data-act="item-down" data-slug="${slug}" data-si="${si}" data-ii="${ii}">↓</button>
+        <button class="ghost mini" data-act="del-item" data-slug="${slug}" data-si="${si}" data-ii="${ii}">✕</button>
+      </div>`;
+  } else {
+    div.innerHTML = `
+      <label>Специальный / RAW блок</label>
+      <textarea data-item-field="html" data-slug="${slug}" data-si="${si}" data-ii="${ii}">${escapeHtml(it.html || "")}</textarea>
+      <div class="item-toolbar">
+        <button class="ghost mini" data-act="del-item" data-slug="${slug}" data-si="${si}" data-ii="${ii}">✕</button>
+      </div>`;
+  }
+  return div;
+}
+
+/* ================== ПАРСЕР И ГЕНЕРАТОР HTML ================== */
+function parseHtmlSections(html) {
+  const container = document.createElement("div");
+  container.innerHTML = html;
+  const sections = [];
+  let currentSec = { cls: "s", items: [] };
+
+  function pushCurrent() {
+    if (currentSec.items.length > 0) {
+      sections.push(currentSec);
+      currentSec = { cls: "s", items: [] };
+    }
+  }
+
+  Array.from(container.children).forEach(child => {
+    const tag = child.tagName.toLowerCase();
+    if (tag === "section") {
+      pushCurrent();
+      const sec = { cls: child.className || "s", items: [] };
+      Array.from(child.children).forEach(el => sec.items.push(nodeToItem(el)));
+      sections.push(sec);
+    } else if (tag === "hr") {
+      pushCurrent();
+      sections.push({ type: "hr" });
+    } else if (tag === "figure") {
+      pushCurrent();
+      const img = child.querySelector("img");
+      sections.push({
+        type: "figure",
+        cls: child.className || "img",
+        src: img ? img.getAttribute("src") || "" : "",
+        alt: img ? img.getAttribute("alt") || "" : "",
+      });
+    } else {
+      currentSec.items.push(nodeToItem(child));
+    }
+  });
+  pushCurrent();
+  if (sections.length === 0) {
+    sections.push({ cls: "s", items: [{ type: "p", noteType: "", text: container.textContent.trim() }] });
+  }
+  return sections;
+}
+
+function nodeToItem(el) {
+  const tag = el.tagName.toLowerCase();
+  if (tag === "h2" || tag === "h3" || tag === "h4") {
+    return { type: tag, text: el.innerHTML.trim() };
+  }
+  if (tag === "p") {
+    let noteType = "";
+    if (el.classList.contains("lead")) noteType = "lead";
+    else if (el.classList.contains("note--exception")) noteType = "exception";
+    else if (el.classList.contains("note--addition")) noteType = "addition";
+    else if (el.classList.contains("note--example")) noteType = "example";
+    else if (el.classList.contains("note")) noteType = "note";
+    return { type: "p", noteType: noteType, text: el.innerHTML.trim() };
+  }
+  if (tag === "ul" || tag === "ol") {
+    const items = Array.from(el.querySelectorAll(":scope > li")).map(li => li.innerHTML.trim());
+    return { type: "list", ordered: tag === "ol", items: items };
+  }
+  return { type: "raw", html: el.outerHTML };
+}
+
+function serializeHtmlSections(sections) {
+  const parts = [];
+  sections.forEach(sec => {
+    if (sec.type === "hr") {
+      parts.push("<hr>");
+      return;
+    }
+    if (sec.type === "figure") {
+      parts.push(`<figure class="${escapeAttr(sec.cls || 'img')}">\n  <img src="${escapeAttr(sec.src || '')}" alt="${escapeAttr(sec.alt || '')}" loading="lazy">\n</figure>`);
+      return;
+    }
+    const inner = (sec.items || []).map(it => {
+      if (it.type === "h2" || it.type === "h3" || it.type === "h4") {
+        return `  <${it.type}>${it.text || ''}</${it.type}>`;
+      }
+      if (it.type === "p") {
+        let clsAttr = "";
+        if (it.noteType === "lead") clsAttr = ' class="lead"';
+        else if (it.noteType === "note") clsAttr = ' class="note"';
+        else if (it.noteType === "exception") clsAttr = ' class="note note--exception"';
+        else if (it.noteType === "addition") clsAttr = ' class="note note--addition"';
+        else if (it.noteType === "example") clsAttr = ' class="note note--example"';
+        return `  <p${clsAttr}>${it.text || ''}</p>`;
+      }
+      if (it.type === "list") {
+        const tag = it.ordered ? "ol" : "ul";
+        const lis = (it.items || []).map(li => `    <li>${li || ''}</li>`).join("\n");
+        return `  <${tag}>\n${lis}\n  </${tag}>`;
+      }
+      if (it.type === "raw") {
+        return `  ${it.html || ''}`;
+      }
+      return "";
+    }).filter(Boolean).join("\n\n");
+    
+    parts.push(`<section class="${escapeAttr(sec.cls || 's')}">\n${inner}\n</section>`);
+  });
+  return parts.join("\n\n<hr>\n\n") + "\n";
+}
+
+/* ================== ОБРАБОТЧИКИ ДЕЙСТВИЙ И КНОПОК ================== */
+document.addEventListener("click", async (e) => {
+  // Переключение режима страницы (блочный / код / предпросмотр)
+  const modeBtn = e.target.closest("button[data-pagemode]");
+  if (modeBtn) {
+    const slug = modeBtn.dataset.slug;
+    state.pageModes[slug] = modeBtn.dataset.pagemode;
+    renderPageEditor(slug);
+    return;
+  }
+
+  // Быстрая вставка тегов в HTML-код
+  const insBtn = e.target.closest("button[data-ins]");
+  if (insBtn) {
+    const slug = insBtn.closest(".toolbar-chips").dataset.slug;
+    const ta = $("#page-raw-" + slug);
+    if (!ta) return;
+    const snippet = insBtn.dataset.ins.replace(/\\n/g, "\n").replace(/\\"/g, '"');
+    const start = ta.selectionStart, end = ta.selectionEnd;
+    const val = ta.value;
+    ta.value = val.substring(0, start) + snippet + val.substring(end);
+    ta.focus();
+    ta.selectionStart = ta.selectionEnd = start + snippet.length;
+    state.models[slug].html = ta.value;
+    markDirty(slug);
+    return;
+  }
+
+  // Действия над страницами из списка страниц
+  const actBtn = e.target.closest("button[data-act]");
+  if (!actBtn) return;
+  const act = actBtn.dataset.act;
+
+  if (act === "open-page-editor") {
+    const slug = actBtn.dataset.slug;
+    state.tab = slug;
+    $$("#tabs button").forEach(b => b.classList.toggle("on", b.dataset.tab === slug));
+    $$(".tab-page").forEach(p => p.classList.add("hidden"));
+    ensureDynamicPageContainer(slug);
+    const target = $("#tab-" + slug);
+    if (target) target.classList.remove("hidden");
+    await loadTab(slug);
+    return;
+  }
+
+  if (act === "page-up" || act === "page-down") {
+    const pi = +actBtn.dataset.pi;
+    const targetIdx = act === "page-up" ? pi - 1 : pi + 1;
+    const arr = state.models._pages.pages;
+    if (targetIdx >= 0 && targetIdx < arr.length) {
+      const [p] = arr.splice(pi, 1);
+      arr.splice(targetIdx, 0, p);
+      renderPagesList();
+      renderNavPageButtons();
+      markDirty("pages");
+    }
+    return;
+  }
+
+  if (act === "del-page") {
+    const slug = actBtn.dataset.slug;
+    if (slug === "index") { alert("Главную страницу нельзя удалить."); return; }
+    if (!confirm(`Удалить страницу «${slug}» из меню и структуры сайта?`)) return;
+    const arr = state.models._pages.pages;
+    const idx = arr.findIndex(p => p.slug === slug);
+    if (idx !== -1) arr.splice(idx, 1);
+    delete state.models[slug];
+    const pageDom = $("#tab-" + slug);
+    if (pageDom) pageDom.remove();
+    renderPagesList();
+    renderNavPageButtons();
+    markDirty("pages");
+    state.tab = "pages";
+    $$("#tabs button").forEach(b => b.classList.toggle("on", b.dataset.tab === "pages"));
+    $$(".tab-page").forEach(p => p.classList.add("hidden"));
+    $("#tab-pages").classList.remove("hidden");
+    return;
+  }
+
+  // Действия над секциями и элементами HTML-страниц
+  const slug = actBtn.dataset.slug;
+  if (slug && state.models[slug]) {
+    const si = +actBtn.dataset.si;
+    const ii = +actBtn.dataset.ii;
+    const li = +actBtn.dataset.li;
+    const sections = parseHtmlSections(state.models[slug].html || "");
+
+    const move = (arr, from, to) => {
+      if (to < 0 || to >= arr.length) return;
+      const [x] = arr.splice(from, 1);
+      arr.splice(to, 0, x);
+    };
+
+    if (act === "add-section") {
+      sections.push({ type: "hr" });
+      sections.push({ cls: "s", items: [{ type: "h3", text: "Новый заголовок" }, { type: "p", noteType: "", text: "Текст нового раздела..." }] });
+    } else if (act === "del-sec") {
+      if (confirm("Удалить эту секцию?")) sections.splice(si, 1);
+      else return;
+    } else if (act === "sec-up") move(sections, si, si - 1);
+    else if (act === "sec-down") move(sections, si, si + 1);
+    else if (act === "add-h") {
+      sections[si].items = sections[si].items || [];
+      sections[si].items.push({ type: "h3", text: "Заголовок" });
+    } else if (act === "add-p") {
+      sections[si].items = sections[si].items || [];
+      sections[si].items.push({ type: "p", noteType: "", text: "Новый текст..." });
+    } else if (act === "add-list") {
+      sections[si].items = sections[si].items || [];
+      sections[si].items.push({ type: "list", ordered: false, items: ["Пункт 1", "Пункт 2"] });
+    } else if (act === "del-item") {
+      sections[si].items.splice(ii, 1);
+    } else if (act === "item-up") move(sections[si].items, ii, ii - 1);
+    else if (act === "item-down") move(sections[si].items, ii, ii + 1);
+    else if (act === "li-add") {
+      sections[si].items[ii].items = sections[si].items[ii].items || [];
+      sections[si].items[ii].items.push("Новый пункт");
+    } else if (act === "li-del") {
+      sections[si].items[ii].items.splice(li, 1);
+    }
+
+    state.models[slug].html = serializeHtmlSections(sections);
+    renderSectionsList(slug, sections);
+    markDirty(slug);
+    return;
+  }
+
+  // Действия над отрядами, рейтингом, цитатами
+  const m = currentModel();
+  if (!m) return;
+  const g = +actBtn.dataset.g, s = +actBtn.dataset.s, o = +actBtn.dataset.o, i = +actBtn.dataset.i;
   const move = (arr, from, to) => {
     if (to < 0 || to >= arr.length) return;
     const [x] = arr.splice(from, 1);
     arr.splice(to, 0, x);
   };
-  // отряд по ссылке: data-p вида "squads.2" или "squads.2.subs.1"
   const squadByPath = (p) => getPath(m, p);
 
   if (act === "squad-up") move(m.squads, g, g - 1);
@@ -859,15 +1691,15 @@ function onListAction(e) {
   else if (act === "sub-promote") {
     const [sub] = m.squads[g].subs.splice(s, 1);
     sub.parent_label = ""; sub.parent = "";
-    m.squads.splice(g + 1, 0, sub);   // сразу после родителя
+    m.squads.splice(g + 1, 0, sub);
   }
   else if (act === "ov-add") {
-    const sq = squadByPath(btn.dataset.p);
+    const sq = squadByPath(actBtn.dataset.p);
     sq.overseers = sq.overseers || [];
     sq.overseers.push({ role: "Смотрящая высшая луна", people: [] });
   }
   else if (act === "ov-del") {
-    const sq = squadByPath(btn.dataset.p);
+    const sq = squadByPath(actBtn.dataset.p);
     sq.overseers.splice(o, 1);
   }
   else if (act === "entry-up") move(m.entries, i, i - 1);
@@ -881,30 +1713,65 @@ function onListAction(e) {
   if (state.tab === "squads") renderSquads();
   else if (state.tab === "ranking") renderRanking();
   else if (state.tab === "quotes") renderQuotes();
-  markDirty();
-}
-
-document.addEventListener("click", (e) => {
-  if (e.target.closest("button[data-act]")) onListAction(e);
+  markDirty(state.tab);
 });
 
-/* ================== привязка полей ================== */
+/* ================== ПРИВЯЗКА ПОЛЕЙ ВВОДА ================== */
 document.addEventListener("input", (e) => {
   const el = e.target;
+  
+  if (el.dataset.itemField) {
+    const slug = el.dataset.slug;
+    const si = +el.dataset.si;
+    const ii = +el.dataset.ii;
+    const field = el.dataset.itemField;
+    const sections = parseHtmlSections(state.models[slug].html || "");
+    if (sections[si] && sections[si].items && sections[si].items[ii]) {
+      sections[si].items[ii][field] = el.value;
+      state.models[slug].html = serializeHtmlSections(sections);
+      markDirty(slug);
+    }
+    return;
+  }
+  
+  if (el.dataset.liInput) {
+    const [slug, siStr, iiStr, liStr] = el.dataset.liInput.split(".");
+    const si = +siStr, ii = +iiStr, li = +liStr;
+    const sections = parseHtmlSections(state.models[slug].html || "");
+    if (sections[si] && sections[si].items && sections[si].items[ii] && sections[si].items[ii].items) {
+      sections[si].items[ii].items[li] = el.value;
+      state.models[slug].html = serializeHtmlSections(sections);
+      markDirty(slug);
+    }
+    return;
+  }
+
+  if (el.dataset.secCls) {
+    const [slug, siStr] = el.dataset.secCls.split(".");
+    const si = +siStr;
+    const sections = parseHtmlSections(state.models[slug].html || "");
+    if (sections[si]) {
+      sections[si].cls = el.value;
+      state.models[slug].html = serializeHtmlSections(sections);
+      markDirty(slug);
+    }
+    return;
+  }
+
   if (el.dataset.lines !== undefined && el.dataset.lines !== "") {
     const arr = el.value.split("\n").map(s => s.trim()).filter(Boolean);
     setPath(currentModel(), el.dataset.lines, arr);
-    markDirty();
+    markDirty(state.tab);
     return;
   }
+  
   if (el.dataset.path !== undefined && el.dataset.path !== "") {
-    // файлы: отдельная логика
     if (el.id === "file-text") return;
     const model = currentModel();
     if (!model) return;
     const val = el.dataset.type === "bool" ? el.checked : el.value;
     setPath(model, el.dataset.path, val);
-    markDirty();
+    markDirty(state.tab);
     if (el.dataset.path.endsWith(".name") && el.closest("details.block")) {
       const det = el.closest("details.block");
       const sum = det.querySelector("summary");
@@ -920,10 +1787,12 @@ function currentModel() {
   if (state.tab === "squads") return state.models.squads;
   if (state.tab === "ranking") return state.models.ranking;
   if (state.tab === "quotes") return state.models.quotes;
+  if (state.tab === "pages") return state.models._pages;
+  if (state.models[state.tab]) return state.models[state.tab];
   return null;
 }
 
-/* ================== вкладка «файлы» ================== */
+/* ================== ВКЛАДКА «ФАЙЛЫ» ================== */
 async function loadFiles() {
   const sel = $("#file-select");
   if (sel.options.length > 1) return;
@@ -932,7 +1801,7 @@ async function loadFiles() {
     try {
       const items = await gh(`/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${dir}?ref=${encodeURIComponent(state.branch || getBranch())}`);
       for (const it of items) if (it.type === "file") paths.push(it.path);
-    } catch (e) { /* папки может не быть — не критично */ }
+    } catch (e) {}
   }
   paths.sort();
   for (const p of paths) {
@@ -952,7 +1821,6 @@ $("#file-select").addEventListener("change", async () => {
     state.fileSha = f.sha;
     $("#file-text").value = f.text;
     state.fileDirty = false;
-    $("#save-status").textContent = "";
     $("#save-status").className = "status";
     $("#save-status").textContent = "Загружен " + path;
   } catch (e) {
@@ -963,7 +1831,7 @@ $("#file-select").addEventListener("change", async () => {
 
 $("#file-text").addEventListener("input", () => {
   state.fileDirty = true;
-  markDirty();
+  markDirty("files");
 });
 
 $("#file-reload").addEventListener("click", () => {
@@ -974,7 +1842,7 @@ $("#file-reload").addEventListener("click", () => {
   $("#file-select").dispatchEvent(new Event("change"));
 });
 
-/* ================== сохранение ================== */
+/* ================== СОХРАНЕНИЕ ================== */
 $("#save-btn").addEventListener("click", async () => {
   const btn = $("#save-btn");
   const s = $("#save-status");
@@ -1013,9 +1881,21 @@ $("#save-btn").addEventListener("click", async () => {
       text = JSON.stringify(state.models._pages, null, 2) + "\n";
       message = "Админка: обновлены цитаты";
       sha = state.shas.pages;
+    } else if (state.tab === "pages") {
+      key = "pages";
+      path = CONFIG.files.pages;
+      text = JSON.stringify(state.models._pages, null, 2) + "\n";
+      message = "Админка: обновлены вкладки и обложки";
+      sha = state.shas.pages;
+    } else {
+      key = state.tab;
+      path = CONFIG.files[state.tab] || `content/${state.tab}.html`;
+      text = (state.models[state.tab] && state.models[state.tab].html) || "";
+      message = "Админка: обновлена вкладка «" + state.tab + "»";
+      sha = state.shas[state.tab];
     }
+    
     const res = await saveFile(path, text, message, sha);
-    // запоминаем новую версию файла — без неё следующее сохранение снова получит 422
     const newSha = res && res.content && res.content.sha ? res.content.sha : "";
     if (state.tab === "files") {
       state.fileSha = newSha;
@@ -1025,8 +1905,10 @@ $("#save-btn").addEventListener("click", async () => {
       state.raw[key] = text;
       if (key === "squads") { state.models.squads = JSON.parse(text); renderSquads(); }
       if (key === "ranking") { state.models.ranking = JSON.parse(text); renderRanking(); }
+      if (key === "pages") { state.models._pages = JSON.parse(text); renderPagesList(); renderNavPageButtons(); }
     }
     state.dirty = false;
+    state.dirtyFiles.clear();
     state.missingNoted = {};
     s.className = "status ok";
     s.innerHTML = "Сохранено в ветку «" + (state.branch || getBranch()) + "»! Сайт пересоберётся автоматически и обновится на bloodpact.su за 1–2 минуты. " +
@@ -1037,10 +1919,6 @@ $("#save-btn").addEventListener("click", async () => {
       s.textContent = "Нет прав на запись. Нужен доступ на запись к репозиторию (админ или коллаборатор) и токен с правами Contents: Read and write.";
     } else if (e.status === 409) {
       s.textContent = "Конфликт версий: файл изменился с момента загрузки. Обновите страницу и повторите.";
-    } else if (e.status === 404) {
-      s.textContent = "Файл или ветка не найдены (404). Проверьте ветку на экране входа (обычно main) — сейчас выбрана «" + (state.branch || getBranch()) + "».";
-    } else if (e.status === 422) {
-      s.textContent = "GitHub отклонил запрос (422): " + e.message + ". Нажмите «Отменить изменения», перезагрузите страницу и повторите.";
     } else {
       s.textContent = "Ошибка сохранения: " + e.message;
     }
@@ -1049,39 +1927,32 @@ $("#save-btn").addEventListener("click", async () => {
   }
 });
 
-$("#discard-btn").addEventListener("click", async () => {
+/* ================== ОТМЕНА ================== */
+$("#discard-btn").addEventListener("click", () => {
+  if (!confirm("Отменить все несохранённые изменения на текущей вкладке?")) return;
   if (state.tab === "files") {
-    if (state.filePath) $("#file-select").dispatchEvent(new Event("change"));
-    state.dirty = false;
-    $("#save-status").textContent = "";
-    return;
+    $("#file-reload").click();
+  } else if (state.tab === "squads" && state.raw.squads) {
+    state.models.squads = JSON.parse(state.raw.squads);
+    renderSquads();
+  } else if (state.tab === "ranking" && state.raw.ranking) {
+    state.models.ranking = JSON.parse(state.raw.ranking);
+    renderRanking();
+  } else if ((state.tab === "quotes" || state.tab === "pages") && state.raw.pages) {
+    state.models._pages = JSON.parse(state.raw.pages);
+    state.models.quotes = state.models._pages.quotes;
+    if (state.tab === "quotes") renderQuotes();
+    if (state.tab === "pages") renderPagesList();
+  } else if (state.raw[state.tab]) {
+    state.models[state.tab].html = state.raw[state.tab];
+    renderPageEditor(state.tab);
   }
-  if (!state.dirty) return;
-  if (!confirm("Отменить несохранённые изменения?")) return;
-  const key = state.tab === "squads" ? "squads" : state.tab === "ranking" ? "ranking" : "quotes";
-  state.models[key] = null;
-  if (key === "quotes") state.models._pages = null;
   state.dirty = false;
-  await loadTab(state.tab);
-  $("#save-status").className = "status ok";
   $("#save-status").textContent = "Изменения отменены.";
+  $("#save-status").className = "status";
 });
 
-window.addEventListener("beforeunload", (e) => {
-  if (state.dirty || state.fileDirty) {
-    e.preventDefault();
-    e.returnValue = "";
-  }
-});
-
-/* ================== утилиты ================== */
-function escapeHtml(s) {
-  return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-}
-function escapeAttr(s) {
-  return escapeHtml(s).replace(/"/g, "&quot;");
-}
-
+// Запуск
 boot();
 </script>
 </body>

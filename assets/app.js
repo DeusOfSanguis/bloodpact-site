@@ -186,14 +186,106 @@
   /* ---------- Готовность героя (буквы встают после прелоадера) ---------- */
   if (!document.querySelector(".preloader")) document.body.classList.add("ready");
 
-  /* ---------- Печати разделов: активная в центре ленты ---------- */
+  /* ---------- Печати разделов: скролл, колесо мыши, перетаскивание, стрелки ---------- */
   (function () {
     var box = document.querySelector("[data-seals]");
-    var on = box && box.querySelector(".seal--on");
-    if (!box || !on) return;
+    if (!box) return;
     var track = box.querySelector(".nav__seals-track") || box;
-    var left = on.offsetLeft - (track.clientWidth - on.offsetWidth) / 2;
-    track.scrollLeft = Math.max(0, left);
+    var on = track.querySelector(".seal--on");
+    var prevBtn = box.querySelector("[data-seals-prev]");
+    var nextBtn = box.querySelector("[data-seals-next]");
+
+    function updateState() {
+      var max = track.scrollWidth - track.clientWidth;
+      var hasOverflow = max > 2;
+      var canLeft = hasOverflow && track.scrollLeft > 4;
+      var canRight = hasOverflow && track.scrollLeft < max - 4;
+      box.setAttribute("data-can-scroll-left", canLeft ? "true" : "false");
+      box.setAttribute("data-can-scroll-right", canRight ? "true" : "false");
+      if (!hasOverflow) {
+        box.style.webkitMaskImage = "none";
+        box.style.maskImage = "none";
+      } else if (canLeft && canRight) {
+        var m = "linear-gradient(90deg, transparent, #000 24px, #000 calc(100% - 24px), transparent)";
+        box.style.webkitMaskImage = m;
+        box.style.maskImage = m;
+      } else if (canRight) {
+        var m = "linear-gradient(90deg, #000 calc(100% - 24px), transparent)";
+        box.style.webkitMaskImage = m;
+        box.style.maskImage = m;
+      } else if (canLeft) {
+        var m = "linear-gradient(90deg, transparent, #000 24px, #000 100%)";
+        box.style.webkitMaskImage = m;
+        box.style.maskImage = m;
+      }
+    }
+
+    if (on) {
+      var left = on.offsetLeft - (track.clientWidth - on.offsetWidth) / 2;
+      track.scrollLeft = Math.max(0, left);
+    }
+    updateState();
+
+    track.addEventListener("scroll", updateState, { passive: true });
+    window.addEventListener("resize", updateState);
+
+    // Колесо мыши — горизонтальная прокрутка ленты печатей
+    box.addEventListener("wheel", function (e) {
+      if (track.scrollWidth <= track.clientWidth) return;
+      var delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+      if (Math.abs(delta) > 0) {
+        var prev = track.scrollLeft;
+        track.scrollLeft += delta;
+        if (track.scrollLeft !== prev) {
+          e.preventDefault();
+        }
+      }
+    }, { passive: false });
+
+    // Стрелки влево / вправо
+    if (prevBtn) {
+      prevBtn.addEventListener("click", function () {
+        track.scrollBy({ left: -180, behavior: "smooth" });
+      });
+    }
+    if (nextBtn) {
+      nextBtn.addEventListener("click", function () {
+        track.scrollBy({ left: 180, behavior: "smooth" });
+      });
+    }
+
+    // Перетаскивание мышью (drag to scroll)
+    var isDown = false, startX = 0, scrollStart = 0, hasDragged = false;
+    track.addEventListener("mousedown", function (e) {
+      if (e.button !== 0) return;
+      isDown = true;
+      hasDragged = false;
+      startX = e.pageX;
+      scrollStart = track.scrollLeft;
+    });
+    window.addEventListener("mousemove", function (e) {
+      if (!isDown) return;
+      var dx = e.pageX - startX;
+      if (Math.abs(dx) > 5) {
+        hasDragged = true;
+        track.classList.add("is-dragging");
+      }
+      track.scrollLeft = scrollStart - dx;
+    });
+    window.addEventListener("mouseup", function () {
+      if (!isDown) return;
+      isDown = false;
+      setTimeout(function () {
+        track.classList.remove("is-dragging");
+        hasDragged = false;
+      }, 50);
+    });
+    track.addEventListener("click", function (e) {
+      if (hasDragged) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    }, true);
   })();
 
   /* ---------- Шкала главной ---------- */
@@ -232,26 +324,90 @@
     document.body.style.overflow = "";
   });
 
-  /* ---------- Переход между свитками: кровавая штора, не рябь ---------- */
-  document.addEventListener("click", function (e) {
-    var a = e.target && e.target.closest ? e.target.closest("a") : null;
-    if (!a || e.defaultPrevented) return;
-    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button) return;
-    if (a.target && a.target !== "_self") return;
-    var href = a.getAttribute("href");
-    if (!href || href.charAt(0) === "#" || href.indexOf("mailto:") === 0 || href.indexOf("javascript:") === 0) return;
-    var url;
-    try { url = new URL(a.href, location.href); } catch (err) { return; }
-    if (url.origin !== location.origin) return;
-    if (url.pathname === location.pathname && url.search === location.search) return;
-    if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    e.preventDefault();
-    document.body.classList.add("leaving");
-    setTimeout(function () { location.href = a.href; }, 540);
-  });
-  window.addEventListener("pageshow", function () {
-    document.body.classList.remove("leaving");
-  });
+  /* ---------- Переход между страницами (кровавая штора-волна) ----------
+     Уходим: кровавая штора поднимается снизу и накрывает экран, затем
+     переход. Приходим: штора уже накрыта (html.veil-cover, ставится в <head>),
+     показывает иероглиф и название страницы и уезжает вверх — новая страница
+     плавно выплывает. Без JS шторку убирает CSS-анимация.                */
+  (function () {
+    var root = document.documentElement;
+    var veil = document.querySelector("[data-veil]");
+    var reduceMotion = !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+
+    function read(key, fallback) {
+      try { return sessionStorage.getItem(key) || fallback; } catch (e) { return fallback; }
+    }
+    function write(key, value) {
+      try { sessionStorage.setItem(key, value); } catch (e) {}
+    }
+
+    if (veil) {
+      /* приход */
+      if (root.classList.contains("veil-cover") && !reduceMotion) {
+        var label = veil.querySelector("[data-veil-label]");
+        var kanji = veil.querySelector("[data-veil-kanji]");
+        if (label) label.textContent = read("bp-nav-label", "Пакт крови");
+        if (kanji) kanji.textContent = read("bp-nav-sigil", "血");
+      }
+      var done = function () {
+        if (veil.classList.contains("is-cover")) return;
+        root.classList.remove("veil-cover");
+        root.classList.add("veil-done");
+        veil.classList.remove("is-cover");
+        veil.classList.remove("is-away");
+        document.body.classList.remove("is-leaving");
+      };
+      var panel = veil.querySelector(".veil__panel");
+      if (panel) panel.addEventListener("animationend", function (e) {
+        if (e.animationName === "veilAway") done();
+      });
+      setTimeout(done, reduceMotion ? 30 : 2400);
+
+      /* уход */
+      function leave(href, title, sigil) {
+        if (reduceMotion) { window.location.href = href; return; }
+        write("bp-nav", "1");
+        if (title) write("bp-nav-label", title);
+        if (sigil) write("bp-nav-sigil", sigil);
+        var label = veil.querySelector("[data-veil-label]");
+        var kanji = veil.querySelector("[data-veil-kanji]");
+        if (label && title) label.textContent = title;
+        if (kanji && sigil) kanji.textContent = sigil;
+        root.classList.remove("veil-done");
+        veil.classList.remove("is-away");
+        void veil.offsetWidth;
+        veil.classList.add("is-cover");
+        document.body.classList.add("is-leaving");
+        setTimeout(function () { window.location.href = href; }, 880);
+      }
+
+      document.addEventListener("click", function (e) {
+        if (e.defaultPrevented || e.button !== 0) return;
+        if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+        var a = e.target && e.target.closest ? e.target.closest("a[href]") : null;
+        if (!a) return;
+        if (a.target && a.target !== "_self") return;
+        if (a.hasAttribute("download")) return;
+        var href = a.getAttribute("href");
+        if (!href || href.charAt(0) === "#" || href.indexOf("mailto:") === 0 || href.indexOf("javascript:") === 0) return;
+        var url;
+        try { url = new URL(a.href, window.location.href); } catch (err) { return; }
+        if (url.protocol !== window.location.protocol) return;
+        if (url.host !== window.location.host) return;
+        if (url.pathname === window.location.pathname && url.search === window.location.search) return;
+        e.preventDefault();
+        var title = a.getAttribute("data-nav-title") || (a.querySelector("span") ? a.querySelector("span").textContent.trim() : (a.textContent || "").trim().slice(0, 40));
+        var sigil = a.getAttribute("data-nav-sigil") || (a.querySelector("i") ? a.querySelector("i").textContent.trim() : "");
+        leave(a.href, title, sigil);
+      }, false);
+
+      /* возврат «назад» из кэша браузера */
+      window.addEventListener("pageshow", function (e) {
+        if (!e.persisted) return;
+        done();
+      });
+    }
+  })();
 
   /* ---------- Свой курсор (только для мыши) ---------- */
   (function () {
