@@ -192,11 +192,11 @@ def render_nav(data, current_page):
         f'<a class="nav__logo" href="{home}"><span class="nav__drop">{SIGIL["index"]}</span>'
         f'<span>{html.escape(site["home_label"]).replace("·", "<i>·</i>")}</span></a>'
         '<div class="nav__seals" data-seals>'
-        '<button class="nav__seals-arrow nav__seals-arrow--prev" data-seals-prev aria-label="Предыдущие разделы" tabindex="-1">‹</button>'
+        '<button class="nav__seals-arrow nav__seals-arrow--prev" type="button" data-seals-prev aria-label="Предыдущие разделы">‹</button>'
         '<div class="nav__seals-track">'
         + "".join(seals) +
         "</div>"
-        '<button class="nav__seals-arrow nav__seals-arrow--next" data-seals-next aria-label="Следующие разделы" tabindex="-1">›</button>'
+        '<button class="nav__seals-arrow nav__seals-arrow--next" type="button" data-seals-next aria-label="Следующие разделы">›</button>'
         "</div>"
         '<button class="nav__burger" data-menu-open aria-label="Открыть кодекс">'
         '<span class="nav__burger-k">鬼</span><span class="nav__burger-t">Кодекс</span></button>'
@@ -523,27 +523,55 @@ def render_preloader():
 
 
 def render_veil(sig=""):
-    """Кровавая штора-волна для переходов между страницами.
+    """Кровавая штора с рваным демоническим краем для переходов между страницами.
 
-    Панель = волна сверху + кровавая тьма + волна снизу. При уходе со страницы штора
-    поднимается снизу и накрывает экран, при приходе — уходит вверх и открывает
-    новую страницу. Без JS штору убирает CSS-анимация в html.veil-cover.
+    При уходе тьма поднимается снизу и накрывает экран, при приходе —
+    уходит вверх и открывает новую страницу. Без JS штору убирает CSS-анимация
+    в html.veil-cover.
     """
     sig = (sig or "").strip() or "血"
-    wave_in = "M0,64 C120,20 240,20 360,64 C480,108 600,108 720,64 C840,20 960,20 1080,64 C1200,108 1320,108 1440,64 L1440,120 L0,120 Z"
-    wave_out = "M0,56 C120,100 240,100 360,56 C480,12 600,12 720,56 C840,100 960,100 1080,56 C1200,12 1320,12 1440,56 L1440,0 L0,0 Z"
+    # Ломаная кромка вместо волны: острые «клыки» тянутся вслед за шторой.
+    edge_points = [
+        (0, 78), (42, 66), (74, 61), (104, 17), (125, 73),
+        (172, 52), (202, 67), (248, 25), (270, 78),
+        (315, 57), (352, 71), (386, 13), (409, 77),
+        (455, 54), (490, 68), (530, 28), (550, 79),
+        (600, 50), (637, 67), (670, 10), (696, 80),
+        (741, 54), (774, 68), (815, 26), (835, 78),
+        (883, 51), (918, 68), (953, 20), (975, 78),
+        (1020, 52), (1058, 69), (1092, 12), (1116, 78),
+        (1163, 53), (1198, 68), (1233, 24), (1254, 81),
+        (1300, 51), (1338, 67), (1372, 17), (1396, 77), (1440, 59),
+    ]
+    edge_line = "M " + " L ".join(f"{x},{y}" for x, y in edge_points)
+    edge_fill_top = edge_line + " L 1440,140 L 0,140 Z"
+    edge_points_bottom = [(x, 140 - y) for x, y in edge_points]
+    edge_line_bottom = "M " + " L ".join(f"{x},{y}" for x, y in edge_points_bottom)
+    edge_fill_bottom = (
+        "M 0,0 L 1440,0 "
+        + " L ".join(f"{x},{y}" for x, y in reversed(edge_points_bottom))
+        + " Z"
+    )
     return (
         '<div class="veil" data-veil aria-hidden="true">'
         '<div class="veil__panel">'
-        f'<svg class="veil__wave veil__wave--in" viewBox="0 0 1440 120" preserveAspectRatio="none"><path d="{wave_in}"/></svg>'
+        '<svg class="veil__edge veil__edge--top" viewBox="0 0 1440 140" preserveAspectRatio="none">'
+        f'<path class="veil__edge-fill" d="{edge_fill_top}"/>'
+        f'<path class="veil__edge-glow" d="{edge_line}"/>'
+        f'<path class="veil__edge-line" d="{edge_line}"/>'
+        '</svg>'
         '<div class="veil__fill">'
         f'<span class="veil__kanji" data-veil-kanji>{html.escape(str(sig))}</span>'
         '<span class="veil__label" data-veil-label>Пакт крови</span>'
         '<span class="veil__bar"><i></i></span>'
-        "</div>"
-        f'<svg class="veil__wave veil__wave--out" viewBox="0 0 1440 120" preserveAspectRatio="none"><path d="{wave_out}"/></svg>'
-        "</div>"
-        "</div>"
+        '</div>'
+        '<svg class="veil__edge veil__edge--bottom" viewBox="0 0 1440 140" preserveAspectRatio="none">'
+        f'<path class="veil__edge-fill" d="{edge_fill_bottom}"/>'
+        f'<path class="veil__edge-glow" d="{edge_line_bottom}"/>'
+        f'<path class="veil__edge-line" d="{edge_line_bottom}"/>'
+        '</svg>'
+        '</div>'
+        '</div>'
     )
 
 

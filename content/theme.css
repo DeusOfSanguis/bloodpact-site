@@ -1573,8 +1573,12 @@ body.ready .hero__crest { animation: fadeIn 1s 1.15s both; }
 }
 .nav__seals-track {
   display: flex;
+  flex: 1 1 0%;
+  min-width: 0;
   gap: 6px;
   overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
   scrollbar-width: none;
   padding: 4px 2px;
   scroll-snap-type: x proximity;
@@ -1830,7 +1834,7 @@ body:has(.mmenu.open) .spine { opacity: 0; pointer-events: none; }
   box-shadow: 0 0 16px -4px rgba(211, 19, 42, 0.85);
 }
 
-/* ---------- кровавая штора-волна между страницами ----------
+/* ---------- демоническая кровавая штора между страницами ----------
    Классы состояния:
    .is-cover  — штора поднялась и накрыла экран (уходим со страницы);
    .is-away   — штора ушла вверх (новая страница открылась);
@@ -1838,9 +1842,8 @@ body:has(.mmenu.open) .spine { opacity: 0; pointer-events: none; }
    отрисовки (ставится инлайн-скриптом в <head>) и уезжает вверх сама,
    даже если JS не выполнился.
 
-   Движение медленное и мягкое: длинный плавный ход (почти секунда),
-   текст и полоска проявляются с задержкой, содержимое страницы за шторой
-   тихо уплывает в размытие — без рывков и резких вспышек.                 */
+   Движение плавное, но с резкой рваной кромкой; текст и полоска проявляются
+   с задержкой, а содержимое страницы за шторой чуть уходит в глубину.      */
 .veil {
   position: fixed;
   inset: 0;
@@ -1863,10 +1866,34 @@ body:has(.mmenu.open) .spine { opacity: 0; pointer-events: none; }
 .veil.is-cover .veil__panel { transform: translateY(-190px); }
 .veil.is-away .veil__panel { transform: translateY(-100%); }
 
-.veil__wave { position: absolute; left: 0; width: 100%; height: 140px; display: block; }
-.veil__wave path { fill: #100205; }
-.veil__wave--in { top: 0; }
-.veil__wave--out { bottom: 0; }
+.veil__edge {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 140px;
+  display: block;
+  overflow: visible;
+}
+.veil__edge--top { top: 0; }
+.veil__edge--bottom { bottom: 0; }
+.veil__edge-fill { fill: #100205; stroke: #100205; stroke-width: 1px; }
+.veil__edge-glow {
+  fill: none;
+  stroke: rgba(211, 19, 42, 0.52);
+  stroke-width: 11px;
+  stroke-linecap: round;
+  stroke-linejoin: miter;
+  vector-effect: non-scaling-stroke;
+  filter: blur(5px);
+}
+.veil__edge-line {
+  fill: none;
+  stroke: rgba(246, 37, 61, 0.88);
+  stroke-width: 1.5px;
+  stroke-linecap: round;
+  stroke-linejoin: miter;
+  vector-effect: non-scaling-stroke;
+}
 .veil__fill {
   position: absolute;
   left: 0; right: 0;
@@ -1875,11 +1902,40 @@ body:has(.mmenu.open) .spine { opacity: 0; pointer-events: none; }
   place-items: center;
   gap: 12px;
   align-content: center;
+  isolation: isolate;
   background:
-    radial-gradient(130% 75% at 50% 44%, rgba(211, 19, 42, 0.28), transparent 74%),
+    radial-gradient(ellipse 70% 85% at 50% 44%, rgba(211, 19, 42, 0.22), transparent 72%),
+    radial-gradient(ellipse 22% 100% at 0% 50%, rgba(92, 5, 17, 0.42), transparent 78%),
+    radial-gradient(ellipse 22% 100% at 100% 50%, rgba(92, 5, 17, 0.42), transparent 78%),
     linear-gradient(180deg, #100205, #220409 55%, #100205);
 }
+.veil__fill::before,
+.veil__fill::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  z-index: 0;
+}
+.veil__fill::before {
+  inset: 0;
+  opacity: 0.46;
+  background:
+    repeating-linear-gradient(132deg, transparent 0 68px, rgba(211, 19, 42, 0.035) 69px 70px, transparent 71px 132px),
+    radial-gradient(ellipse at 50% 50%, transparent 15%, rgba(0, 0, 0, 0.3) 100%);
+}
+.veil__fill::after {
+  width: min(48vw, 420px);
+  aspect-ratio: 1;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%) rotate(45deg);
+  border: 1px solid rgba(211, 19, 42, 0.16);
+  border-radius: 42% 58% 46% 54%;
+  box-shadow: 0 0 76px rgba(211, 19, 42, 0.12), inset 0 0 54px rgba(211, 19, 42, 0.06);
+}
 .veil__fill > * {
+  position: relative;
+  z-index: 1;
   opacity: 0;
   transform: translateY(14px);
   transition: opacity 0.7s ease, transform 0.85s cubic-bezier(0.22, 1, 0.36, 1);
@@ -1894,8 +1950,8 @@ body:has(.mmenu.open) .spine { opacity: 0; pointer-events: none; }
   font-weight: 900;
   font-size: min(22vw, 190px);
   line-height: 1;
-  color: rgba(211, 19, 42, 0.45);
-  text-shadow: 0 0 80px rgba(211, 19, 42, 0.55);
+  color: rgba(211, 19, 42, 0.4);
+  text-shadow: 0 0 70px rgba(211, 19, 42, 0.62), 0 4px 0 rgba(0, 0, 0, 0.45);
   animation: veilFloat 6s ease-in-out infinite;
 }
 @keyframes veilFloat {

@@ -1590,8 +1590,12 @@ body.ready .hero__crest { animation: fadeIn 1s 1.15s both; }
 }
 .nav__seals-track {
   display: flex;
+  flex: 1 1 0%;
+  min-width: 0;
   gap: 6px;
   overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
   scrollbar-width: none;
   padding: 4px 2px;
   scroll-snap-type: x proximity;
@@ -1847,7 +1851,7 @@ body:has(.mmenu.open) .spine { opacity: 0; pointer-events: none; }
   box-shadow: 0 0 16px -4px rgba(211, 19, 42, 0.85);
 }
 
-/* ---------- кровавая штора-волна между страницами ----------
+/* ---------- демоническая кровавая штора между страницами ----------
    Классы состояния:
    .is-cover  — штора поднялась и накрыла экран (уходим со страницы);
    .is-away   — штора ушла вверх (новая страница открылась);
@@ -1855,9 +1859,8 @@ body:has(.mmenu.open) .spine { opacity: 0; pointer-events: none; }
    отрисовки (ставится инлайн-скриптом в <head>) и уезжает вверх сама,
    даже если JS не выполнился.
 
-   Движение медленное и мягкое: длинный плавный ход (почти секунда),
-   текст и полоска проявляются с задержкой, содержимое страницы за шторой
-   тихо уплывает в размытие — без рывков и резких вспышек.                 */
+   Движение плавное, но с резкой рваной кромкой; текст и полоска проявляются
+   с задержкой, а содержимое страницы за шторой чуть уходит в глубину.      */
 .veil {
   position: fixed;
   inset: 0;
@@ -1880,10 +1883,34 @@ body:has(.mmenu.open) .spine { opacity: 0; pointer-events: none; }
 .veil.is-cover .veil__panel { transform: translateY(-190px); }
 .veil.is-away .veil__panel { transform: translateY(-100%); }
 
-.veil__wave { position: absolute; left: 0; width: 100%; height: 140px; display: block; }
-.veil__wave path { fill: #100205; }
-.veil__wave--in { top: 0; }
-.veil__wave--out { bottom: 0; }
+.veil__edge {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 140px;
+  display: block;
+  overflow: visible;
+}
+.veil__edge--top { top: 0; }
+.veil__edge--bottom { bottom: 0; }
+.veil__edge-fill { fill: #100205; stroke: #100205; stroke-width: 1px; }
+.veil__edge-glow {
+  fill: none;
+  stroke: rgba(211, 19, 42, 0.52);
+  stroke-width: 11px;
+  stroke-linecap: round;
+  stroke-linejoin: miter;
+  vector-effect: non-scaling-stroke;
+  filter: blur(5px);
+}
+.veil__edge-line {
+  fill: none;
+  stroke: rgba(246, 37, 61, 0.88);
+  stroke-width: 1.5px;
+  stroke-linecap: round;
+  stroke-linejoin: miter;
+  vector-effect: non-scaling-stroke;
+}
 .veil__fill {
   position: absolute;
   left: 0; right: 0;
@@ -1892,11 +1919,40 @@ body:has(.mmenu.open) .spine { opacity: 0; pointer-events: none; }
   place-items: center;
   gap: 12px;
   align-content: center;
+  isolation: isolate;
   background:
-    radial-gradient(130% 75% at 50% 44%, rgba(211, 19, 42, 0.28), transparent 74%),
+    radial-gradient(ellipse 70% 85% at 50% 44%, rgba(211, 19, 42, 0.22), transparent 72%),
+    radial-gradient(ellipse 22% 100% at 0% 50%, rgba(92, 5, 17, 0.42), transparent 78%),
+    radial-gradient(ellipse 22% 100% at 100% 50%, rgba(92, 5, 17, 0.42), transparent 78%),
     linear-gradient(180deg, #100205, #220409 55%, #100205);
 }
+.veil__fill::before,
+.veil__fill::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  z-index: 0;
+}
+.veil__fill::before {
+  inset: 0;
+  opacity: 0.46;
+  background:
+    repeating-linear-gradient(132deg, transparent 0 68px, rgba(211, 19, 42, 0.035) 69px 70px, transparent 71px 132px),
+    radial-gradient(ellipse at 50% 50%, transparent 15%, rgba(0, 0, 0, 0.3) 100%);
+}
+.veil__fill::after {
+  width: min(48vw, 420px);
+  aspect-ratio: 1;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%) rotate(45deg);
+  border: 1px solid rgba(211, 19, 42, 0.16);
+  border-radius: 42% 58% 46% 54%;
+  box-shadow: 0 0 76px rgba(211, 19, 42, 0.12), inset 0 0 54px rgba(211, 19, 42, 0.06);
+}
 .veil__fill > * {
+  position: relative;
+  z-index: 1;
   opacity: 0;
   transform: translateY(14px);
   transition: opacity 0.7s ease, transform 0.85s cubic-bezier(0.22, 1, 0.36, 1);
@@ -1911,8 +1967,8 @@ body:has(.mmenu.open) .spine { opacity: 0; pointer-events: none; }
   font-weight: 900;
   font-size: min(22vw, 190px);
   line-height: 1;
-  color: rgba(211, 19, 42, 0.45);
-  text-shadow: 0 0 80px rgba(211, 19, 42, 0.55);
+  color: rgba(211, 19, 42, 0.4);
+  text-shadow: 0 0 70px rgba(211, 19, 42, 0.62), 0 4px 0 rgba(0, 0, 0, 0.45);
   animation: veilFloat 6s ease-in-out infinite;
 }
 @keyframes veilFloat {
@@ -2698,7 +2754,7 @@ body.embed .hero__crest { display: none; }
 </style>
 </head>
 <body id="top" class="page-404" data-sigil="鬼">
-<div class="veil" data-veil aria-hidden="true"><div class="veil__panel"><svg class="veil__wave veil__wave--in" viewBox="0 0 1440 120" preserveAspectRatio="none"><path d="M0,64 C120,20 240,20 360,64 C480,108 600,108 720,64 C840,20 960,20 1080,64 C1200,108 1320,108 1440,64 L1440,120 L0,120 Z"/></svg><div class="veil__fill"><span class="veil__kanji" data-veil-kanji>鬼</span><span class="veil__label" data-veil-label>Пакт крови</span><span class="veil__bar"><i></i></span></div><svg class="veil__wave veil__wave--out" viewBox="0 0 1440 120" preserveAspectRatio="none"><path d="M0,56 C120,100 240,100 360,56 C480,12 600,12 720,56 C840,100 960,100 1080,56 C1200,12 1320,12 1440,56 L1440,0 L0,0 Z"/></svg></div></div>
+<div class="veil" data-veil aria-hidden="true"><div class="veil__panel"><svg class="veil__edge veil__edge--top" viewBox="0 0 1440 140" preserveAspectRatio="none"><path class="veil__edge-fill" d="M 0,78 L 42,66 L 74,61 L 104,17 L 125,73 L 172,52 L 202,67 L 248,25 L 270,78 L 315,57 L 352,71 L 386,13 L 409,77 L 455,54 L 490,68 L 530,28 L 550,79 L 600,50 L 637,67 L 670,10 L 696,80 L 741,54 L 774,68 L 815,26 L 835,78 L 883,51 L 918,68 L 953,20 L 975,78 L 1020,52 L 1058,69 L 1092,12 L 1116,78 L 1163,53 L 1198,68 L 1233,24 L 1254,81 L 1300,51 L 1338,67 L 1372,17 L 1396,77 L 1440,59 L 1440,140 L 0,140 Z"/><path class="veil__edge-glow" d="M 0,78 L 42,66 L 74,61 L 104,17 L 125,73 L 172,52 L 202,67 L 248,25 L 270,78 L 315,57 L 352,71 L 386,13 L 409,77 L 455,54 L 490,68 L 530,28 L 550,79 L 600,50 L 637,67 L 670,10 L 696,80 L 741,54 L 774,68 L 815,26 L 835,78 L 883,51 L 918,68 L 953,20 L 975,78 L 1020,52 L 1058,69 L 1092,12 L 1116,78 L 1163,53 L 1198,68 L 1233,24 L 1254,81 L 1300,51 L 1338,67 L 1372,17 L 1396,77 L 1440,59"/><path class="veil__edge-line" d="M 0,78 L 42,66 L 74,61 L 104,17 L 125,73 L 172,52 L 202,67 L 248,25 L 270,78 L 315,57 L 352,71 L 386,13 L 409,77 L 455,54 L 490,68 L 530,28 L 550,79 L 600,50 L 637,67 L 670,10 L 696,80 L 741,54 L 774,68 L 815,26 L 835,78 L 883,51 L 918,68 L 953,20 L 975,78 L 1020,52 L 1058,69 L 1092,12 L 1116,78 L 1163,53 L 1198,68 L 1233,24 L 1254,81 L 1300,51 L 1338,67 L 1372,17 L 1396,77 L 1440,59"/></svg><div class="veil__fill"><span class="veil__kanji" data-veil-kanji>鬼</span><span class="veil__label" data-veil-label>Пакт крови</span><span class="veil__bar"><i></i></span></div><svg class="veil__edge veil__edge--bottom" viewBox="0 0 1440 140" preserveAspectRatio="none"><path class="veil__edge-fill" d="M 0,0 L 1440,0 1440,81 L 1396,63 L 1372,123 L 1338,73 L 1300,89 L 1254,59 L 1233,116 L 1198,72 L 1163,87 L 1116,62 L 1092,128 L 1058,71 L 1020,88 L 975,62 L 953,120 L 918,72 L 883,89 L 835,62 L 815,114 L 774,72 L 741,86 L 696,60 L 670,130 L 637,73 L 600,90 L 550,61 L 530,112 L 490,72 L 455,86 L 409,63 L 386,127 L 352,69 L 315,83 L 270,62 L 248,115 L 202,73 L 172,88 L 125,67 L 104,123 L 74,79 L 42,74 L 0,62 Z"/><path class="veil__edge-glow" d="M 0,62 L 42,74 L 74,79 L 104,123 L 125,67 L 172,88 L 202,73 L 248,115 L 270,62 L 315,83 L 352,69 L 386,127 L 409,63 L 455,86 L 490,72 L 530,112 L 550,61 L 600,90 L 637,73 L 670,130 L 696,60 L 741,86 L 774,72 L 815,114 L 835,62 L 883,89 L 918,72 L 953,120 L 975,62 L 1020,88 L 1058,71 L 1092,128 L 1116,62 L 1163,87 L 1198,72 L 1233,116 L 1254,59 L 1300,89 L 1338,73 L 1372,123 L 1396,63 L 1440,81"/><path class="veil__edge-line" d="M 0,62 L 42,74 L 74,79 L 104,123 L 125,67 L 172,88 L 202,73 L 248,115 L 270,62 L 315,83 L 352,69 L 386,127 L 409,63 L 455,86 L 490,72 L 530,112 L 550,61 L 600,90 L 637,73 L 670,130 L 696,60 L 741,86 L 774,72 L 815,114 L 835,62 L 883,89 L 918,72 L 953,120 L 975,62 L 1020,88 L 1058,71 L 1092,128 L 1116,62 L 1163,87 L 1198,72 L 1233,116 L 1254,59 L 1300,89 L 1338,73 L 1372,123 L 1396,63 L 1440,81"/></svg></div></div>
 <div class="progress"></div>
 <section class="hero hero--inner"><div class="hero__shade"></div><div class="hero__in"><p class="hero__eyebrow">Ошибка 404</p><h1 class="hero__title"><span class="w bone"><span class="ch" style="animation-delay:0.20s">П</span><span class="ch" style="animation-delay:0.26s">У</span><span class="ch" style="animation-delay:0.31s">С</span><span class="ch" style="animation-delay:0.36s">Т</span><span class="ch" style="animation-delay:0.42s">О</span><span class="ch" style="animation-delay:0.48s">Т</span><span class="ch" style="animation-delay:0.53s">А</span></span></h1><p class="hero__quote"><span class="quote__text">«Стань демоном, Кёджуро. Мы сможем сражаться вечно.»</span><cite class="quote__author">— Аказа · Третья Высшая Луна</cite></p><div class="hero__btns"><a class="btn btn--blood" id="home" href="/"><span>На главную</span></a></div></div></section><script>(function(){var h=location.hostname,p=location.pathname.split('/');document.getElementById('home').href=/\.github\.io$/.test(h)&&p[1]?'/'+p[1]+'/':'/';})();</script>
 <script>
@@ -2890,105 +2946,136 @@ body.embed .hero__crest { display: none; }
   /* ---------- Готовность героя (буквы встают после прелоадера) ---------- */
   if (!document.querySelector(".preloader")) document.body.classList.add("ready");
 
-  /* ---------- Печати разделов: скролл, колесо мыши, перетаскивание, стрелки ---------- */
+  /* ---------- Печати разделов: надёжный горизонтальный скролл ---------- */
   (function () {
     var box = document.querySelector("[data-seals]");
     if (!box) return;
-    var track = box.querySelector(".nav__seals-track") || box;
-    var on = track.querySelector(".seal--on");
+    var track = box.querySelector(".nav__seals-track");
+    if (!track) return;
+    var active = track.querySelector(".seal--on");
     var prevBtn = box.querySelector("[data-seals-prev]");
     var nextBtn = box.querySelector("[data-seals-next]");
+    var stateFrame = 0;
 
     function updateState() {
-      var max = track.scrollWidth - track.clientWidth;
+      stateFrame = 0;
+      var max = Math.max(0, track.scrollWidth - track.clientWidth);
       var hasOverflow = max > 2;
-      var canLeft = hasOverflow && track.scrollLeft > 4;
-      var canRight = hasOverflow && track.scrollLeft < max - 4;
+      var left = Math.max(0, track.scrollLeft);
+      var canLeft = hasOverflow && left > 4;
+      var canRight = hasOverflow && left < max - 4;
       box.setAttribute("data-can-scroll-left", canLeft ? "true" : "false");
       box.setAttribute("data-can-scroll-right", canRight ? "true" : "false");
-      if (!hasOverflow) {
-        box.style.webkitMaskImage = "none";
-        box.style.maskImage = "none";
-      } else if (canLeft && canRight) {
-        var m = "linear-gradient(90deg, transparent, #000 24px, #000 calc(100% - 24px), transparent)";
-        box.style.webkitMaskImage = m;
-        box.style.maskImage = m;
+      if (prevBtn) prevBtn.disabled = !canLeft;
+      if (nextBtn) nextBtn.disabled = !canRight;
+
+      // Маска применяется только к ленте, не к стрелкам поверх неё.
+      var mask = "none";
+      if (canLeft && canRight) {
+        mask = "linear-gradient(90deg, transparent, #000 26px, #000 calc(100% - 26px), transparent)";
       } else if (canRight) {
-        var m = "linear-gradient(90deg, #000 calc(100% - 24px), transparent)";
-        box.style.webkitMaskImage = m;
-        box.style.maskImage = m;
+        mask = "linear-gradient(90deg, #000, #000 calc(100% - 26px), transparent)";
       } else if (canLeft) {
-        var m = "linear-gradient(90deg, transparent, #000 24px, #000 100%)";
-        box.style.webkitMaskImage = m;
-        box.style.maskImage = m;
+        mask = "linear-gradient(90deg, transparent, #000 26px, #000)";
       }
+      track.style.webkitMaskImage = mask;
+      track.style.maskImage = mask;
     }
 
-    if (on) {
-      var left = on.offsetLeft - (track.clientWidth - on.offsetWidth) / 2;
-      track.scrollLeft = Math.max(0, left);
+    function scheduleState() {
+      if (stateFrame) return;
+      stateFrame = window.requestAnimationFrame(updateState);
     }
-    updateState();
 
-    track.addEventListener("scroll", updateState, { passive: true });
-    window.addEventListener("resize", updateState);
+    function centerActive() {
+      if (!active || !track.clientWidth) return;
+      // offsetLeft зависит от offsetParent (это может быть вся шапка, не лента).
+      // Считаем координату через прямоугольники, затем переводим её в scroll-space.
+      var trackRect = track.getBoundingClientRect();
+      var itemRect = active.getBoundingClientRect();
+      var itemLeft = itemRect.left - trackRect.left + track.scrollLeft;
+      var target = itemLeft - (track.clientWidth - itemRect.width) / 2;
+      var max = Math.max(0, track.scrollWidth - track.clientWidth);
+      track.scrollLeft = Math.max(0, Math.min(max, target));
+    }
 
-    // Колесо мыши — горизонтальная прокрутка ленты печатей
+    function syncLayout() {
+      centerActive();
+      updateState();
+    }
+
+    // Выравниваем активный раздел после первого layout и после загрузки шрифтов.
+    window.requestAnimationFrame(syncLayout);
+    window.addEventListener("resize", syncLayout, { passive: true });
+    window.addEventListener("orientationchange", syncLayout, { passive: true });
+    window.addEventListener("load", syncLayout, { once: true });
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(syncLayout).catch(function () {});
+    }
+
+    track.addEventListener("scroll", scheduleState, { passive: true });
+    if (window.ResizeObserver) {
+      var resizeObserver = new window.ResizeObserver(scheduleState);
+      resizeObserver.observe(box);
+      resizeObserver.observe(track);
+    }
+
+    // Обычная вертикальная прокрутка колеса листает вкладки по горизонтали.
     box.addEventListener("wheel", function (e) {
-      if (track.scrollWidth <= track.clientWidth) return;
+      var max = track.scrollWidth - track.clientWidth;
+      if (max <= 2) return;
       var delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
-      if (Math.abs(delta) > 0) {
-        var prev = track.scrollLeft;
-        track.scrollLeft += delta;
-        if (track.scrollLeft !== prev) {
-          e.preventDefault();
-        }
-      }
+      if (e.deltaMode === 1) delta *= 16;
+      else if (e.deltaMode === 2) delta *= track.clientWidth;
+      if (!delta) return;
+      var before = track.scrollLeft;
+      track.scrollLeft = Math.max(0, Math.min(max, before + delta));
+      if (Math.abs(track.scrollLeft - before) > 0.1) e.preventDefault();
     }, { passive: false });
 
-    // Стрелки влево / вправо
-    if (prevBtn) {
-      prevBtn.addEventListener("click", function () {
-        track.scrollBy({ left: -180, behavior: "smooth" });
-      });
-    }
-    if (nextBtn) {
-      nextBtn.addEventListener("click", function () {
-        track.scrollBy({ left: 180, behavior: "smooth" });
-      });
-    }
-
-    // Перетаскивание мышью (drag to scroll)
-    var isDown = false, startX = 0, scrollStart = 0, hasDragged = false;
-    track.addEventListener("mousedown", function (e) {
-      if (e.button !== 0) return;
-      isDown = true;
-      hasDragged = false;
-      startX = e.pageX;
-      scrollStart = track.scrollLeft;
-    });
-    window.addEventListener("mousemove", function (e) {
-      if (!isDown) return;
-      var dx = e.pageX - startX;
-      if (Math.abs(dx) > 5) {
-        hasDragged = true;
-        track.classList.add("is-dragging");
+    function scrollPage(direction) {
+      var amount = Math.max(180, track.clientWidth * 0.72) * direction;
+      if (typeof track.scrollBy === "function") {
+        track.scrollBy({ left: amount, behavior: "smooth" });
+      } else {
+        track.scrollLeft += amount;
       }
-      track.scrollLeft = scrollStart - dx;
-    });
-    window.addEventListener("mouseup", function () {
+    }
+    if (prevBtn) prevBtn.addEventListener("click", function () { scrollPage(-1); });
+    if (nextBtn) nextBtn.addEventListener("click", function () { scrollPage(1); });
+
+    // Перетаскивание мышью. На телефонах остаётся нативный инерционный свайп.
+    var isDown = false, startX = 0, scrollStart = 0, hasDragged = false;
+    function stopDrag() {
       if (!isDown) return;
       isDown = false;
       setTimeout(function () {
         track.classList.remove("is-dragging");
         hasDragged = false;
-      }, 50);
+      }, 80);
+    }
+    track.addEventListener("mousedown", function (e) {
+      if (e.button !== 0) return;
+      isDown = true;
+      hasDragged = false;
+      startX = e.clientX;
+      scrollStart = track.scrollLeft;
     });
-    track.addEventListener("click", function (e) {
-      if (hasDragged) {
-        e.preventDefault();
-        e.stopPropagation();
+    window.addEventListener("mousemove", function (e) {
+      if (!isDown) return;
+      var dx = e.clientX - startX;
+      if (Math.abs(dx) > 5) {
+        hasDragged = true;
+        track.classList.add("is-dragging");
+        track.scrollLeft = scrollStart - dx;
       }
+    });
+    window.addEventListener("mouseup", stopDrag);
+    window.addEventListener("blur", stopDrag);
+    track.addEventListener("click", function (e) {
+      if (!hasDragged) return;
+      e.preventDefault();
+      e.stopPropagation();
     }, true);
   })();
 
@@ -3028,11 +3115,11 @@ body.embed .hero__crest { display: none; }
     document.body.style.overflow = "";
   });
 
-  /* ---------- Переход между страницами (кровавая штора-волна) ----------
+  /* ---------- Переход между страницами (демоническая кровавая штора) ----------
      Уходим: кровавая штора поднимается снизу и накрывает экран, затем
      переход. Приходим: штора уже накрыта (html.veil-cover, ставится в <head>),
-     показывает иероглиф и название страницы и уезжает вверх — новая страница
-     плавно выплывает. Без JS шторку убирает CSS-анимация.                */
+     показывает иероглиф и название страницы и уезжает вверх, открывая новую
+     страницу. Без JS шторку убирает CSS-анимация.                         */
   (function () {
     var root = document.documentElement;
     var veil = document.querySelector("[data-veil]");
@@ -3068,7 +3155,10 @@ body.embed .hero__crest { display: none; }
       setTimeout(done, reduceMotion ? 30 : 2400);
 
       /* уход */
+      var leaving = false;
       function leave(href, title, sigil) {
+        if (leaving) return;
+        leaving = true;
         if (reduceMotion) { window.location.href = href; return; }
         write("bp-nav", "1");
         if (title) write("bp-nav-label", title);
@@ -3080,9 +3170,24 @@ body.embed .hero__crest { display: none; }
         root.classList.remove("veil-done");
         veil.classList.remove("is-away");
         void veil.offsetWidth;
+
+        var navigated = false;
+        var fallback;
+        function navigate() {
+          if (navigated) return;
+          navigated = true;
+          if (panel) panel.removeEventListener("transitionend", onCoverEnd);
+          clearTimeout(fallback);
+          window.location.href = href;
+        }
+        function onCoverEnd(e) {
+          if (e.target === panel && e.propertyName === "transform") navigate();
+        }
+        if (panel) panel.addEventListener("transitionend", onCoverEnd);
         veil.classList.add("is-cover");
         document.body.classList.add("is-leaving");
-        setTimeout(function () { window.location.href = href; }, 880);
+        // Fallback for browsers that do not emit transitionend.
+        fallback = setTimeout(navigate, 1300);
       }
 
       document.addEventListener("click", function (e) {
@@ -3090,6 +3195,7 @@ body.embed .hero__crest { display: none; }
         if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
         var a = e.target && e.target.closest ? e.target.closest("a[href]") : null;
         if (!a) return;
+        if (root.classList.contains("veil-cover") || leaving) { e.preventDefault(); return; }
         if (a.target && a.target !== "_self") return;
         if (a.hasAttribute("download")) return;
         var href = a.getAttribute("href");
@@ -3105,10 +3211,14 @@ body.embed .hero__crest { display: none; }
         leave(a.href, title, sigil);
       }, false);
 
-      /* возврат «назад» из кэша браузера */
+      /* Возврат «назад» из bfcache: сбрасываем незавершённую штору явно. */
       window.addEventListener("pageshow", function (e) {
         if (!e.persisted) return;
-        done();
+        leaving = false;
+        root.classList.remove("veil-cover");
+        root.classList.add("veil-done");
+        veil.classList.remove("is-cover", "is-away");
+        document.body.classList.remove("is-leaving");
       });
     }
   })();
