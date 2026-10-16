@@ -186,105 +186,136 @@
   /* ---------- Готовность героя (буквы встают после прелоадера) ---------- */
   if (!document.querySelector(".preloader")) document.body.classList.add("ready");
 
-  /* ---------- Печати разделов: скролл, колесо мыши, перетаскивание, стрелки ---------- */
+  /* ---------- Печати разделов: надёжный горизонтальный скролл ---------- */
   (function () {
     var box = document.querySelector("[data-seals]");
     if (!box) return;
-    var track = box.querySelector(".nav__seals-track") || box;
-    var on = track.querySelector(".seal--on");
+    var track = box.querySelector(".nav__seals-track");
+    if (!track) return;
+    var active = track.querySelector(".seal--on");
     var prevBtn = box.querySelector("[data-seals-prev]");
     var nextBtn = box.querySelector("[data-seals-next]");
+    var stateFrame = 0;
 
     function updateState() {
-      var max = track.scrollWidth - track.clientWidth;
+      stateFrame = 0;
+      var max = Math.max(0, track.scrollWidth - track.clientWidth);
       var hasOverflow = max > 2;
-      var canLeft = hasOverflow && track.scrollLeft > 4;
-      var canRight = hasOverflow && track.scrollLeft < max - 4;
+      var left = Math.max(0, track.scrollLeft);
+      var canLeft = hasOverflow && left > 4;
+      var canRight = hasOverflow && left < max - 4;
       box.setAttribute("data-can-scroll-left", canLeft ? "true" : "false");
       box.setAttribute("data-can-scroll-right", canRight ? "true" : "false");
-      if (!hasOverflow) {
-        box.style.webkitMaskImage = "none";
-        box.style.maskImage = "none";
-      } else if (canLeft && canRight) {
-        var m = "linear-gradient(90deg, transparent, #000 24px, #000 calc(100% - 24px), transparent)";
-        box.style.webkitMaskImage = m;
-        box.style.maskImage = m;
+      if (prevBtn) prevBtn.disabled = !canLeft;
+      if (nextBtn) nextBtn.disabled = !canRight;
+
+      // Маска применяется только к ленте, не к стрелкам поверх неё.
+      var mask = "none";
+      if (canLeft && canRight) {
+        mask = "linear-gradient(90deg, transparent, #000 26px, #000 calc(100% - 26px), transparent)";
       } else if (canRight) {
-        var m = "linear-gradient(90deg, #000 calc(100% - 24px), transparent)";
-        box.style.webkitMaskImage = m;
-        box.style.maskImage = m;
+        mask = "linear-gradient(90deg, #000, #000 calc(100% - 26px), transparent)";
       } else if (canLeft) {
-        var m = "linear-gradient(90deg, transparent, #000 24px, #000 100%)";
-        box.style.webkitMaskImage = m;
-        box.style.maskImage = m;
+        mask = "linear-gradient(90deg, transparent, #000 26px, #000)";
       }
+      track.style.webkitMaskImage = mask;
+      track.style.maskImage = mask;
     }
 
-    if (on) {
-      var left = on.offsetLeft - (track.clientWidth - on.offsetWidth) / 2;
-      track.scrollLeft = Math.max(0, left);
+    function scheduleState() {
+      if (stateFrame) return;
+      stateFrame = window.requestAnimationFrame(updateState);
     }
-    updateState();
 
-    track.addEventListener("scroll", updateState, { passive: true });
-    window.addEventListener("resize", updateState);
+    function centerActive() {
+      if (!active || !track.clientWidth) return;
+      // offsetLeft зависит от offsetParent (это может быть вся шапка, не лента).
+      // Считаем координату через прямоугольники, затем переводим её в scroll-space.
+      var trackRect = track.getBoundingClientRect();
+      var itemRect = active.getBoundingClientRect();
+      var itemLeft = itemRect.left - trackRect.left + track.scrollLeft;
+      var target = itemLeft - (track.clientWidth - itemRect.width) / 2;
+      var max = Math.max(0, track.scrollWidth - track.clientWidth);
+      track.scrollLeft = Math.max(0, Math.min(max, target));
+    }
 
-    // Колесо мыши — горизонтальная прокрутка ленты печатей
+    function syncLayout() {
+      centerActive();
+      updateState();
+    }
+
+    // Выравниваем активный раздел после первого layout и после загрузки шрифтов.
+    window.requestAnimationFrame(syncLayout);
+    window.addEventListener("resize", syncLayout, { passive: true });
+    window.addEventListener("orientationchange", syncLayout, { passive: true });
+    window.addEventListener("load", syncLayout, { once: true });
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(syncLayout).catch(function () {});
+    }
+
+    track.addEventListener("scroll", scheduleState, { passive: true });
+    if (window.ResizeObserver) {
+      var resizeObserver = new window.ResizeObserver(scheduleState);
+      resizeObserver.observe(box);
+      resizeObserver.observe(track);
+    }
+
+    // Обычная вертикальная прокрутка колеса листает вкладки по горизонтали.
     box.addEventListener("wheel", function (e) {
-      if (track.scrollWidth <= track.clientWidth) return;
+      var max = track.scrollWidth - track.clientWidth;
+      if (max <= 2) return;
       var delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
-      if (Math.abs(delta) > 0) {
-        var prev = track.scrollLeft;
-        track.scrollLeft += delta;
-        if (track.scrollLeft !== prev) {
-          e.preventDefault();
-        }
-      }
+      if (e.deltaMode === 1) delta *= 16;
+      else if (e.deltaMode === 2) delta *= track.clientWidth;
+      if (!delta) return;
+      var before = track.scrollLeft;
+      track.scrollLeft = Math.max(0, Math.min(max, before + delta));
+      if (Math.abs(track.scrollLeft - before) > 0.1) e.preventDefault();
     }, { passive: false });
 
-    // Стрелки влево / вправо
-    if (prevBtn) {
-      prevBtn.addEventListener("click", function () {
-        track.scrollBy({ left: -180, behavior: "smooth" });
-      });
-    }
-    if (nextBtn) {
-      nextBtn.addEventListener("click", function () {
-        track.scrollBy({ left: 180, behavior: "smooth" });
-      });
-    }
-
-    // Перетаскивание мышью (drag to scroll)
-    var isDown = false, startX = 0, scrollStart = 0, hasDragged = false;
-    track.addEventListener("mousedown", function (e) {
-      if (e.button !== 0) return;
-      isDown = true;
-      hasDragged = false;
-      startX = e.pageX;
-      scrollStart = track.scrollLeft;
-    });
-    window.addEventListener("mousemove", function (e) {
-      if (!isDown) return;
-      var dx = e.pageX - startX;
-      if (Math.abs(dx) > 5) {
-        hasDragged = true;
-        track.classList.add("is-dragging");
+    function scrollPage(direction) {
+      var amount = Math.max(180, track.clientWidth * 0.72) * direction;
+      if (typeof track.scrollBy === "function") {
+        track.scrollBy({ left: amount, behavior: "smooth" });
+      } else {
+        track.scrollLeft += amount;
       }
-      track.scrollLeft = scrollStart - dx;
-    });
-    window.addEventListener("mouseup", function () {
+    }
+    if (prevBtn) prevBtn.addEventListener("click", function () { scrollPage(-1); });
+    if (nextBtn) nextBtn.addEventListener("click", function () { scrollPage(1); });
+
+    // Перетаскивание мышью. На телефонах остаётся нативный инерционный свайп.
+    var isDown = false, startX = 0, scrollStart = 0, hasDragged = false;
+    function stopDrag() {
       if (!isDown) return;
       isDown = false;
       setTimeout(function () {
         track.classList.remove("is-dragging");
         hasDragged = false;
-      }, 50);
+      }, 80);
+    }
+    track.addEventListener("mousedown", function (e) {
+      if (e.button !== 0) return;
+      isDown = true;
+      hasDragged = false;
+      startX = e.clientX;
+      scrollStart = track.scrollLeft;
     });
-    track.addEventListener("click", function (e) {
-      if (hasDragged) {
-        e.preventDefault();
-        e.stopPropagation();
+    window.addEventListener("mousemove", function (e) {
+      if (!isDown) return;
+      var dx = e.clientX - startX;
+      if (Math.abs(dx) > 5) {
+        hasDragged = true;
+        track.classList.add("is-dragging");
+        track.scrollLeft = scrollStart - dx;
       }
+    });
+    window.addEventListener("mouseup", stopDrag);
+    window.addEventListener("blur", stopDrag);
+    track.addEventListener("click", function (e) {
+      if (!hasDragged) return;
+      e.preventDefault();
+      e.stopPropagation();
     }, true);
   })();
 
@@ -324,11 +355,11 @@
     document.body.style.overflow = "";
   });
 
-  /* ---------- Переход между страницами (кровавая штора-волна) ----------
+  /* ---------- Переход между страницами (демоническая кровавая штора) ----------
      Уходим: кровавая штора поднимается снизу и накрывает экран, затем
      переход. Приходим: штора уже накрыта (html.veil-cover, ставится в <head>),
-     показывает иероглиф и название страницы и уезжает вверх — новая страница
-     плавно выплывает. Без JS шторку убирает CSS-анимация.                */
+     показывает иероглиф и название страницы и уезжает вверх, открывая новую
+     страницу. Без JS шторку убирает CSS-анимация.                         */
   (function () {
     var root = document.documentElement;
     var veil = document.querySelector("[data-veil]");
@@ -364,7 +395,10 @@
       setTimeout(done, reduceMotion ? 30 : 2400);
 
       /* уход */
+      var leaving = false;
       function leave(href, title, sigil) {
+        if (leaving) return;
+        leaving = true;
         if (reduceMotion) { window.location.href = href; return; }
         write("bp-nav", "1");
         if (title) write("bp-nav-label", title);
@@ -376,9 +410,24 @@
         root.classList.remove("veil-done");
         veil.classList.remove("is-away");
         void veil.offsetWidth;
+
+        var navigated = false;
+        var fallback;
+        function navigate() {
+          if (navigated) return;
+          navigated = true;
+          if (panel) panel.removeEventListener("transitionend", onCoverEnd);
+          clearTimeout(fallback);
+          window.location.href = href;
+        }
+        function onCoverEnd(e) {
+          if (e.target === panel && e.propertyName === "transform") navigate();
+        }
+        if (panel) panel.addEventListener("transitionend", onCoverEnd);
         veil.classList.add("is-cover");
         document.body.classList.add("is-leaving");
-        setTimeout(function () { window.location.href = href; }, 880);
+        // Fallback for browsers that do not emit transitionend.
+        fallback = setTimeout(navigate, 1300);
       }
 
       document.addEventListener("click", function (e) {
@@ -386,6 +435,7 @@
         if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
         var a = e.target && e.target.closest ? e.target.closest("a[href]") : null;
         if (!a) return;
+        if (root.classList.contains("veil-cover") || leaving) { e.preventDefault(); return; }
         if (a.target && a.target !== "_self") return;
         if (a.hasAttribute("download")) return;
         var href = a.getAttribute("href");
@@ -401,10 +451,14 @@
         leave(a.href, title, sigil);
       }, false);
 
-      /* возврат «назад» из кэша браузера */
+      /* Возврат «назад» из bfcache: сбрасываем незавершённую штору явно. */
       window.addEventListener("pageshow", function (e) {
         if (!e.persisted) return;
-        done();
+        leaving = false;
+        root.classList.remove("veil-cover");
+        root.classList.add("veil-done");
+        veil.classList.remove("is-cover", "is-away");
+        document.body.classList.remove("is-leaving");
       });
     }
   })();
