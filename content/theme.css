@@ -84,7 +84,7 @@ a { color: inherit; }
   align-items: center;
   justify-content: center;
   background: var(--void);
-  transition: transform 1.05s cubic-bezier(0.55, 0, 0.2, 1);
+  transition: transform 0.95s cubic-bezier(0.65, 0, 0.18, 1);
 }
 .preloader.done { transform: translateY(-100%); }
 /* Экран загрузки — один раз за сеанс. Дальше переходы между страницами
@@ -179,13 +179,13 @@ html.bp-seen .preloader { display: none; }
   padding: 12px 0;
 }
 .nav__in {
-  max-width: 1500px;
+  max-width: min(1600px, 98vw);
   margin: 0 auto;
-  padding: 0 20px;
-  display: flex;
+  padding: 0 16px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
-  justify-content: space-between;
-  gap: 16px;
+  gap: 12px;
 }
 .nav__logo {
   display: flex;
@@ -1344,7 +1344,7 @@ body.embed .tabs__btns { display: none; }
   html { scroll-behavior: auto; }
   .marquee__track, .hero__cue span:last-child,
   .creed__seal, .preloader__kanji { animation: none; }
-  .veil, body.leaving .veil { animation: none; }
+  .veil { animation: none !important; display: none !important; }
   .preloader, .preloader__kanji, .preloader__bar, .preloader__foot { transition: none; }
   .reveal { opacity: 1; transform: none; transition: none; }
   .hero__title .ch { animation: none; transform: none; }
@@ -1520,6 +1520,9 @@ body.ready .hero__crest { animation: fadeIn 1s 1.15s both; }
 
 /* ---------- шапка: печати ---------- */
 .nav__in {
+  max-width: min(1600px, 98vw);
+  margin: 0 auto;
+  padding: 0 16px;
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
@@ -1543,6 +1546,7 @@ body.ready .hero__crest { animation: fadeIn 1s 1.15s both; }
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--bone);
+  flex-shrink: 0;
 }
 .nav__burger:hover { background: var(--blood); border-color: var(--blood); }
 .nav__burger-k {
@@ -1558,52 +1562,101 @@ body.ready .hero__crest { animation: fadeIn 1s 1.15s both; }
 }
 .nav__burger:hover .nav__burger-k { background: rgba(0, 0, 0, 0.25); color: var(--bone); }
 .nav__burger-t { font-size: 11px; letter-spacing: 0.18em; }
+
 .nav__seals {
+  position: relative;
   min-width: 0;
+  display: flex;
+  align-items: center;
   overflow: hidden;
-  -webkit-mask-image: linear-gradient(90deg, transparent, #000 16px, #000 calc(100% - 20px), transparent);
-  mask-image: linear-gradient(90deg, transparent, #000 16px, #000 calc(100% - 20px), transparent);
+  padding: 0 2px;
 }
 .nav__seals-track {
   display: flex;
-  gap: 8px;
+  gap: 6px;
   overflow-x: auto;
   scrollbar-width: none;
-  padding: 2px 2px;
+  padding: 4px 2px;
   scroll-snap-type: x proximity;
   -webkit-overflow-scrolling: touch;
+  cursor: grab;
+  user-select: none;
+  width: 100%;
 }
-.seal { scroll-snap-align: center; }
+.nav__seals-track.is-dragging {
+  cursor: grabbing;
+  scroll-snap-type: none;
+  user-select: none;
+}
 .nav__seals-track::-webkit-scrollbar { display: none; }
+
+.nav__seals-arrow {
+  display: none;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 4;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 1px solid rgba(211, 19, 42, 0.6);
+  background: rgba(12, 3, 7, 0.88);
+  color: var(--bone);
+  font-size: 14px;
+  font-family: inherit;
+  font-weight: 700;
+  line-height: 1;
+  padding: 0;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.8), 0 0 8px rgba(211, 19, 42, 0.4);
+  transition: background 0.2s, border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+}
+.nav__seals-arrow:hover {
+  background: var(--blood);
+  border-color: var(--blood);
+  box-shadow: 0 0 16px rgba(211, 19, 42, 0.85);
+  transform: translateY(-50%) scale(1.1);
+}
+.nav__seals-arrow--prev { left: 0px; }
+.nav__seals-arrow--next { right: 0px; }
+.nav__seals[data-can-scroll-left="true"] .nav__seals-arrow--prev { display: flex; }
+.nav__seals[data-can-scroll-right="true"] .nav__seals-arrow--next { display: flex; }
+
 .seal {
   flex: 0 0 auto;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 4px 12px 4px 4px;
+  gap: 6px;
+  padding: 3px 10px 3px 3px;
   border-radius: 999px;
   border: 1px solid rgba(237, 228, 214, 0.14);
   background: rgba(6, 3, 9, 0.42);
   color: var(--ash);
   text-decoration: none;
   font-size: 11px;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.11em;
   text-transform: uppercase;
   white-space: nowrap;
+  scroll-snap-align: center;
   transition: border-color 0.3s, color 0.3s, background 0.3s, box-shadow 0.3s;
 }
 .seal i {
-  width: 26px;
-  height: 26px;
+  width: 24px;
+  height: 24px;
   display: grid;
   place-items: center;
   border-radius: 50%;
   border: 1px solid rgba(211, 19, 42, 0.4);
   font-style: normal;
   font-family: var(--font-display);
-  font-size: 13px;
+  font-size: 12px;
   color: var(--blood);
   letter-spacing: 0;
+  flex-shrink: 0;
 }
 .seal:hover { color: var(--bone); border-color: rgba(211, 19, 42, 0.55); }
 .seal--on {
@@ -1777,36 +1830,143 @@ body:has(.mmenu.open) .spine { opacity: 0; pointer-events: none; }
   box-shadow: 0 0 16px -4px rgba(211, 19, 42, 0.85);
 }
 
-/* ---------- кровавая штора между страницами ---------- */
+/* ---------- кровавая штора-волна между страницами ----------
+   Классы состояния:
+   .is-cover  — штора поднялась и накрыла экран (уходим со страницы);
+   .is-away   — штора ушла вверх (новая страница открылась);
+   html.veil-cover — состояние НА ПРИХОДЕ: штора уже накрыта ещё до первой
+   отрисовки (ставится инлайн-скриптом в <head>) и уезжает вверх сама,
+   даже если JS не выполнился.
+
+   Движение медленное и мягкое: длинный плавный ход (почти секунда),
+   текст и полоска проявляются с задержкой, содержимое страницы за шторой
+   тихо уплывает в размытие — без рывков и резких вспышек.                 */
 .veil {
   position: fixed;
   inset: 0;
-  z-index: 120;
+  z-index: 200;
+  overflow: hidden;
   pointer-events: none;
-  background: #2a060c;
-  transform: scaleY(0);
-  transform-origin: top;
 }
-.veil::after {
-  content: "血";
+.veil.is-cover { pointer-events: auto; }
+
+.veil__panel {
   position: absolute;
-  left: 50%;
-  top: 46%;
-  transform: translate(-50%, -50%);
+  left: 0;
+  right: 0;
+  top: 0;
+  height: calc(100% + 320px);
+  transform: translateY(112%);
+  transition: transform 0.95s cubic-bezier(0.5, 0.02, 0.22, 1);
+  will-change: transform;
+}
+.veil.is-cover .veil__panel { transform: translateY(-190px); }
+.veil.is-away .veil__panel { transform: translateY(-100%); }
+
+.veil__wave { position: absolute; left: 0; width: 100%; height: 140px; display: block; }
+.veil__wave path { fill: #100205; }
+.veil__wave--in { top: 0; }
+.veil__wave--out { bottom: 0; }
+.veil__fill {
+  position: absolute;
+  left: 0; right: 0;
+  top: 140px; bottom: 140px;
+  display: grid;
+  place-items: center;
+  gap: 12px;
+  align-content: center;
+  background:
+    radial-gradient(130% 75% at 50% 44%, rgba(211, 19, 42, 0.28), transparent 74%),
+    linear-gradient(180deg, #100205, #220409 55%, #100205);
+}
+.veil__fill > * {
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 0.7s ease, transform 0.85s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.veil.is-cover .veil__fill > * { opacity: 1; transform: none; }
+.veil.is-cover .veil__fill > .veil__kanji { transition-delay: 0.1s; }
+.veil.is-cover .veil__fill > .veil__label { transition-delay: 0.2s; }
+.veil.is-cover .veil__fill > .veil__bar { transition-delay: 0.3s; }
+
+.veil__kanji {
   font-family: var(--font-display);
   font-weight: 900;
-  font-size: min(28vw, 220px);
+  font-size: min(22vw, 190px);
+  line-height: 1;
   color: rgba(211, 19, 42, 0.45);
-  opacity: 0;
+  text-shadow: 0 0 80px rgba(211, 19, 42, 0.55);
+  animation: veilFloat 6s ease-in-out infinite;
 }
-body.leaving .veil {
-  pointer-events: auto;
-  animation: veilDown 0.55s cubic-bezier(0.6, 0, 0.25, 1) forwards;
+@keyframes veilFloat {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-8px) scale(1.012); }
 }
-body.leaving .veil::after { opacity: 1; transition: opacity 0.3s 0.14s ease; }
-@keyframes veilDown {
-  from { transform: scaleY(0); }
-  to { transform: scaleY(1); }
+.veil__label {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(13px, 2.2vw, 22px);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--bone);
+  text-align: center;
+  padding: 0 18px;
+}
+.veil__bar {
+  margin-top: 8px;
+  width: min(240px, 54vw);
+  height: 2px;
+  border-radius: 2px;
+  background: rgba(237, 228, 214, 0.14);
+  overflow: hidden;
+}
+.veil__bar i {
+  display: block;
+  height: 100%;
+  width: 100%;
+  transform: scaleX(0);
+  transform-origin: left;
+  background: linear-gradient(90deg, #700b14, #d3132a, #ff4d61);
+}
+.veil.is-cover .veil__bar i { animation: veilBar 0.9s 0.28s cubic-bezier(0.32, 0.72, 0.24, 1) forwards; }
+@keyframes veilBar { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+
+/* уход: страница за шторой мягко уходит в глубину */
+body.is-leaving .hero,
+body.is-leaving main,
+body.is-leaving .marquee,
+body.is-leaving .footer,
+body.is-leaving .spine {
+  opacity: 0.55;
+  transform: scale(0.988);
+  transition: opacity 0.7s ease, transform 0.9s cubic-bezier(0.5, 0.02, 0.22, 1);
+  will-change: opacity, transform;
+}
+
+/* приход: штора накрыта до первой отрисовки и уезжает вверх сама */
+html.veil-cover .veil__panel {
+  transform: translateY(-190px);
+  transition: none;
+  animation: veilAway 1.15s 0.38s both cubic-bezier(0.32, 0.72, 0.24, 1);
+}
+@keyframes veilAway {
+  from { transform: translateY(-190px); }
+  to { transform: translateY(-100%); }
+}
+html.veil-cover .veil__kanji { animation: none; }
+html.veil-cover .veil__fill > * { opacity: 1; transform: none; transition: opacity 0.5s ease; }
+html.veil-cover .veil__bar i { animation: veilBar 0.7s cubic-bezier(0.32, 0.72, 0.24, 1) forwards; }
+
+/* когда всё закончилось — убираем штору совсем */
+html.veil-done .veil { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .veil { display: none !important; }
+  body.is-leaving .hero,
+  body.is-leaving main,
+  body.is-leaving .marquee,
+  body.is-leaving .footer,
+  body.is-leaving .spine { opacity: 1; transform: none; }
 }
 
 /* ---------- внутренний герой ---------- */
@@ -2191,8 +2351,7 @@ body.embed .hero__crest { display: none; }
   .tabs__panel.active .rolehead,
   .tabs__panel.active .rolehead .k,
   .tabs__panel.active .permit__col,
-  .tabs__panel.active .permit li,
-  body.leaving .veil { animation: none; }
+  .tabs__panel.active .permit li { animation: none; }
 }
 
 .tnode__dot.ico { font-size: 0; color: inherit; }

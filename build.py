@@ -173,7 +173,8 @@ def render_nav(data, current_page):
     seals.append(
         f'<a class="seal{" seal--on" if home_on else ""}" href="{home}"'
         + (' aria-current="page"' if home_on else "")
-        + f'><i>{SIGIL["index"]}</i><span>Пакт</span></a>'
+        + f' data-nav-title="Пакт крови" data-nav-sigil="{SIGIL["index"]}">'
+        + f'<i>{SIGIL["index"]}</i><span>Пакт</span></a>'
     )
     for p in data["pages"]:
         if not p.get("nav"):
@@ -182,16 +183,21 @@ def render_nav(data, current_page):
         seals.append(
             f'<a class="seal{" seal--on" if on else ""}" href="{up}{page_path(p)}"'
             + (' aria-current="page"' if on else "")
-            + f'><i>{html.escape(_sigil(p))}</i><span>{html.escape(p["nav"])}</span></a>'
+            + f' data-nav-title="{html.escape(p["title"])}" data-nav-sigil="{html.escape(_sigil(p))}">'
+            + f'<i>{html.escape(_sigil(p))}</i><span>{html.escape(p["nav"])}</span></a>'
         )
     return (
         '<header class="nav">'
         '<div class="nav__in">'
         f'<a class="nav__logo" href="{home}"><span class="nav__drop">{SIGIL["index"]}</span>'
         f'<span>{html.escape(site["home_label"]).replace("·", "<i>·</i>")}</span></a>'
-        '<div class="nav__seals" data-seals><div class="nav__seals-track">'
+        '<div class="nav__seals" data-seals>'
+        '<button class="nav__seals-arrow nav__seals-arrow--prev" data-seals-prev aria-label="Предыдущие разделы" tabindex="-1">‹</button>'
+        '<div class="nav__seals-track">'
         + "".join(seals) +
-        "</div></div>"
+        "</div>"
+        '<button class="nav__seals-arrow nav__seals-arrow--next" data-seals-next aria-label="Следующие разделы" tabindex="-1">›</button>'
+        "</div>"
         '<button class="nav__burger" data-menu-open aria-label="Открыть кодекс">'
         '<span class="nav__burger-k">鬼</span><span class="nav__burger-t">Кодекс</span></button>'
         "</div></header>"
@@ -211,7 +217,8 @@ def render_mmenu(data, current_page):
     for i, (slug, title, short, href, sig) in enumerate(entries):
         on = " on" if slug == current_page["slug"] else ""
         cards.append(
-            f'<a class="codex__card{on}" href="{href}" style="transition-delay:{0.04 + i * 0.035:.2f}s">'
+            f'<a class="codex__card{on}" href="{href}" style="transition-delay:{0.04 + i * 0.035:.2f}s"'
+            f' data-nav-title="{html.escape(title)}" data-nav-sigil="{html.escape(sig)}">'
             f'<span class="codex__n">{i:02d}</span>'
             f'<span class="codex__t">{html.escape(title)}</span>'
             f'<span class="codex__s">{html.escape(short)}</span>'
@@ -515,6 +522,31 @@ def render_preloader():
     )
 
 
+def render_veil(sig=""):
+    """Кровавая штора-волна для переходов между страницами.
+
+    Панель = волна сверху + кровавая тьма + волна снизу. При уходе со страницы штора
+    поднимается снизу и накрывает экран, при приходе — уходит вверх и открывает
+    новую страницу. Без JS штору убирает CSS-анимация в html.veil-cover.
+    """
+    sig = (sig or "").strip() or "血"
+    wave_in = "M0,64 C120,20 240,20 360,64 C480,108 600,108 720,64 C840,20 960,20 1080,64 C1200,108 1320,108 1440,64 L1440,120 L0,120 Z"
+    wave_out = "M0,56 C120,100 240,100 360,56 C480,12 600,12 720,56 C840,100 960,100 1080,56 C1200,12 1320,12 1440,56 L1440,0 L0,0 Z"
+    return (
+        '<div class="veil" data-veil aria-hidden="true">'
+        '<div class="veil__panel">'
+        f'<svg class="veil__wave veil__wave--in" viewBox="0 0 1440 120" preserveAspectRatio="none"><path d="{wave_in}"/></svg>'
+        '<div class="veil__fill">'
+        f'<span class="veil__kanji" data-veil-kanji>{html.escape(str(sig))}</span>'
+        '<span class="veil__label" data-veil-label>Пакт крови</span>'
+        '<span class="veil__bar"><i></i></span>'
+        "</div>"
+        f'<svg class="veil__wave veil__wave--out" viewBox="0 0 1440 120" preserveAspectRatio="none"><path d="{wave_out}"/></svg>'
+        "</div>"
+        "</div>"
+    )
+
+
 # ------------------------------------------------------------- документ ---
 
 def render_document(page, data, body, css_link=None, css_inline=None,
@@ -530,16 +562,18 @@ def render_document(page, data, body, css_link=None, css_inline=None,
         f'<script src="{js_link}" defer></script>' if js_link else f"<script>\n{js_inline}\n</script>"
     )
     slug = page.get("slug") or "page"
-    sig = html.escape(SIGIL.get(slug, ""))
+    sig = html.escape(_sigil(page))
     cls = f"page-{slug} {body_class}".strip()
-    # Экран загрузки показывается только один раз за сеанс: если человек уже открывал
-    # любую страницу сайта, при следующих переходах остаётся только шторка (один переход, а не два).
     visit = (
         "<script>try{"
-        "if(sessionStorage.getItem('bp-visited')){document.documentElement.classList.add('bp-seen');}"
+        "var de=document.documentElement;"
+        "if(sessionStorage.getItem('bp-visited')){de.classList.add('bp-seen');}"
         "else{sessionStorage.setItem('bp-visited','1');}"
+        "if(sessionStorage.getItem('bp-nav')){de.classList.add('veil-cover');"
+        "try{sessionStorage.removeItem('bp-nav');}catch(e2){}}"
         "}catch(e){}</script>"
     )
+    veil = render_veil(sig)
     return f"""<!DOCTYPE html>
 <html lang="{site['lang']}">
 <head>
@@ -559,7 +593,7 @@ def render_document(page, data, body, css_link=None, css_inline=None,
 {head_css}
 </head>
 <body id="top" class="{cls}" data-sigil="{sig}">
-<div class="veil" aria-hidden="true"></div>
+{veil}
 {body}
 {script}
 </body>
