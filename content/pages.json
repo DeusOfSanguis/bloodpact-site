@@ -111,15 +111,6 @@
       "cover_uptitle": "Пакт крови",
       "cover_title": "Рейтинг",
       "cover_image": "blood-moon.jpg"
-    },
-    {
-      "slug": "court",
-      "source": "https://bloodpact-yufu.tilda.ws/court",
-      "title": "Суд",
-      "nav": "Суд",
-      "cover_uptitle": "Пакт крови",
-      "cover_title": "Суд",
-      "cover_image": "blood-moon.jpg"
     }
   ],
   "quotes": {
