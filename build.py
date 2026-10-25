@@ -57,14 +57,13 @@ SIGIL = {
     "index": "血",
     "law": "法",
     "elevation": "昇",
-    "squads": "隊",
+    "squads": "族",
     "scars": "傷",
     "limits": "限",
     "bloodbattle": "闘",
     "territories": "域",
     "incentives": "賞",
     "ranking": "位",
-    "court": "裁",
 }
 
 # Короткие подписи боковой шкалы главной (не пункты меню).
@@ -154,6 +153,7 @@ def render_fragment(fragment, data, prefix="", kind="site"):
     out = out.replace("{{marquee:reverse}}", render_marquee(data, True))
     out = out.replace("{{squads}}", render_squads(data))
     out = out.replace("{{ranking-top}}", render_ranking_top(data))
+    out = out.replace("{{clan-ranking-top}}", render_clan_ranking_top(data))
     return out
 
 
@@ -345,31 +345,33 @@ def render_marquee(data=None, reverse=False):
 # ------------------------------------------------------- списки из data/ ---
 
 def render_squad_card(sq, parent_name=None, is_sub=False):
-    """Карточка отряда/подотряда из content/data/squads.json.
-    parent_name — название родительского отряда (для подотрядов);
-    is_sub — подотряд: заголовок уровнем ниже (h4) и подчинённое оформление."""
+    """Карточка клана/поглощённого клана из content/data/squads.json.
+    parent_name — название родительского клана (для поглощённых кланов);
+    is_sub — поглощённый клан: заголовок уровнем ниже (h4) и подчинённое оформление."""
     tag = "h4" if is_sub else "h3"
     parts = [f'<{tag} class="squad">{html.escape(str(sq.get("name", "")).strip())}</{tag}>']
+    if not is_sub:
+        parts.append('<p class="squad-parent"><strong>Высший клан</strong></p>')
     parent = str(sq.get("parent", "") or "").strip()
     label = str(sq.get("parent_label", "") or "").strip()
     if parent_name and not parent:
         parent = str(parent_name).strip()
-        label = label or "Подотряд"
-    # У вложенного подотряда родителя не повторяем: он и так показан внутри
-    # группы своего основного отряда. Плашка нужна только самостоятельным
-    # отрядам с явно указанным руководством (например, Сакуран/Джингу).
+        label = label or "Поглощённый клан"
+    # У вложенного поглощённого клана родителя не повторяем: он и так показан внутри
+    # группы своего основного клана. Плашка нужна только самостоятельным
+    # кланам с явно указанным руководством.
     if parent and not is_sub:
-        label = label or "Подотряд"
+        label = label or "Поглощённый клан"
         parts.append(
             f'<p class="squad-parent"><strong>{html.escape(label)}:</strong> {html.escape(parent)}</p>'
         )
-    # Владелец отряда — как луны: мелко звание, крупно имя демона.
+    # Владелец клана — как луны: мелко звание, крупно имя демона.
     # (owner — старое одиночное поле, поддерживается для совместимости.)
     rank = str(sq.get("owner_rank", "") or "").strip()
     name = str(sq.get("owner_name", "") or "").strip() or str(sq.get("owner", "") or "").strip()
     if rank or name:
         big = name or rank
-        small = rank if rank and rank != big else "Владелец отряда"
+        small = rank if rank and rank != big else "Глава клана"
         parts.append(
             '<div class="squad-owner">\n'
             '<span class="squad-owner__sigil" aria-hidden="true">主</span>\n'
@@ -403,7 +405,7 @@ def render_squad_card(sq, parent_name=None, is_sub=False):
         parts.append(f"<p>{html.escape(desc)}</p>")
     tasks = [str(t).strip() for t in (sq.get("tasks") or []) if str(t).strip()]
     if tasks:
-        label = str(sq.get("tasks_label", "") or "Задачи отряда:").strip() or "Задачи отряда:"
+        label = str(sq.get("tasks_label", "") or "Задачи клана:").strip() or "Задачи клана:"
         parts.append(f"<p><strong>{html.escape(label)}</strong></p>")
         parts.append("<ul>" + "".join(f"<li>{html.escape(t)}</li>" for t in tasks) + "</ul>")
     note_label = str(sq.get("note_label", "") or "").strip()
@@ -418,10 +420,10 @@ def render_squad_card(sq, parent_name=None, is_sub=False):
 
 
 def render_squads(data):
-    """{{squads}} — как в меню админки: основной отряд, под ним его подотряды,
-    затем следующий основной отряд и его подотряды, и так далее
-    (порядок и вложенность — из content/data/squads.json: у отряда есть subs).
-    Каждый основной отряд выводится отдельной группой (секцией), подотряды —
+    """{{squads}} — как в меню админки: основной клан, под ним его поглощённые кланы,
+    затем следующий основной клан и его поглощённые кланы, и так далее
+    (порядок и вложенность — из content/data/squads.json: у клана есть subs).
+    Каждый основной клан выводится отдельной группой (секцией), поглощённые кланы —
     вложенным блоком внутри неё."""
     squads = ((data.get("lists") or {}).get("squads") or {}).get("squads") or []
     groups = []
@@ -430,7 +432,7 @@ def render_squads(data):
         subs = sq.get("subs") or []
         if subs:
             group.append('<div class="squad-subs">')
-            group.append('<p class="squad-subs__cap">Подотряды</p>')
+            group.append('<p class="squad-subs__cap">Поглощённые кланы</p>')
             for sub in subs:
                 group.append(render_squad_card(sub, parent_name=sq.get("name"), is_sub=True))
             group.append("</div>")
@@ -441,17 +443,21 @@ def render_squads(data):
     return "\n".join(groups)
 
 
-def render_ranking_top(data):
-    """Чемпион и таблица мест ({{ranking-top}}) из content/data/ranking.json."""
-    rk = (data.get("lists") or {}).get("ranking") or {}
+def render_ranking_table(data, ranking_key, title, empty_name, empty_aria, occupied_aria):
+    """Чемпион и таблица позиций отдельного рейтинга из ranking.json."""
+    all_rankings = ((data.get("lists") or {}).get("ranking") or {})
+    rk = all_rankings.get(ranking_key) or {}
+    # Совместимость с ранним форматом файла: champion/entries были личным рейтингом.
+    if ranking_key == "personal" and not rk:
+        rk = all_rankings
     champ = rk.get("champion") or {}
-    name = str(champ.get("name", "") or "").strip() or "Пока нет чемпиона"
+    name = str(champ.get("name", "") or "").strip() or empty_name
     free = bool(champ.get("free", True))
     status = str(champ.get("status", "") or "").strip() or ("Место свободно" if free else "")
-    aria = "Место чемпиона пока свободно" if free else "Печать чемпиона"
+    aria = empty_aria if free else occupied_aria
     champion = (
         '<section class="s narrow center champion">\n'
-        '<h2 class="xl c-gold">Чемпион</h2>\n'
+        f'<h2 class="xl c-gold">{html.escape(title)}</h2>\n'
         f'<div class="avatar-mark" role="img" aria-label="{html.escape(aria)}">\n'
         '<span class="avatar-mark__kanji" aria-hidden="true">位</span>\n'
         f'<span class="avatar-mark__label">{html.escape(status)}</span>\n'
@@ -473,6 +479,20 @@ def render_ranking_top(data):
             rows.append(f"<p>▶ {html.escape(label)}{tail}</p>")
     table = '<section class="s narrow center">\n' + "\n".join(rows) + "\n</section>"
     return champion + "\n<hr>\n" + table
+
+
+def render_ranking_top(data):
+    return render_ranking_table(
+        data, "personal", "Чемпион VIC", "Пока нет чемпиона",
+        "Место личного чемпиона пока свободно", "Печать личного чемпиона"
+    )
+
+
+def render_clan_ranking_top(data):
+    return render_ranking_table(
+        data, "clans", "Сильнейший клан", "Пока нет сильнейшего клана",
+        "Первое место Рейтинга Кланов пока свободно", "Печать сильнейшего клана"
+    )
 
 
 # --------------------------------------------------------------- подвал ---
