@@ -1158,7 +1158,7 @@ html.bp-seen .preloader { display: none; }
 @media (min-width: 768px) { .permit__note { font-size: 16px; } }
 .permit__note .i { color: var(--blood); font-style: normal; }
 
-/* подблок «внутри отрядов» */
+/* подблок «внутри кланов» */
 .squadgrid { margin-top: 64px; }
 @media (min-width: 768px) { .squadgrid { margin-top: 96px; } }
 .squadgrid__cap { font-size: 11px; letter-spacing: 0.4em; text-transform: uppercase; color: var(--blood); margin: 0 0 24px; }
@@ -1183,7 +1183,7 @@ html.bp-seen .preloader { display: none; }
 @media (min-width: 768px) { .gloss__card p { font-size: 14px; } }
 
 /* =====================================================================
-   ТЕКСТОВЫЕ СТРАНИЦЫ (закон, отряды и т.д.) — стили для content/*.html
+   ТЕКСТОВЫЕ СТРАНИЦЫ (закон, кланы и т.д.) — стили для content/*.html
    ===================================================================== */
 .article { padding: 72px 20px 40px; }
 @media (min-width: 768px) { .article { padding: 110px 40px 60px; } }
@@ -2195,7 +2195,7 @@ body.embed .hero__crest { display: none; }
   font-size: 26px;
 }
 .page-law .article .s h3::before { content: "法"; }
-.page-court .article .s h3::before { content: "裁"; }
+
 .page-scars .article .s h3::before { content: "傷"; }
 .page-incentives .article .s h3::before { content: "賞"; }
 .page-bloodbattle .article .s h3::before { content: "闘"; }
@@ -2544,7 +2544,7 @@ body.embed .hero__crest { display: none; }
 }
 .article .s p.squad-parent strong { color: var(--ember); }
 
-/* Владелец отряда — парный к лунам блок, но с золотой печатью владыки. */
+/* Владелец клана — парный к лунам блок, но с золотой печатью владыки. */
 .article .s .squad-owner {
   display: flex;
   gap: 14px;
@@ -2590,7 +2590,7 @@ body.embed .hero__crest { display: none; }
   line-height: 1.45;
 }
 
-/* Смотрящие луны в карточке отряда — выделенный блок с печатью луны:
+/* Смотрящие луны в карточке клана — выделенный блок с печатью луны:
    высшие луны подсвечены кровью, низшие — приглушены. */
 .article .s .squad-moons {
   display: grid;
@@ -2655,8 +2655,8 @@ body.embed .hero__crest { display: none; }
 .article .s .squad-moon--lower .squad-moon__role { color: var(--ash); }
 .article .s .squad-moon--lower .squad-moon__name { color: rgba(237, 228, 214, 0.88); font-weight: 700; }
 
-/* Отряды сгруппированы как в админке: основной отряд — отдельная секция,
-   сразу под ним вложенным блоком — его подотряды, затем следующий основной. */
+/* Кланы сгруппированы как в админке: основной клан — отдельная секция,
+   сразу под ним вложенным блоком — его поглощённые кланы, затем следующий основной. */
 .article .s + .s { margin-top: 26px; }
 .article .squad-group .squad-card--main > h3.squad { margin-top: 0; }
 .article .s .squad-subs {

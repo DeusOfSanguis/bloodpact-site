@@ -26,7 +26,7 @@
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; }
   body {
-    background: var(--bg);
+    background: radial-gradient(ellipse at 10% -10%, rgba(184,30,44,.12), transparent 42%), var(--bg);
     color: var(--text);
     font: 14.5px/1.55 Manrope, "Segoe UI", Roboto, Arial, sans-serif;
     min-height: 100vh;
@@ -44,7 +44,7 @@
   .card h2 { margin: 0 0 12px; font-size: 17px; letter-spacing: .03em; }
   .card h3 { margin: 16px 0 8px; font-size: 14.5px; color: var(--gold); }
   label { display: block; font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin: 10px 0 4px; }
-  input[type=text], input[type=password], textarea, select {
+  input[type=text], input[type=password], input[type=search], textarea, select {
     width: 100%;
     background: var(--panel2);
     border: 1px solid var(--line);
@@ -55,7 +55,9 @@
     font-size: 13.5px;
   }
   textarea { min-height: 80px; resize: vertical; }
-  input:focus, textarea:focus, select:focus { outline: 1px solid var(--red2); border-color: var(--red2); }
+  input:focus, textarea:focus, select:focus { outline: 2px solid rgba(227,49,63,.42); outline-offset: 1px; border-color: var(--red2); }
+  button:focus-visible, a:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+  input[type=checkbox] { accent-color: var(--red2); }
   .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; }
   .row > div { flex: 1 1 200px; min-width: 160px; }
   .row .narrow { flex: 0 0 auto; }
@@ -147,6 +149,19 @@
     margin: 0 0 16px;
     flex-wrap: wrap;
   }
+  .quick-tools {
+    display: grid; grid-template-columns: minmax(220px, 1fr) auto auto; gap: 10px;
+    align-items: center; margin: 0 0 12px; padding: 10px;
+    background: linear-gradient(110deg, rgba(184,30,44,.10), rgba(19,13,16,.95) 45%);
+    border: 1px solid var(--line); border-radius: 12px;
+  }
+  .quick-search-wrap { display:flex; align-items:center; gap:8px; min-width:0; position:relative; }
+  .quick-search-wrap input { padding:9px 58px 9px 34px; }
+  .quick-search-icon { position:absolute; left:12px; color:var(--gold); font-size:20px; line-height:1; pointer-events:none; }
+  .quick-search-wrap kbd { position:absolute; right:9px; color:var(--muted); font:11px Manrope,sans-serif; border:1px solid var(--line); border-radius:4px; padding:2px 5px; }
+  .quick-hint { color:var(--muted); font-size:11px; white-space:nowrap; }
+  .quick-actions { display:flex; justify-content:flex-end; flex-wrap:wrap; gap:6px; }
+  .quick-actions button { white-space:nowrap; }
   .who { color: var(--muted); font-size: 13px; }
   .who b { color: var(--text); }
   .savebar {
@@ -165,6 +180,11 @@
     flex-wrap: wrap;
   }
   .savebar .status { margin: 0; flex: 1 1 260px; font-size: 13px; }
+  .savebar button:disabled { filter:saturate(.35); }
+  details.block, .card, .pair { transition: border-color .18s ease, background .18s ease, transform .18s ease; }
+  details.block:hover { border-color: rgba(227,49,63,.36); }
+  .pair:hover { border-color: rgba(210,181,0,.30); }
+  .savebar { box-shadow: 0 -12px 32px rgba(0,0,0,.24); }
   details.block {
     border: 1px solid var(--line);
     border-radius: 10px;
@@ -293,11 +313,74 @@
   .live-preview li { margin-bottom: 4px; }
   .live-preview hr { border: 0; border-top: 1px solid rgba(237, 228, 214, 0.12); margin: 20px 0; }
   
+  @media (max-width: 760px) {
+    .quick-tools { grid-template-columns: 1fr; }
+    .quick-actions { justify-content:flex-start; }
+    .quick-hint { display:none; }
+  }
   @media (max-width: 640px) {
     h1 { font-size: 20px; }
     .row > div { flex: 1 1 100%; }
     .nav-groups { padding: 10px; }
   }
+
+  /* Единая визуальная система редактора */
+  :root {
+    --bg:#080607; --panel:#120d10; --panel2:#191216; --panel3:#20171b;
+    --line:rgba(237,228,214,.13); --text:#f1e9df; --muted:#a89a90;
+    --red:#a91d2a; --red2:#e33b49; --gold:#d8bc52;
+  }
+  .wrap { max-width:1180px; padding:28px 22px 150px; }
+  .card, .nav-groups, .mode-switch, details.block, .pair {
+    border:1px solid var(--line); border-radius:14px; background:var(--panel);
+    box-shadow:0 10px 34px rgba(0,0,0,.16);
+  }
+  .card { padding:22px; margin-bottom:18px; }
+  .card h2 { font:600 16px/1.35 Unbounded,Manrope,sans-serif; letter-spacing:.015em; }
+  .card h3 { font:600 13px/1.4 Unbounded,Manrope,sans-serif; }
+  .nav-groups { padding:16px; gap:15px; }
+  .nav-group { padding:0 0 12px; border-bottom:1px solid rgba(237,228,214,.07); }
+  .nav-group:last-child { padding-bottom:0; border:0; }
+  .nav-group__head { margin-bottom:3px; }
+  .nav-group__btns { gap:8px; }
+  button, .btn { min-height:36px; border-radius:9px; text-transform:none; letter-spacing:.01em; }
+  button.mini { min-height:30px; border-radius:8px; }
+  .nav-group__btns button { min-height:36px; border-radius:9px; padding:8px 13px; }
+  .nav-group__btns button.on { box-shadow:0 5px 18px rgba(184,30,44,.25); }
+  input[type=text], input[type=password], input[type=search], textarea, select {
+    border-radius:9px; padding:10px 12px; background:#100c0e; border-color:rgba(237,228,214,.15);
+  }
+  input[type=text], input[type=password], input[type=search], select { min-height:40px; }
+  textarea { min-height:94px; }
+  label { margin-top:12px; font-size:10px; letter-spacing:.09em; }
+  .pair { background:var(--panel2); padding:14px; margin:10px 0; border-style:solid; }
+  details.block { background:var(--panel2); padding:14px 16px; }
+  details.block.sub-card { background:rgba(169,29,42,.055); }
+  details.block > summary { padding:4px 0 8px; }
+  .quick-tools { border-radius:14px; padding:12px; }
+  .mode-switch { border-radius:12px; padding:8px; }
+  .mode-switch button { min-height:34px; }
+  .toolbar-chips button { border-radius:8px; }
+  .live-preview { border-radius:14px; background:linear-gradient(160deg,#130d10,#090708); }
+  .html-code-area { border-radius:12px; }
+  .savebar { padding:13px max(18px,calc((100vw - 1140px)/2)); }
+  .savebar .status { line-height:1.4; }
+  .preview-banner { display:flex; align-items:center; gap:12px; padding:13px 16px; margin:0 0 12px; border:1px solid rgba(216,188,82,.32); border-radius:14px; background:rgba(216,188,82,.07); color:var(--muted); font-size:12px; }
+  .preview-banner strong { color:var(--gold); }
+  .preview-banner__sigil { display:grid; place-items:center; width:30px; height:30px; flex:0 0 30px; border-radius:9px; background:rgba(216,188,82,.12); color:var(--gold); font-size:18px; }
+  .li-rich {
+    min-height:40px; width:100%; padding:9px 11px; border:1px solid var(--line);
+    border-radius:9px; background:#100c0e; color:var(--text); outline:none; line-height:1.5;
+  }
+  .li-rich:focus { border-color:var(--red2); box-shadow:0 0 0 2px rgba(227,59,73,.18); }
+  .li-rich strong, .li-rich b { color:#fff1c2; }
+  .li-rich a { color:#f08088; }
+  @media (max-width:760px) {
+    .wrap { padding:18px 14px 150px; }
+    .card { padding:16px; }
+    .savebar { padding:10px 12px; }
+  }
+
 </style>
 </head>
 <body>
@@ -339,6 +422,24 @@
       </div>
     </div>
 
+    <div id="local-preview-banner" class="preview-banner hidden" role="status">
+      <span class="preview-banner__sigil">眼</span>
+      <span><strong>Локальный предпросмотр</strong> · данные загружаются из текущей версии файлов. Запись в GitHub отключена; для проверки используйте «Скачать копию».</span>
+    </div>
+    <div class="quick-tools" aria-label="Быстрые действия">
+      <div class="quick-search-wrap">
+        <span class="quick-search-icon" aria-hidden="true">⌕</span>
+        <input type="search" id="quick-filter" placeholder="Найти раздел…" autocomplete="off" aria-label="Фильтр разделов">
+        <kbd>Ctrl K</kbd>
+      </div>
+      <span id="filter-count" class="quick-hint">Фильтр разделов</span>
+      <div class="quick-actions">
+        <button class="ghost mini" id="expand-all">Раскрыть всё</button>
+        <button class="ghost mini" id="collapse-all">Свернуть всё</button>
+        <button class="ghost mini" id="export-current">Скачать копию</button>
+      </div>
+    </div>
+
     <!-- Навигация по всем вкладкам/разделам сайта (динамически строится из pages.json) -->
     <div class="nav-groups" id="tabs">
       <div class="nav-group">
@@ -347,7 +448,7 @@
           <button class="ghost mini" id="open-new-tab-modal" style="padding:2px 8px;font-size:10.5px">+ Новая вкладка / страница</button>
         </div>
         <div class="nav-group__btns" id="nav-system-btns">
-          <button data-tab="squads" class="on"><i>隊</i> Отряды</button>
+          <button data-tab="squads" class="on"><i>族</i> Кланы</button>
           <button data-tab="ranking"><i>位</i> Рейтинг</button>
           <button data-tab="quotes"><i>言</i> Цитаты</button>
           <button data-tab="pages"><i>頁</i> Управление вкладками и обложками</button>
@@ -408,41 +509,40 @@
     <!-- Контейнер динамических страниц (создаются на лету) -->
     <div id="dynamic-tab-pages"></div>
 
-    <!-- ---------- 1. ОТРЯДЫ ---------- -->
+    <!-- ---------- 1. КЛАНЫ ---------- -->
     <div class="tab-page" id="tab-squads">
       <div class="card">
-        <h2>Отряды (данные <code>content/data/squads.json</code>)</h2>
-        <p class="hint">Основной отряд, под ним — его подотряды; следующий основной отряд и его подотряды — и так далее.
-          «↑/↓» меняют порядок, «+ Подотряд» добавляет вложенный отряд, «Вынести в основные» делает подотряд самостоятельным.</p>
+        <h2>Кланы (данные <code>content/data/squads.json</code>)</h2>
+        <p class="hint">Высший клан, под ним — его поглощённые кланы; следующий основной клан и его поглощённые кланы — и так далее.
+          «↑/↓» меняют порядок, «+ Поглощённый клан» добавляет вложенный клан, «Вынести в высшие кланы» делает поглощённый клан самостоятельным.</p>
         <div id="squads-list"></div>
-        <button class="ghost" id="add-squad">+ Добавить отряд</button>
+        <button class="ghost" id="add-squad">+ Добавить клан</button>
       </div>
     </div>
 
-    <!-- ---------- 2. РЕЙТИНГ ---------- -->
+    <!-- ---------- 2. РЕЙТИНГИ ---------- -->
     <div class="tab-page hidden" id="tab-ranking">
       <div class="card">
-        <h2>Чемпион (данные <code>content/data/ranking.json</code>)</h2>
+        <h2>Личный рейтинг</h2>
+        <p class="hint">Данные личного рейтинга и Чемпиона VIC.</p>
         <div class="row">
-          <div>
-            <label>Имя чемпиона (или «Пока нет чемпиона»)</label>
-            <input type="text" data-path="champion.name">
-          </div>
-          <div>
-            <label>Подпись на печати</label>
-            <input type="text" data-path="champion.status" placeholder="Место свободно">
-          </div>
+          <div><label>Имя чемпиона VIC</label><input type="text" data-path="personal.champion.name"></div>
+          <div><label>Подпись на печати</label><input type="text" data-path="personal.champion.status" placeholder="Место свободно"></div>
         </div>
-        <div class="checkline">
-          <input type="checkbox" data-path="champion.free" data-type="bool" id="champ-free">
-          <span>Место свободно (галочка снята — чемпион занял место)</span>
-        </div>
+        <div class="checkline"><input type="checkbox" data-path="personal.champion.free" data-type="bool" id="personal-free"><span>Место чемпиона свободно</span></div>
+        <div id="personal-ranking-entries"></div>
+        <button class="ghost" data-ranking-add="personal">+ Добавить позицию</button>
       </div>
-
       <div class="card">
-        <h2>Таблица мест рейтинга</h2>
-        <div id="ranking-entries"></div>
-        <button class="ghost" id="add-entry">+ Добавить место</button>
+        <h2>Рейтинг Кланов</h2>
+        <p class="hint">Первое место и таблица вызовов между кланами.</p>
+        <div class="row">
+          <div><label>Название сильнейшего клана</label><input type="text" data-path="clans.champion.name"></div>
+          <div><label>Подпись на печати</label><input type="text" data-path="clans.champion.status" placeholder="Первое место свободно"></div>
+        </div>
+        <div class="checkline"><input type="checkbox" data-path="clans.champion.free" data-type="bool" id="clans-free"><span>Первое место свободно</span></div>
+        <div id="clan-ranking-entries"></div>
+        <button class="ghost" data-ranking-add="clans">+ Добавить позицию</button>
       </div>
     </div>
 
@@ -511,8 +611,8 @@
 
     <!-- Фиксированная нижняя панель сохранения -->
     <div class="savebar">
-      <button id="save-btn">Сохранить</button>
-      <button id="discard-btn" class="ghost">Отменить изменения</button>
+      <button id="save-btn" disabled>Сохранить</button>
+      <button id="discard-btn" class="ghost" disabled>Отменить изменения</button>
       <p class="status" id="save-status"></p>
     </div>
   </section>
@@ -522,6 +622,7 @@
 <script>
 "use strict";
 /* ================== конфигурация ================== */
+const LOCAL_PREVIEW = location.hostname === "localhost" || location.hostname === "127.0.0.1" || location.hostname.endsWith(".e2b.app");
 const CONFIG = {
   owner: "DeusOfSanguis",
   repo: "bloodpact-site",
@@ -606,6 +707,16 @@ async function gh(path, opts) {
 }
 
 async function getFile(path) {
+  if (LOCAL_PREVIEW) {
+    const localUrl = "../" + path.split("/").map(encodeURIComponent).join("/");
+    const res = await fetch(localUrl, { cache: "no-store" });
+    if (!res.ok) {
+      const err = new Error(`Локальный файл ${path}: HTTP ${res.status}`);
+      err.status = res.status;
+      throw err;
+    }
+    return { sha: "", text: await res.text() };
+  }
   const data = await gh(`/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${path}?ref=${encodeURIComponent(state.branch || getBranch())}`);
   return { sha: data.sha, text: data.content ? b64decode(data.content) : "" };
 }
@@ -633,6 +744,7 @@ function noteMissing(path) {
 }
 
 async function saveFile(path, text, message, sha) {
+  if (LOCAL_PREVIEW) throw new Error("Запись в GitHub отключена в локальном предпросмотре. Скачайте черновик или откройте опубликованную админку.");
   const body = {
     message: message,
     content: b64encode(text),
@@ -666,8 +778,78 @@ const state = {
 function markDirty(key) {
   state.dirty = true;
   if (key) state.dirtyFiles.add(key);
+  const save = $("#save-btn");
+  const discard = $("#discard-btn");
+  if (save) save.disabled = LOCAL_PREVIEW;
+  if (discard) discard.disabled = false;
+  const names = [...state.dirtyFiles].join(", ");
   $("#save-status").className = "status";
-  $("#save-status").textContent = "Есть несохранённые изменения…";
+  $("#save-status").textContent = LOCAL_PREVIEW
+    ? `Предпросмотр · локальные изменения${names ? ` · ${names}` : ""} · сохраните копию`
+    : `Есть несохранённые изменения${names ? ` · ${names}` : ""}`;
+}
+
+
+function exportCurrentDraft() {
+  let content, extension = "json", filename = state.tab || "draft";
+  if (state.tab === "files") {
+    if (!state.filePath) { alert("Сначала выберите файл во вкладке «Все файлы». "); return; }
+    content = $("#file-text").value;
+    filename = state.filePath.replace(/[^a-zA-Z0-9._-]+/g, "-");
+    extension = filename.split(".").pop() || "txt";
+    filename = filename.replace(/\.[^.]+$/, "");
+  } else if (state.models[state.tab] && typeof state.models[state.tab].html === "string") {
+    content = state.models[state.tab].html;
+    extension = "html";
+  } else {
+    const model = currentModel();
+    if (!model) { alert("Данные ещё не загружены."); return; }
+    content = JSON.stringify(model, null, 2) + "\n";
+    extension = "json";
+  }
+  const blob = new Blob([content], { type: extension === "json" ? "application/json;charset=utf-8" : "text/plain;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `${filename}-draft.${extension}`;
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function applyNavFilter() {
+  const q = ($("#quick-filter").value || "").trim().toLocaleLowerCase("ru");
+  let visible = 0;
+  $$("#tabs .nav-group").forEach(group => {
+    const buttons = $$(".nav-group__btns button[data-tab]", group);
+    buttons.forEach(btn => {
+      const match = !q || btn.textContent.toLocaleLowerCase("ru").includes(q) || btn.dataset.tab.toLocaleLowerCase("ru").includes(q);
+      btn.hidden = !match;
+      if (match) visible++;
+    });
+    const list = group.querySelector(".nav-group__btns");
+    if (list) list.hidden = buttons.length > 0 && !buttons.some(btn => !btn.hidden);
+  });
+  $("#filter-count").textContent = q ? `Найдено разделов: ${visible}` : "Фильтр разделов";
+}
+
+function discardCurrentDraft() {
+  const tab = state.tab;
+  if (tab === "files") {
+    state.fileDirty = false;
+    if (state.filePath) { $("#file-select").value = state.filePath; $("#file-select").dispatchEvent(new Event("change")); }
+  } else if (tab === "squads" && state.raw.squads) {
+    state.models.squads = JSON.parse(state.raw.squads); renderSquads();
+  } else if (tab === "ranking" && state.raw.ranking) {
+    state.models.ranking = JSON.parse(state.raw.ranking); renderRanking();
+  } else if (tab === "quotes" && state.raw.pages) {
+    state.models._pages = JSON.parse(state.raw.pages); state.models.quotes = state.models._pages.quotes; renderQuotes();
+  } else if (tab === "pages" && state.raw.pages) {
+    state.models._pages = JSON.parse(state.raw.pages); renderPagesList(); renderNavPageButtons();
+  } else if (state.raw[tab] !== undefined) {
+    state.models[tab] = { html: state.raw[tab] }; renderPageEditor(tab);
+  }
+  state.dirty = false; state.dirtyFiles.clear();
+  $("#save-btn").disabled = true; $("#discard-btn").disabled = true;
+  $("#save-status").className = "status"; $("#save-status").textContent = "Черновик отменён.";
 }
 
 function getPath(obj, path) {
@@ -703,6 +885,11 @@ async function boot() {
   state.branch = getBranch();
   const bi = $("#branch");
   if (bi) bi.value = state.branch;
+  if (LOCAL_PREVIEW) {
+    state.user = { login: "локальный предпросмотр", name: "Предпросмотр" };
+    await enterApp();
+    return;
+  }
   const token = getToken();
   if (!token) { showLogin(); return; }
   try {
@@ -715,6 +902,7 @@ async function boot() {
 
 async function enterApp() {
   showApp();
+  $("#local-preview-banner").classList.toggle("hidden", !LOCAL_PREVIEW);
   await ensurePagesJson();
   renderNavPageButtons();
   await loadTab(state.tab || "squads");
@@ -763,6 +951,25 @@ $("#login-btn").addEventListener("click", async () => {
   }
 });
 
+$("#quick-filter").addEventListener("input", applyNavFilter);
+$("#expand-all").addEventListener("click", () => $$(".tab-page:not(.hidden) details.block").forEach(d => d.open = true));
+$("#collapse-all").addEventListener("click", () => $$(".tab-page:not(.hidden) details.block").forEach(d => d.open = false));
+$("#export-current").addEventListener("click", exportCurrentDraft);
+window.addEventListener("beforeunload", (e) => {
+  if (!state.dirty) return;
+  e.preventDefault(); e.returnValue = "";
+});
+document.addEventListener("keydown", (e) => {
+  const mod = e.ctrlKey || e.metaKey;
+  if (mod && e.key.toLowerCase() === "s") { e.preventDefault(); if (!$("#save-btn").disabled) $("#save-btn").click(); }
+  else if (mod && e.key.toLowerCase() === "k") { e.preventDefault(); $("#quick-filter").focus(); $("#quick-filter").select(); }
+  else if (e.key === "/" && !["INPUT", "TEXTAREA", "SELECT"].includes(document.activeElement.tagName)) { e.preventDefault(); $("#quick-filter").focus(); }
+  else if (e.key === "Escape" && document.activeElement === $("#quick-filter")) { $("#quick-filter").value = ""; applyNavFilter(); $("#quick-filter").blur(); }
+});
+document.addEventListener("input", (e) => {
+  if (e.target.matches("textarea:not(.html-code-area)")) { e.target.style.height = "auto"; e.target.style.height = Math.min(e.target.scrollHeight, 520) + "px"; }
+});
+
 $("#logout-btn").addEventListener("click", () => {
   clearToken();
   state.user = null;
@@ -773,8 +980,8 @@ $("#logout-btn").addEventListener("click", () => {
 $("#tabs").addEventListener("click", async (e) => {
   const btn = e.target.closest("button[data-tab]");
   if (!btn) return;
-  if (state.dirty && !confirm("Есть несохранённые изменения. Уйти со вкладки и потерять их?")) return;
-  state.dirty = false;
+  if (state.dirty && !confirm("Есть несохранённые изменения. Отменить их и перейти?")) return;
+  if (state.dirty) discardCurrentDraft();
   state.tab = btn.dataset.tab;
   $$("#tabs button").forEach(b => b.classList.toggle("on", b === btn));
   $$(".tab-page").forEach(p => p.classList.add("hidden"));
@@ -821,7 +1028,7 @@ async function loadTab(tab) {
   }
 }
 
-/* ================== 1. ОТРЯДЫ ================== */
+/* ================== 1. КЛАНЫ ================== */
 async function loadSquads() {
   if (!state.models.squads) {
     const f = await getFileOrDefault(
@@ -847,8 +1054,8 @@ async function loadSquads() {
 
 function emptySquad(name) {
   return {
-    name: name || "Новый отряд", parent_label: "", parent: "", owner_rank: "", owner_name: "",
-    overseers: [], description: "", tasks_label: "Задачи отряда:", tasks: [],
+    name: name || "Новый клан", parent_label: "", parent: "", owner_rank: "", owner_name: "",
+    overseers: [], description: "", tasks_label: "Задачи клана:", tasks: [],
     note_label: "", note_text: "", subs: [],
   };
 }
@@ -861,17 +1068,18 @@ function renderSquads() {
     const det = document.createElement("details");
     det.className = "block";
     det.innerHTML = `
-      <summary>Отряд: ${escapeHtml(sq.name || "Без названия")}${(sq.subs || []).length ? " · подотрядов: " + sq.subs.length : ""}</summary>
+      <summary>Клан: ${escapeHtml(sq.name || "Без названия")}${(sq.subs || []).length ? " · поглощённых кланов: " + sq.subs.length : ""}</summary>
       ${squadFieldsHtml(`squads.${gi}`, sq)}
       <div class="pair">
-        <b style="font-size:13px;letter-spacing:.04em">Подотряды</b>
+        <b style="font-size:13px;letter-spacing:.04em">Поглощённые кланы</b>
         <div data-subs="${gi}"></div>
-        <button class="ghost mini" data-act="sub-add" data-g="${gi}">+ Добавить подотряд</button>
+        <button class="ghost mini" data-act="sub-add" data-g="${gi}">+ Добавить поглощённый клан</button>
       </div>
       <div class="item-toolbar">
         <button class="ghost mini" data-act="squad-up" data-g="${gi}">↑ Выше</button>
         <button class="ghost mini" data-act="squad-down" data-g="${gi}">↓ Ниже</button>
-        <button class="ghost mini" data-act="squad-del" data-g="${gi}">Удалить отряд</button>
+        <button class="ghost mini" data-act="squad-duplicate" data-g="${gi}">Дублировать</button>
+        <button class="ghost mini" data-act="squad-del" data-g="${gi}">Удалить клан</button>
       </div>`;
     const subsHolder = det.querySelector(`[data-subs="${gi}"]`);
     (sq.subs || []).forEach((sub, si) => subsHolder.appendChild(renderSubCard(gi, si, sub, sq.name)));
@@ -883,12 +1091,13 @@ function renderSubCard(gi, si, sub, parentName) {
   const det = document.createElement("details");
   det.className = "block sub-card";
   det.innerHTML = `
-    <summary>Подотряд: ${escapeHtml(sub.name || "Без названия")}</summary>
+    <summary>Поглощённый клан: ${escapeHtml(sub.name || "Без названия")}</summary>
     ${squadFieldsHtml(`squads.${gi}.subs.${si}`, sub, parentName)}
     <div class="item-toolbar">
       <button class="ghost mini" data-act="sub-up" data-g="${gi}" data-s="${si}">↑ Выше</button>
       <button class="ghost mini" data-act="sub-down" data-g="${gi}" data-s="${si}">↓ Ниже</button>
-      <button class="ghost mini" data-act="sub-promote" data-g="${gi}" data-s="${si}">Вынести в основные</button>
+      <button class="ghost mini" data-act="sub-promote" data-g="${gi}" data-s="${si}">Вынести в высшие кланы</button>
+      <button class="ghost mini" data-act="sub-duplicate" data-g="${gi}" data-s="${si}">Дублировать</button>
       <button class="ghost mini" data-act="sub-del" data-g="${gi}" data-s="${si}">Удалить</button>
     </div>`;
   return det;
@@ -901,8 +1110,8 @@ function squadFieldsHtml(p, sq, parentName) {
     <input type="text" data-path="${p}.name" value="${escapeAttr(sq.name || "")}">
     <div class="row">
       <div>
-        <label>Подпись подчинения (пусто = «Подотряд»)</label>
-        <input type="text" data-path="${p}.parent_label" value="${escapeAttr(sq.parent_label || "")}" placeholder="Подотряд">
+        <label>Подпись подчинения (пусто = «Поглощённый клан»)</label>
+        <input type="text" data-path="${p}.parent_label" value="${escapeAttr(sq.parent_label || "")}" placeholder="Поглощённый клан">
       </div>
       <div>
         <label>Чему подчинён (пусто = ${parentName ? escapeAttr(parentName) : "не указано"})</label>
@@ -929,7 +1138,7 @@ function squadFieldsHtml(p, sq, parentName) {
     <div class="row">
       <div>
         <label>Заголовок задач</label>
-        <input type="text" data-path="${p}.tasks_label" value="${escapeAttr(sq.tasks_label || "Задачи отряда:")}">
+        <input type="text" data-path="${p}.tasks_label" value="${escapeAttr(sq.tasks_label || "Задачи клана:")}">
       </div>
     </div>
     <label>Задачи (по одной на строку)</label>
@@ -965,7 +1174,7 @@ function overseerHtml(p, oi, ov) {
 
 $("#add-squad").addEventListener("click", () => {
   if (!state.models.squads.squads) state.models.squads.squads = [];
-  state.models.squads.squads.push(emptySquad("Новый отряд"));
+  state.models.squads.squads.push(emptySquad("Новый клан"));
   renderSquads();
   markDirty("squads");
 });
@@ -981,64 +1190,66 @@ async function loadRanking() {
     state.raw.ranking = f.text;
     state.models.ranking = JSON.parse(f.text) || {};
     const m = state.models.ranking;
-    m.champion = m.champion || {};
-    if (!Array.isArray(m.entries)) m.entries = [];
+    if (!m.personal) m.personal = { champion: m.champion || { name: "", status: "Место свободно", free: true }, entries: m.entries || [] };
+    if (!m.clans) m.clans = { champion: { name: "", status: "Первое место свободно", free: true }, entries: [] };
+    delete m.champion; delete m.entries;
+  }
+  const m = state.models.ranking;
+  m.personal = m.personal || { champion: {}, entries: [] };
+  m.clans = m.clans || { champion: {}, entries: [] };
+  for (const key of ["personal", "clans"]) {
+    m[key].champion = m[key].champion || {};
+    if (m[key].champion.free === undefined) m[key].champion.free = true;
+    if (!Array.isArray(m[key].entries)) m[key].entries = [];
   }
   renderRanking();
 }
 
 function renderRanking() {
   const m = state.models.ranking;
-  $('[data-path="champion.name"]').value = (m.champion && m.champion.name) || "";
-  $('[data-path="champion.status"]').value = (m.champion && m.champion.status) || "";
-  $('[data-path="champion.free"]').checked = !!(m.champion && m.champion.free);
-
-  const root = $("#ranking-entries");
-  root.innerHTML = "";
-  (m.entries || []).forEach((e, i) => {
-    const div = document.createElement("div");
-    div.className = "pair";
-    div.innerHTML = `
-      <div class="row">
-        <div style="flex:0 0 70px;min-width:60px">
-          <label>Место</label>
-          <input type="text" data-path="entries.${i}.place" value="${escapeAttr(e.place || (i + 1))}">
+  for (const type of ["personal", "clans"]) {
+    const rating = m[type] || { champion: {}, entries: [] };
+    const root = $(type === "personal" ? "#personal-ranking-entries" : "#clan-ranking-entries");
+    $(`[data-path="${type}.champion.name"]`).value = (rating.champion && rating.champion.name) || "";
+    $(`[data-path="${type}.champion.status"]`).value = (rating.champion && rating.champion.status) || "";
+    $(`[data-path="${type}.champion.free"]`).checked = !!(rating.champion && rating.champion.free);
+    root.innerHTML = "";
+    (rating.entries || []).forEach((entry, i) => {
+      const div = document.createElement("div");
+      div.className = "pair";
+      div.innerHTML = `
+        <div class="row">
+          <div style="flex:0 0 150px;min-width:120px">
+            <label>Позиция / подпись</label>
+            <input type="text" data-path="${type}.entries.${i}.label" value="${escapeAttr(entry.label || `${i + 1} место`)}">
+          </div>
+          <div>
+            <label>${type === "personal" ? "Имя демона" : "Название клана"}</label>
+            <input type="text" data-path="${type}.entries.${i}.name" value="${escapeAttr(entry.name || "")}">
+          </div>
         </div>
-        <div>
-          <label>Имя</label>
-          <input type="text" data-path="entries.${i}.name" value="${escapeAttr(e.name || "")}">
+        <div class="checkline">
+          <input type="checkbox" data-path="${type}.entries.${i}.highlight" data-type="bool" id="rank-${type}-${i}" ${entry.highlight ? "checked" : ""}>
+          <span>Выделить строку как претендента</span>
         </div>
-        <div>
-          <label>Ранг / Отряд</label>
-          <input type="text" data-path="entries.${i}.rank" value="${escapeAttr(e.rank || "")}">
-        </div>
-        <div style="flex:0 0 110px;min-width:90px">
-          <label>Очки (баллы)</label>
-          <input type="text" data-path="entries.${i}.score" value="${escapeAttr(e.score || "")}">
-        </div>
-      </div>
-      <div class="row">
-        <div>
-          <label>Примечание / Статус (необязательно)</label>
-          <input type="text" data-path="entries.${i}.note" value="${escapeAttr(e.note || "")}">
-        </div>
-      </div>
-      <div class="item-toolbar">
-        <button class="ghost mini" data-act="entry-up" data-i="${i}">↑ Выше</button>
-        <button class="ghost mini" data-act="entry-down" data-i="${i}">↓ Ниже</button>
-        <button class="ghost mini" data-act="entry-del" data-i="${i}">Удалить</button>
-      </div>`;
-    root.appendChild(div);
-  });
+        <div class="item-toolbar">
+          <button class="ghost mini" data-act="entry-up" data-rank-type="${type}" data-i="${i}">↑ Выше</button>
+          <button class="ghost mini" data-act="entry-down" data-rank-type="${type}" data-i="${i}">↓ Ниже</button>
+          <button class="ghost mini" data-act="entry-duplicate" data-rank-type="${type}" data-i="${i}">Копировать</button>
+          <button class="ghost mini" data-act="entry-del" data-rank-type="${type}" data-i="${i}">Удалить</button>
+        </div>`;
+      root.appendChild(div);
+    });
+  }
 }
 
-$("#add-entry").addEventListener("click", () => {
-  if (!state.models.ranking.entries) state.models.ranking.entries = [];
-  const nextPlace = String(state.models.ranking.entries.length + 1);
-  state.models.ranking.entries.push({ place: nextPlace, name: "Имя демона", rank: "Ранг", score: "0", note: "" });
+$$('[data-ranking-add]').forEach(button => button.addEventListener("click", () => {
+  const type = button.dataset.rankingAdd;
+  const entries = state.models.ranking[type].entries;
+  entries.push({ label: `${entries.length + 1} место`, name: "", highlight: false });
   renderRanking();
   markDirty("ranking");
-});
+}));
 
 /* ================== 3. ЦИТАТЫ ================== */
 async function loadQuotes() {
@@ -1081,6 +1292,7 @@ function renderQuotes() {
       <div class="item-toolbar">
         <button class="ghost mini" data-act="mq-up" data-i="${i}">↑ Выше</button>
         <button class="ghost mini" data-act="mq-down" data-i="${i}">↓ Ниже</button>
+        <button class="ghost mini" data-act="mq-duplicate" data-i="${i}">Копировать</button>
         <button class="ghost mini" data-act="mq-del" data-i="${i}">Удалить</button>
       </div>`;
     root.appendChild(div);
@@ -1126,7 +1338,7 @@ function renderPagesList() {
         </div>
         <div>
           <label>Название в верхнем меню (пусто = скрыть из шапки)</label>
-          <input type="text" data-path="pages.${pi}.nav" value="${escapeAttr(p.nav || "")}" placeholder="Закон, Отряды...">
+          <input type="text" data-path="pages.${pi}.nav" value="${escapeAttr(p.nav || "")}" placeholder="Закон, Кланы...">
         </div>
         <div style="flex:0 0 90px;min-width:80px">
           <label>Иероглиф</label>
@@ -1340,6 +1552,7 @@ function renderSectionsList(slug, sections) {
         <button class="ghost mini" data-act="add-list" data-slug="${slug}" data-si="${si}">+ Список пунктов</button>
         <button class="ghost mini" data-act="sec-up" data-slug="${slug}" data-si="${si}">↑ Секцию выше</button>
         <button class="ghost mini" data-act="sec-down" data-slug="${slug}" data-si="${si}">↓ Секцию ниже</button>
+        <button class="ghost mini" data-act="sec-duplicate" data-slug="${slug}" data-si="${si}">Дублировать секцию</button>
         <button class="ghost mini" data-act="del-sec" data-slug="${slug}" data-si="${si}">Удалить секцию</button>
       </div>
     `;
@@ -1373,6 +1586,7 @@ function renderSectionItem(slug, si, ii, it) {
       <div class="item-toolbar">
         <button class="ghost mini" data-act="item-up" data-slug="${slug}" data-si="${si}" data-ii="${ii}">↑</button>
         <button class="ghost mini" data-act="item-down" data-slug="${slug}" data-si="${si}" data-ii="${ii}">↓</button>
+        <button class="ghost mini" data-act="item-duplicate" data-slug="${slug}" data-si="${si}" data-ii="${ii}">Копировать</button>
         <button class="ghost mini" data-act="del-item" data-slug="${slug}" data-si="${si}" data-ii="${ii}">✕</button>
       </div>`;
   } else if (it.type === "p") {
@@ -1397,23 +1611,25 @@ function renderSectionItem(slug, si, ii, it) {
       <div class="item-toolbar">
         <button class="ghost mini" data-act="item-up" data-slug="${slug}" data-si="${si}" data-ii="${ii}">↑</button>
         <button class="ghost mini" data-act="item-down" data-slug="${slug}" data-si="${si}" data-ii="${ii}">↓</button>
+        <button class="ghost mini" data-act="item-duplicate" data-slug="${slug}" data-si="${si}" data-ii="${ii}">Копировать</button>
         <button class="ghost mini" data-act="del-item" data-slug="${slug}" data-si="${si}" data-ii="${ii}">✕</button>
       </div>`;
   } else if (it.type === "list") {
     const listItems = (it.items || []).map((li, liIndex) => `
-      <div style="display:flex;gap:6px;align-items:center;margin:4px 0">
-        <span style="color:var(--gold);font-weight:700">•</span>
-        <input type="text" data-li-input="${slug}.${si}.${ii}.${liIndex}" value="${escapeAttr(li || '')}" style="flex:1">
-        <button class="ghost mini" data-act="li-del" data-slug="${slug}" data-si="${si}" data-ii="${ii}" data-li="${liIndex}">✕</button>
+      <div style="display:flex;gap:8px;align-items:flex-start;margin:8px 0">
+        <span style="color:var(--gold);font-weight:700;padding:10px 2px">${it.ordered ? `${liIndex + 1}.` : "•"}</span>
+        <div class="li-rich" contenteditable="true" role="textbox" aria-label="Текст пункта ${liIndex + 1}" data-li-input="${slug}.${si}.${ii}.${liIndex}">${cleanInlineHtml(li || "")}</div>
+        <button class="ghost mini" aria-label="Удалить пункт" title="Удалить пункт" data-act="li-del" data-slug="${slug}" data-si="${si}" data-ii="${ii}" data-li="${liIndex}">✕</button>
       </div>
     `).join("");
     div.innerHTML = `
-      <label>${it.ordered ? 'Нумерованный список (OL)' : 'Маркированный список (UL)'}</label>
+      <label>${it.ordered ? 'Нумерованный список (OL)' : 'Маркированный список (UL)'} · выделите текст и используйте Ctrl+B / Ctrl+I для форматирования</label>
       <div class="list-items-box">${listItems}</div>
       <div class="item-toolbar" style="margin-top:6px">
         <button class="ghost mini" data-act="li-add" data-slug="${slug}" data-si="${si}" data-ii="${ii}">+ Добавить пункт списка</button>
         <button class="ghost mini" data-act="item-up" data-slug="${slug}" data-si="${si}" data-ii="${ii}">↑</button>
         <button class="ghost mini" data-act="item-down" data-slug="${slug}" data-si="${si}" data-ii="${ii}">↓</button>
+        <button class="ghost mini" data-act="item-duplicate" data-slug="${slug}" data-si="${si}" data-ii="${ii}">Копировать</button>
         <button class="ghost mini" data-act="del-item" data-slug="${slug}" data-si="${si}" data-ii="${ii}">✕</button>
       </div>`;
   } else {
@@ -1469,6 +1685,35 @@ function parseHtmlSections(html) {
     sections.push({ cls: "s", items: [{ type: "p", noteType: "", text: container.textContent.trim() }] });
   }
   return sections;
+}
+
+
+function cleanInlineHtml(html) {
+  const source = document.createElement("div");
+  source.innerHTML = html;
+  const allowed = new Set(["STRONG", "B", "EM", "I", "U", "BR", "SPAN", "A"]);
+  function clean(node) {
+    if (node.nodeType === Node.TEXT_NODE) return document.createTextNode(node.nodeValue || "");
+    if (node.nodeType !== Node.ELEMENT_NODE) return document.createDocumentFragment();
+    const tag = node.tagName;
+    if (!allowed.has(tag)) {
+      const frag = document.createDocumentFragment();
+      Array.from(node.childNodes).forEach(child => frag.appendChild(clean(child)));
+      return frag;
+    }
+    const out = document.createElement(tag.toLowerCase());
+    if (tag === "SPAN" && node.className) out.className = String(node.className).replace(/[^a-zA-Z0-9 _-]/g, "");
+    if (tag === "A") {
+      const href = node.getAttribute("href") || "";
+      if (/^(https?:|mailto:|\/|#)/i.test(href)) out.setAttribute("href", href);
+      const title = node.getAttribute("title"); if (title) out.setAttribute("title", title);
+    }
+    Array.from(node.childNodes).forEach(child => out.appendChild(clean(child)));
+    return out;
+  }
+  const result = document.createElement("div");
+  Array.from(source.childNodes).forEach(child => result.appendChild(clean(child)));
+  return result.innerHTML.trim();
 }
 
 function nodeToItem(el) {
@@ -1631,6 +1876,8 @@ document.addEventListener("click", async (e) => {
     } else if (act === "del-sec") {
       if (confirm("Удалить эту секцию?")) sections.splice(si, 1);
       else return;
+    } else if (act === "sec-duplicate") {
+      sections.splice(si + 1, 0, JSON.parse(JSON.stringify(sections[si])));
     } else if (act === "sec-up") move(sections, si, si - 1);
     else if (act === "sec-down") move(sections, si, si + 1);
     else if (act === "add-h") {
@@ -1644,6 +1891,8 @@ document.addEventListener("click", async (e) => {
       sections[si].items.push({ type: "list", ordered: false, items: ["Пункт 1", "Пункт 2"] });
     } else if (act === "del-item") {
       sections[si].items.splice(ii, 1);
+    } else if (act === "item-duplicate") {
+      sections[si].items.splice(ii + 1, 0, JSON.parse(JSON.stringify(sections[si].items[ii])));
     } else if (act === "item-up") move(sections[si].items, ii, ii - 1);
     else if (act === "item-down") move(sections[si].items, ii, ii + 1);
     else if (act === "li-add") {
@@ -1659,7 +1908,7 @@ document.addEventListener("click", async (e) => {
     return;
   }
 
-  // Действия над отрядами, рейтингом, цитатами
+  // Действия над кланами, рейтингом, цитатами
   const m = currentModel();
   if (!m) return;
   const g = +actBtn.dataset.g, s = +actBtn.dataset.s, o = +actBtn.dataset.o, i = +actBtn.dataset.i;
@@ -1672,20 +1921,28 @@ document.addEventListener("click", async (e) => {
 
   if (act === "squad-up") move(m.squads, g, g - 1);
   else if (act === "squad-down") move(m.squads, g, g + 1);
+  else if (act === "squad-duplicate") {
+    const copy = JSON.parse(JSON.stringify(m.squads[g])); copy.name = (copy.name || "Клан") + " — копия";
+    m.squads.splice(g + 1, 0, copy);
+  }
   else if (act === "squad-del") {
     const sq = m.squads[g];
     const n = (sq.subs || []).length;
-    if (confirm("Удалить отряд «" + (sq.name || "") + "»" + (n ? " вместе с " + n + " подотрядами" : "") + "?")) m.squads.splice(g, 1);
+    if (confirm("Удалить клан «" + (sq.name || "") + "»" + (n ? " вместе с " + n + " поглощёнными кланами" : "") + "?")) m.squads.splice(g, 1);
     else return;
   }
   else if (act === "sub-add") {
     m.squads[g].subs = m.squads[g].subs || [];
-    m.squads[g].subs.push(emptySquad("Новый подотряд"));
+    m.squads[g].subs.push(emptySquad("Новый поглощённый клан"));
   }
   else if (act === "sub-up") move(m.squads[g].subs, s, s - 1);
   else if (act === "sub-down") move(m.squads[g].subs, s, s + 1);
+  else if (act === "sub-duplicate") {
+    const copy = JSON.parse(JSON.stringify(m.squads[g].subs[s])); copy.name = (copy.name || "Клан") + " — копия";
+    m.squads[g].subs.splice(s + 1, 0, copy);
+  }
   else if (act === "sub-del") {
-    if (confirm("Удалить подотряд?")) m.squads[g].subs.splice(s, 1);
+    if (confirm("Удалить поглощённый клан?")) m.squads[g].subs.splice(s, 1);
     else return;
   }
   else if (act === "sub-promote") {
@@ -1702,11 +1959,17 @@ document.addEventListener("click", async (e) => {
     const sq = squadByPath(actBtn.dataset.p);
     sq.overseers.splice(o, 1);
   }
-  else if (act === "entry-up") move(m.entries, i, i - 1);
-  else if (act === "entry-down") move(m.entries, i, i + 1);
-  else if (act === "entry-del") m.entries.splice(i, 1);
+  else if (act === "entry-up" || act === "entry-down" || act === "entry-duplicate" || act === "entry-del") {
+    const rating = m[actBtn.dataset.rankType || "personal"];
+    if (!rating || !Array.isArray(rating.entries)) return;
+    if (act === "entry-up") move(rating.entries, i, i - 1);
+    else if (act === "entry-down") move(rating.entries, i, i + 1);
+    else if (act === "entry-duplicate") { const copy = JSON.parse(JSON.stringify(rating.entries[i])); copy.label = (copy.label || "Место") + " — копия"; rating.entries.splice(i + 1, 0, copy); }
+    else rating.entries.splice(i, 1);
+  }
   else if (act === "mq-up") move(m.marquee, i, i - 1);
   else if (act === "mq-down") move(m.marquee, i, i + 1);
+  else if (act === "mq-duplicate") { const copy = JSON.parse(JSON.stringify(m.marquee[i])); copy.text = (copy.text || "Цитата") + " (копия)"; m.marquee.splice(i + 1, 0, copy); }
   else if (act === "mq-del") m.marquee.splice(i, 1);
   else return;
 
@@ -1739,7 +2002,7 @@ document.addEventListener("input", (e) => {
     const si = +siStr, ii = +iiStr, li = +liStr;
     const sections = parseHtmlSections(state.models[slug].html || "");
     if (sections[si] && sections[si].items && sections[si].items[ii] && sections[si].items[ii].items) {
-      sections[si].items[ii].items[li] = el.value;
+      sections[si].items[ii].items[li] = cleanInlineHtml(el.innerHTML);
       state.models[slug].html = serializeHtmlSections(sections);
       markDirty(slug);
     }
@@ -1776,7 +2039,7 @@ document.addEventListener("input", (e) => {
       const det = el.closest("details.block");
       const sum = det.querySelector("summary");
       if (sum) {
-        const prefix = det.classList.contains("sub-card") ? "Подотряд: " : "Отряд: ";
+        const prefix = det.classList.contains("sub-card") ? "Поглощённый клан: " : "Клан: ";
         sum.textContent = prefix + (el.value || "Без названия");
       }
     }
@@ -1797,7 +2060,11 @@ async function loadFiles() {
   const sel = $("#file-select");
   if (sel.options.length > 1) return;
   const paths = [];
-  for (const dir of ["content", "content/data"]) {
+  if (LOCAL_PREVIEW) {
+    const pages = state.models._pages && state.models._pages.pages || [];
+    paths.push("content/pages.json", "content/data/squads.json", "content/data/ranking.json", "content/theme.css", "content/app.js");
+    pages.forEach(page => { if (page.slug !== "index") paths.push(`content/${page.slug}.html`); });
+  } else for (const dir of ["content", "content/data"]) {
     try {
       const items = await gh(`/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${dir}?ref=${encodeURIComponent(state.branch || getBranch())}`);
       for (const it of items) if (it.type === "file") paths.push(it.path);
@@ -1844,6 +2111,10 @@ $("#file-reload").addEventListener("click", () => {
 
 /* ================== СОХРАНЕНИЕ ================== */
 $("#save-btn").addEventListener("click", async () => {
+  if (LOCAL_PREVIEW) {
+    $("#save-status").textContent = "Локальный предпросмотр: сохранение в GitHub отключено. Используйте «Скачать копию».";
+    return;
+  }
   const btn = $("#save-btn");
   const s = $("#save-status");
   btn.disabled = true;
@@ -1866,7 +2137,7 @@ $("#save-btn").addEventListener("click", async () => {
       key = "squads";
       path = CONFIG.files.squads;
       text = JSON.stringify(state.models.squads, null, 2) + "\n";
-      message = "Админка: обновлены отряды";
+      message = "Админка: обновлены кланы";
       sha = state.shas.squads;
     } else if (state.tab === "ranking") {
       key = "ranking";
@@ -1909,6 +2180,7 @@ $("#save-btn").addEventListener("click", async () => {
     }
     state.dirty = false;
     state.dirtyFiles.clear();
+    $("#save-btn").disabled = true; $("#discard-btn").disabled = true;
     state.missingNoted = {};
     s.className = "status ok";
     s.innerHTML = "Сохранено в ветку «" + (state.branch || getBranch()) + "»! Сайт пересоберётся автоматически и обновится на bloodpact.su за 1–2 минуты. " +
@@ -1947,7 +2219,8 @@ $("#discard-btn").addEventListener("click", () => {
     state.models[state.tab].html = state.raw[state.tab];
     renderPageEditor(state.tab);
   }
-  state.dirty = false;
+  state.dirty = false; state.dirtyFiles.clear();
+  $("#save-btn").disabled = true; $("#discard-btn").disabled = true;
   $("#save-status").textContent = "Изменения отменены.";
   $("#save-status").className = "status";
 });

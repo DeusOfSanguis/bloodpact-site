@@ -52,10 +52,10 @@
     {
       "slug": "squads",
       "source": "https://bloodpact-yufu.tilda.ws/squads",
-      "title": "Отряды",
-      "nav": "Отряды",
+      "title": "Кланы",
+      "nav": "Кланы",
       "cover_uptitle": "Пакт крови",
-      "cover_title": "Отряды",
+      "cover_title": "Кланы",
       "cover_image": "blood-moon.jpg"
     },
     {
@@ -64,7 +64,7 @@
       "title": "Шрамы",
       "nav": "Шрамы",
       "cover_uptitle": "Пакт крови",
-      "cover_title": "Шрамы безотрядных",
+      "cover_title": "Шрамы демонов без клана",
       "cover_image": "blood-moon.jpg"
     },
     {
@@ -106,10 +106,10 @@
     {
       "slug": "ranking",
       "source": "https://bloodpact-yufu.tilda.ws/ranking",
-      "title": "Рейтинг",
-      "nav": "Рейтинг",
+      "title": "Рейтинги",
+      "nav": "Рейтинги",
       "cover_uptitle": "Пакт крови",
-      "cover_title": "Рейтинг",
+      "cover_title": "Рейтинги",
       "cover_image": "blood-moon.jpg"
     }
   ],
