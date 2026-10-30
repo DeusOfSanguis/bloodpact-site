@@ -381,6 +381,123 @@
     .savebar { padding:10px 12px; }
   }
 
+  /* ---------- Кланы: схема с перетаскиванием ---------- */
+  .card-head { display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; margin:0 0 10px; }
+  .card-head h2 { margin:0; }
+  .seg {
+    display:inline-flex; gap:3px; padding:3px;
+    border:1px solid var(--line); border-radius:10px; background:#0d090b;
+  }
+  .seg button {
+    min-height:30px; padding:5px 11px; font-size:11.5px; border-radius:7px;
+    background:transparent; border:1px solid transparent; color:var(--muted);
+  }
+  .seg button:hover { background:rgba(237,228,214,.06); color:var(--text); }
+  .seg button.on { background:var(--red); border-color:var(--red); color:#fff; }
+  .seg button.on:hover { background:var(--red2); border-color:var(--red2); }
+
+  .board__top { display:flex; justify-content:space-between; align-items:baseline; gap:10px; flex-wrap:wrap; margin:0 0 10px; }
+  .board__top-title { font:600 14px/1.3 Unbounded, Manrope, sans-serif; letter-spacing:.02em; }
+  .board__top-stats { font-size:11.5px; color:var(--muted); }
+  .board__promote {
+    display:flex; align-items:center; gap:10px;
+    padding:12px 14px; margin:0 0 12px;
+    border:1px dashed rgba(216,188,82,.35); border-radius:12px;
+    color:var(--muted); font-size:12.5px; line-height:1.45;
+    transition:border-color .15s, background .15s, color .15s, border-style .15s;
+  }
+  .board__promote b { color:var(--gold); }
+  .board__promote-sigil {
+    display:grid; place-items:center; width:30px; height:30px; flex:0 0 30px;
+    border-radius:9px; background:rgba(216,188,82,.12); color:var(--gold); font-size:16px;
+  }
+  .board__promote.is-ready { border-style:solid; border-color:rgba(216,188,82,.5); }
+  .board__promote.drop-over { border-color:var(--gold); background:rgba(216,188,82,.1); color:var(--text); }
+  .board__grid { display:grid; gap:12px; grid-template-columns:repeat(auto-fill, minmax(230px, 1fr)); }
+  .board__col {
+    display:flex; flex-direction:column; min-height:110px;
+    border:1px solid var(--line); border-radius:12px; background:var(--panel2);
+    transition:border-color .15s, box-shadow .15s, background .15s;
+  }
+  .board__col.drop-target { border-color:var(--gold); box-shadow:0 0 0 2px rgba(216,188,82,.16); }
+  .board__col.drop-over { border-color:var(--gold); background:rgba(216,188,82,.04); }
+  .board__head {
+    display:flex; align-items:center; gap:8px; padding:10px 12px;
+    border-bottom:1px solid var(--line); cursor:grab; user-select:none;
+  }
+  .board__head:active { cursor:grabbing; }
+  .board__grip { color:var(--muted); font-size:13px; letter-spacing:-1px; }
+  .board__title { flex:1 1 auto; min-width:0; font-weight:700; font-size:13px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .board__count { flex:0 0 auto; font-size:11px; color:var(--muted); border:1px solid var(--line); border-radius:99px; padding:1px 7px; }
+  .board__chips {
+    display:flex; flex-direction:column; gap:6px; flex:1 1 auto;
+    padding:10px; min-height:64px; border-radius:0 0 12px 12px; transition:background .15s;
+  }
+  .board__chips:empty::after {
+    content:"Перетащите сюда поглощённый клан";
+    display:block; padding:10px; text-align:center;
+    font-size:11.5px; color:var(--muted);
+    border:1px dashed var(--line); border-radius:9px;
+  }
+  .board__chips.drop-over { background:rgba(216,188,82,.06); }
+  .chip {
+    display:flex; align-items:center; gap:6px;
+    padding:6px 8px; border:1px solid var(--line); border-radius:9px;
+    background:var(--panel3); font-size:12.5px; cursor:grab; user-select:none;
+    transition:border-color .15s, background .15s, opacity .15s;
+  }
+  .chip:hover { border-color:rgba(227,59,73,.45); background:rgba(169,29,42,.18); }
+  .chip:active { cursor:grabbing; }
+  .chip.dragging { opacity:.38; }
+  .chip__grip { color:var(--muted); font-size:10px; }
+  .chip__name {
+    flex:1 1 auto; min-width:0; padding:2px 0; cursor:pointer;
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  }
+  .chip__name:hover, .chip__name:focus-visible { color:var(--gold); outline:none; }
+  .chip__btn {
+    flex:0 0 auto; width:24px; height:24px; min-height:0; padding:0;
+    display:grid; place-items:center; border-radius:6px;
+    background:transparent; border:1px solid var(--line); color:var(--muted);
+    font-size:12px; line-height:1;
+  }
+  .chip__btn:hover { border-color:var(--gold); color:var(--gold); background:transparent; }
+  .drop-marker { height:0; border-top:2px solid var(--gold); border-radius:2px; margin:1px 0; box-shadow:0 0 10px rgba(216,188,82,.55); }
+  .board__flash { margin:10px 0 0; min-height:18px; font-size:12.5px; color:var(--gold); opacity:0; transition:opacity .2s; }
+  .board__flash.on { opacity:1; }
+
+  .clan-type {
+    display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+    margin:8px 0 10px; padding:8px 10px;
+    border:1px solid var(--line); border-radius:10px; background:rgba(237,228,214,.03);
+  }
+  .clan-type__label { font-size:10px; letter-spacing:.09em; text-transform:uppercase; color:var(--muted); }
+  .clan-type__hint { font-size:11.5px; color:var(--muted); }
+  .clan-owner { margin:0 0 8px; }
+  .clan-owner__field { max-width:420px; }
+  .clan-owner .hint { margin:6px 0 0; }
+  .clan-picker {
+    display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end;
+    margin:0 0 12px; padding:12px;
+    border:1px solid rgba(216,188,82,.4); border-radius:12px; background:rgba(216,188,82,.06);
+  }
+  .clan-picker > div { flex:1 1 220px; min-width:170px; }
+  .clan-picker label { margin-top:0; }
+  .clan-picker > .clan-picker__actions { flex:0 0 auto; min-width:0; display:flex; gap:8px; }
+  .subs-flat__head {
+    display:flex; align-items:center; gap:8px;
+    margin:16px 0 8px; font-size:12.5px; font-weight:700; color:var(--text);
+  }
+  .subs-flat__head:first-child { margin-top:0; }
+  .subs-flat__sigil { color:var(--red2); }
+  .subs-flat__count { font-size:11px; font-weight:500; color:var(--muted); border:1px solid var(--line); border-radius:99px; padding:1px 7px; }
+  details.block.flash-card { border-color:var(--gold); box-shadow:0 0 0 2px rgba(216,188,82,.18); }
+  @media (max-width:640px) {
+    .board__grid { grid-template-columns:1fr; }
+    .seg { width:100%; }
+    .seg button { flex:1 1 auto; }
+  }
+
 </style>
 </head>
 <body>
@@ -512,11 +629,26 @@
     <!-- ---------- 1. КЛАНЫ ---------- -->
     <div class="tab-page" id="tab-squads">
       <div class="card">
-        <h2>Кланы (данные <code>content/data/squads.json</code>)</h2>
-        <p class="hint">Высший клан, под ним — его поглощённые кланы; следующий основной клан и его поглощённые кланы — и так далее.
-          «↑/↓» меняют порядок, «+ Поглощённый клан» добавляет вложенный клан, «Вынести в высшие кланы» делает поглощённый клан самостоятельным.</p>
+        <h2>Схема кланов</h2>
+        <p class="hint">Колонка — основной клан, внутри — его поглощённые кланы.
+          Перетащите поглощённый клан в колонку другого основного клана, чтобы сменить владельца, или в зону «Высшие кланы», чтобы сделать его основным.
+          Внутри колонки кланы так же меняются местами перетаскиванием, а заголовок колонки меняет порядок основных кланов.
+          Клик по названию клана открывает его карточку в редакторе.</p>
+        <div id="squad-board" class="board"></div>
+      </div>
+      <div class="card">
+        <div class="card-head">
+          <h2>Редактор кланов (данные <code>content/data/squads.json</code>)</h2>
+          <div class="seg" id="squad-filter" role="group" aria-label="Показать кланы">
+            <button type="button" data-filter="all" class="on">Все</button>
+            <button type="button" data-filter="main">Основные</button>
+            <button type="button" data-filter="sub">Поглощённые</button>
+          </div>
+        </div>
+        <p class="hint">Тип клана переключается в карточке: «Основной» или «Поглощённый».
+          У поглощённого клана можно выбрать основного клана-владельца — клан сразу переедет к нему (это же работает на телефоне, где перетаскивание недоступно).</p>
         <div id="squads-list"></div>
-        <button class="ghost" id="add-squad">+ Добавить клан</button>
+        <button class="ghost" id="add-squad">+ Добавить основной клан</button>
       </div>
     </div>
 
@@ -773,6 +905,7 @@ const state = {
   fileSha: "",
   fileDirty: false,
   missingNoted: {},
+  squadUI: { filter: "all" }, // фильтр карточек кланов: all | main | sub
 };
 
 function markDirty(key) {
@@ -1049,6 +1182,8 @@ async function loadSquads() {
     };
     m.squads.forEach(migrateOwner);
   }
+  if (!state.squadUI) state.squadUI = { filter: "all" };
+  renderSquadFilter();
   renderSquads();
 }
 
@@ -1060,21 +1195,229 @@ function emptySquad(name) {
   };
 }
 
-function renderSquads() {
+/* ---------- данные кланов: основные кланы и их поглощённые кланы ---------- */
+function mainSquads() {
   const m = state.models.squads;
+  if (!m) return [];
+  if (!Array.isArray(m.squads)) m.squads = [];
+  return m.squads;
+}
+
+function clanSubs(sq) {
+  if (!sq) return [];
+  if (!Array.isArray(sq.subs)) sq.subs = [];
+  return sq.subs;
+}
+
+function clanName(sq) {
+  return (sq && sq.name) ? sq.name : "Без названия";
+}
+
+/* ---------- операции, общие для схемы и редактора ---------- */
+// Поглощённый клан → основной (встаёт сразу после бывшего владельца).
+function promoteSubToMain(g, s) {
+  const mains = mainSquads();
+  const owner = mains[g];
+  const subs = clanSubs(owner);
+  const sub = subs[s];
+  if (!sub) return null;
+  subs.splice(s, 1);
+  sub.parent = "";
+  sub.parent_label = "";
+  clanSubs(sub);
+  mains.splice(Math.min(g + 1, mains.length), 0, sub);
+  return sub;
+}
+
+// Перемещение поглощённого клана в другой основной (index = позиция внутри владельца).
+function moveSubToMain(g, s, targetG, index) {
+  const mains = mainSquads();
+  const owner = mains[g];
+  const dest = mains[targetG];
+  if (!owner || !dest) return false;
+  const subs = clanSubs(owner);
+  const sub = subs[s];
+  if (!sub) return false;
+  subs.splice(s, 1);
+  const destSubs = clanSubs(dest);
+  const idx = Math.max(0, Math.min(typeof index === "number" ? index : destSubs.length, destSubs.length));
+  destSubs.splice(idx, 0, sub);
+  return true;
+}
+
+// Основной клан → поглощённый. Его собственные поглощённые кланы становятся основными.
+function demoteMainToSub(g, targetG, index) {
+  const mains = mainSquads();
+  const src = mains[g];
+  const dest = mains[targetG];
+  if (!src || !dest || src === dest) return { ok: false, orphans: 0 };
+  const orphans = clanSubs(src).splice(0);
+  orphans.forEach(sq => { sq.parent = ""; sq.parent_label = ""; clanSubs(sq); });
+  mains.splice(g, 1);
+  if (orphans.length) mains.splice(g, 0, ...orphans);
+  const destSubs = clanSubs(dest);
+  const idx = Math.max(0, Math.min(typeof index === "number" ? index : destSubs.length, destSubs.length));
+  destSubs.splice(idx, 0, src);
+  return { ok: true, orphans: orphans.length };
+}
+
+/* ---------- схема кланов (перетаскивание) ---------- */
+function renderSquadBoard() {
+  const root = $("#squad-board");
+  const m = state.models.squads;
+  if (!root || !m) return;
+  const mains = mainSquads();
+  const totalSubs = mains.reduce((n, sq) => n + clanSubs(sq).length, 0);
+  root.innerHTML = `
+    <div class="board__top">
+      <div class="board__top-title">Основные и поглощённые кланы</div>
+      <div class="board__top-stats">${mains.length} основных · ${totalSubs} поглощённых</div>
+    </div>
+    <div class="board__promote" data-drop="promote" title="Перетащите сюда поглощённый клан">
+      <span class="board__promote-sigil" aria-hidden="true">昇</span>
+      <span><b>Высшие кланы.</b> Перетащите сюда поглощённый клан, чтобы сделать его самостоятельным основным кланом.</span>
+    </div>
+    <div class="board__grid">
+      ${mains.length
+        ? mains.map((sq, gi) => boardColumnHtml(sq, gi)).join("")
+        : '<p class="hint">Кланов пока нет — добавьте первый в редакторе ниже.</p>'}
+    </div>
+    <p class="board__flash" id="squad-board-flash" role="status" aria-live="polite"></p>`;
+}
+
+function boardColumnHtml(sq, gi) {
+  const subs = clanSubs(sq);
+  return `
+    <section class="board__col" data-main="${gi}">
+      <header class="board__head" draggable="true" data-drag="main" data-g="${gi}" title="Перетащите, чтобы изменить порядок основных кланов">
+        <span class="board__grip" aria-hidden="true">⋮⋮</span>
+        <span class="board__title">${escapeHtml(clanName(sq))}</span>
+        <span class="board__count" title="Поглощённых кланов: ${subs.length}">${subs.length}</span>
+      </header>
+      <div class="board__chips" data-main="${gi}" data-drop="clan" aria-label="Поглощённые кланы клана ${escapeAttr(clanName(sq))}">${subs.length ? "\n" + subs.map((sub, si) => boardChipHtml(sub, gi, si)).join("\n") + "\n      " : ""}</div>
+    </section>`;
+}
+
+function boardChipHtml(sub, gi, si) {
+  return `
+    <div class="chip" draggable="true" data-drag="sub" data-g="${gi}" data-s="${si}">
+      <span class="chip__grip" aria-hidden="true">⠿</span>
+      <span class="chip__name" role="button" tabindex="0" data-open-clan data-g="${gi}" data-s="${si}" title="Открыть клан в редакторе">${escapeHtml(clanName(sub))}</span>
+      <button type="button" class="chip__btn" data-act="clan-make-main" data-g="${gi}" data-s="${si}" title="Вынести в основные кланы" aria-label="Вынести «${escapeAttr(clanName(sub))}» в основные кланы">↑</button>
+    </div>`;
+}
+
+function flashBoard(message) {
+  const el = $("#squad-board-flash");
+  if (!el) return;
+  el.textContent = message;
+  el.classList.add("on");
+  clearTimeout(flashBoard._t);
+  flashBoard._t = setTimeout(() => el.classList.remove("on"), 2800);
+}
+
+/* ---------- тип клана: переключатель в карточке ---------- */
+function clanTypeSwitchHtml(g, s) {
+  const isSub = s !== null && s !== undefined;
+  const attrs = `data-g="${g}"${isSub ? ` data-s="${s}"` : ""}`;
+  return `
+    <div class="clan-type">
+      <span class="clan-type__label">Тип клана</span>
+      <div class="seg" role="group" aria-label="Тип клана">
+        <button type="button" class="${isSub ? "" : "on"}" data-act="clan-make-main" ${attrs} aria-pressed="${!isSub}">Основной</button>
+        <button type="button" class="${isSub ? "on" : ""}" data-act="clan-make-sub" ${attrs} aria-pressed="${isSub}">Поглощённый</button>
+      </div>
+      <span class="clan-type__hint">${isSub
+        ? "Входит в основной клан и показывается внутри его группы"
+        : "Высший клан — отдельная группа и колонка в схеме"}</span>
+    </div>`;
+}
+
+function subOwnerHtml(g, s) {
+  const mains = mainSquads();
+  const sub = clanSubs(mains[g])[s];
+  if (!sub) return "";
+  const others = mains.length - 1;
+  const options = mains.map((sq, i) =>
+    `<option value="${i}"${i === g ? " selected" : ""}>${escapeHtml(clanName(sq))}</option>`).join("");
+  return `
+    <div class="clan-owner">
+      <div class="clan-owner__field">
+        <label>Основной клан-владелец</label>
+        <select data-sub-owner data-g="${g}" data-s="${s}"${others ? "" : " disabled"}>${options}</select>
+      </div>
+      <p class="hint">${others
+        ? "Выберите другой основной клан — поглощённый клан сразу переедет к нему."
+        : "Чтобы перевести клан к другому владельцу, нужен ещё хотя бы один основной клан."}</p>
+    </div>`;
+}
+
+/* ---------- список карточек ---------- */
+function renderSquads() {
+  renderSquadBoard();
+  renderSquadList();
+}
+
+function renderSquadFilter() {
+  const filter = (state.squadUI && state.squadUI.filter) || "all";
+  $$("#squad-filter button").forEach(b => b.classList.toggle("on", b.dataset.filter === filter));
+}
+
+function renderSquadList() {
   const root = $("#squads-list");
+  const m = state.models.squads;
+  if (!root || !m) return;
+  const mains = mainSquads();
+  const filter = (state.squadUI && state.squadUI.filter) || "all";
   root.innerHTML = "";
-  (m.squads || []).forEach((sq, gi) => {
+
+  if (!mains.length) {
+    const p = document.createElement("p");
+    p.className = "hint";
+    p.textContent = "Кланов пока нет — добавьте первый кнопкой ниже.";
+    root.appendChild(p);
+    return;
+  }
+
+  // Фильтр «Поглощённые»: плоский список всех вложенных кланов по владельцам.
+  if (filter === "sub") {
+    let shown = 0;
+    mains.forEach((sq, gi) => {
+      const subs = clanSubs(sq);
+      if (!subs.length) return;
+      shown += subs.length;
+      const head = document.createElement("div");
+      head.className = "subs-flat__head";
+      head.innerHTML = `<span class="subs-flat__sigil" aria-hidden="true">主</span><span>${escapeHtml(clanName(sq))}</span>` +
+        `<span class="subs-flat__count">${subs.length}</span>`;
+      root.appendChild(head);
+      subs.forEach((sub, si) => root.appendChild(renderSubCard(gi, si, sub, sq.name)));
+    });
+    if (!shown) {
+      const p = document.createElement("p");
+      p.className = "hint";
+      p.textContent = "Поглощённых кланов нет.";
+      root.appendChild(p);
+    }
+    return;
+  }
+
+  mains.forEach((sq, gi) => {
+    const subs = clanSubs(sq);
     const det = document.createElement("details");
     det.className = "block";
+    det.dataset.clanKey = "main:" + gi;
+    det.dataset.clanType = "main";
     det.innerHTML = `
-      <summary>Клан: ${escapeHtml(sq.name || "Без названия")}${(sq.subs || []).length ? " · поглощённых кланов: " + sq.subs.length : ""}</summary>
+      <summary>Клан: ${escapeHtml(clanName(sq))}${subs.length ? " · поглощённых кланов: " + subs.length : ""}</summary>
+      ${clanTypeSwitchHtml(gi, null)}
       ${squadFieldsHtml(`squads.${gi}`, sq)}
+      ${filter === "main" ? "" : `
       <div class="pair">
         <b style="font-size:13px;letter-spacing:.04em">Поглощённые кланы</b>
         <div data-subs="${gi}"></div>
         <button class="ghost mini" data-act="sub-add" data-g="${gi}">+ Добавить поглощённый клан</button>
-      </div>
+      </div>`}
       <div class="item-toolbar">
         <button class="ghost mini" data-act="squad-up" data-g="${gi}">↑ Выше</button>
         <button class="ghost mini" data-act="squad-down" data-g="${gi}">↓ Ниже</button>
@@ -1082,7 +1425,7 @@ function renderSquads() {
         <button class="ghost mini" data-act="squad-del" data-g="${gi}">Удалить клан</button>
       </div>`;
     const subsHolder = det.querySelector(`[data-subs="${gi}"]`);
-    (sq.subs || []).forEach((sub, si) => subsHolder.appendChild(renderSubCard(gi, si, sub, sq.name)));
+    if (subsHolder) subs.forEach((sub, si) => subsHolder.appendChild(renderSubCard(gi, si, sub, sq.name)));
     root.appendChild(det);
   });
 }
@@ -1090,18 +1433,23 @@ function renderSquads() {
 function renderSubCard(gi, si, sub, parentName) {
   const det = document.createElement("details");
   det.className = "block sub-card";
+  det.dataset.clanKey = `sub:${gi}:${si}`;
+  det.dataset.clanType = "sub";
   det.innerHTML = `
-    <summary>Поглощённый клан: ${escapeHtml(sub.name || "Без названия")}</summary>
+    <summary>Поглощённый клан: ${escapeHtml(clanName(sub))}</summary>
+    ${clanTypeSwitchHtml(gi, si)}
+    ${subOwnerHtml(gi, si)}
     ${squadFieldsHtml(`squads.${gi}.subs.${si}`, sub, parentName)}
     <div class="item-toolbar">
       <button class="ghost mini" data-act="sub-up" data-g="${gi}" data-s="${si}">↑ Выше</button>
       <button class="ghost mini" data-act="sub-down" data-g="${gi}" data-s="${si}">↓ Ниже</button>
-      <button class="ghost mini" data-act="sub-promote" data-g="${gi}" data-s="${si}">Вынести в высшие кланы</button>
+      <button class="ghost mini" data-act="clan-make-main" data-g="${gi}" data-s="${si}">Вынести в основные</button>
       <button class="ghost mini" data-act="sub-duplicate" data-g="${gi}" data-s="${si}">Дублировать</button>
       <button class="ghost mini" data-act="sub-del" data-g="${gi}" data-s="${si}">Удалить</button>
     </div>`;
   return det;
 }
+
 
 function squadFieldsHtml(p, sq, parentName) {
   const ovRows = (sq.overseers || []).map((ov, oi) => overseerHtml(p, oi, ov)).join("");
@@ -1175,8 +1523,345 @@ function overseerHtml(p, oi, ov) {
 $("#add-squad").addEventListener("click", () => {
   if (!state.models.squads.squads) state.models.squads.squads = [];
   state.models.squads.squads.push(emptySquad("Новый клан"));
+  state.squadUI = state.squadUI || { filter: "all" };
+  state.squadUI.filter = "all";
+  renderSquadFilter();
   renderSquads();
   markDirty("squads");
+});
+
+/* ---------- фильтр карточек: все / основные / поглощённые ---------- */
+function setSquadFilter(filter) {
+  state.squadUI = state.squadUI || { filter: "all" };
+  if (state.squadUI.filter === filter) return;
+  state.squadUI.filter = filter;
+  renderSquadFilter();
+  renderSquadList();
+}
+
+$("#squad-filter").addEventListener("click", (e) => {
+  const btn = e.target.closest("button[data-filter]");
+  if (!btn) return;
+  setSquadFilter(btn.dataset.filter);
+});
+
+/* ---------- тип клана: основной ↔ поглощённый ---------- */
+function openClanPicker(btn, g) {
+  const mains = mainSquads();
+  const card = btn.closest("details.block");
+  if (!card) return;
+  const old = card.querySelector(".clan-picker");
+  if (old) { const sel = old.querySelector("select"); if (sel) sel.focus(); return; }
+  if (mains.length < 2) {
+    alert("Чтобы сделать клан поглощённым, нужен хотя бы один другой основной клан. Сначала добавьте ещё один основной клан.");
+    return;
+  }
+  const options = mains.map((sq, i) => i === g ? "" : `<option value="${i}">${escapeHtml(clanName(sq))}</option>`).join("");
+  const box = document.createElement("div");
+  box.className = "clan-picker";
+  box.innerHTML = `
+    <div>
+      <label>Поглотить клан «${escapeHtml(clanName(mains[g]))}» в основной клан</label>
+      <select>${options}</select>
+    </div>
+    <div class="clan-picker__actions">
+      <button type="button" data-act="clan-pick-confirm" data-g="${g}">Поглотить</button>
+      <button type="button" class="ghost" data-act="clan-pick-cancel">Отмена</button>
+    </div>`;
+  const anchor = card.querySelector(".clan-type");
+  if (anchor) anchor.insertAdjacentElement("afterend", box); else card.appendChild(box);
+  const sel = box.querySelector("select");
+  if (sel) sel.focus();
+}
+
+function openClanCard(g, s) {
+  const isSub = s !== null && s !== undefined;
+  if (isSub && state.squadUI.filter === "main") setSquadFilter("all");
+  if (!isSub && state.squadUI.filter === "sub") setSquadFilter("all");
+  const key = isSub ? `sub:${g}:${s}` : `main:${g}`;
+  const el = document.querySelector(`#squads-list details[data-clan-key="${key}"]`);
+  if (!el) return;
+  let parent = el.parentElement ? el.parentElement.closest("details") : null;
+  while (parent) {
+    parent.open = true;
+    parent = parent.parentElement ? parent.parentElement.closest("details") : null;
+  }
+  el.open = true;
+  el.classList.add("flash-card");
+  if (el.scrollIntoView) el.scrollIntoView({ behavior: "smooth", block: "center" });
+  setTimeout(() => el.classList.remove("flash-card"), 1600);
+}
+
+function handleClanAction(act, btn) {
+  if (!state.models.squads) return;
+  const mains = mainSquads();
+  const g = +btn.dataset.g;
+  const hasS = btn.dataset.s !== undefined && btn.dataset.s !== "";
+  const s = hasS ? +btn.dataset.s : null;
+
+  if (act === "open-clan") { openClanCard(g, s); return; }
+
+  // Поглощённый → основной
+  if (act === "clan-make-main") {
+    if (!hasS) return; // уже основной
+    const owner = mains[g];
+    const sub = owner ? clanSubs(owner)[s] : null;
+    if (!sub) return;
+    const extra = clanSubs(sub).length;
+    if (extra && !confirm(`У клана «${clanName(sub)}» есть поглощённые кланы (${extra}). После выноса они станут самостоятельными основными кланами. Продолжить?`)) return;
+    const moved = promoteSubToMain(g, s);
+    if (!moved) return;
+    renderSquads();
+    markDirty("squads");
+    flashBoard(`«${clanName(moved)}» стал основным кланом`);
+    return;
+  }
+
+  // Основной → поглощённый (нужно выбрать владельца)
+  if (act === "clan-make-sub") {
+    if (hasS) {
+      const card = btn.closest("details");
+      const sel = card ? card.querySelector("[data-sub-owner]") : null;
+      if (sel) { sel.focus(); if (sel.scrollIntoView) sel.scrollIntoView({ block: "nearest" }); }
+      return;
+    }
+    openClanPicker(btn, g);
+    return;
+  }
+
+  if (act === "clan-pick-cancel") {
+    const box = btn.closest(".clan-picker");
+    if (box) box.remove();
+    return;
+  }
+
+  if (act === "clan-pick-confirm") {
+    const box = btn.closest(".clan-picker");
+    const sel = box ? box.querySelector("select") : null;
+    if (!sel || sel.value === "") return;
+    const targetG = +sel.value;
+    if (!Number.isFinite(targetG) || targetG === g) return;
+    const src = mains[g];
+    if (!src) return;
+    const extra = clanSubs(src).length;
+    if (extra && !confirm(`У клана «${clanName(src)}» есть поглощённые кланы (${extra}). После поглощения они станут самостоятельными основными кланами. Продолжить?`)) return;
+    const srcName = clanName(src);
+    const destName = clanName(mains[targetG]);
+    const res = demoteMainToSub(g, targetG, null);
+    if (!res.ok) return;
+    renderSquads();
+    markDirty("squads");
+    flashBoard(`«${srcName}» поглощён кланом «${destName}»`);
+    return;
+  }
+}
+
+/* ---------- перетаскивание кланов в схеме ---------- */
+const clanDrag = { payload: null };
+
+function boardClearMarks() {
+  $$("#squad-board .drop-marker").forEach(el => el.remove());
+  $$("#squad-board .drop-over, #squad-board .drop-target").forEach(el => el.classList.remove("drop-over", "drop-target"));
+}
+
+function boardMarkHover(el, cls) {
+  $$("#squad-board ." + cls).forEach(x => { if (x !== el) x.classList.remove(cls); });
+  if (el) el.classList.add(cls);
+}
+
+function updateDropMarker(zone, e) {
+  const chips = Array.from(zone.children).filter(el => el.classList.contains("chip") && !el.classList.contains("dragging"));
+  let marker = Array.from(zone.children).find(el => el.classList.contains("drop-marker"));
+  if (!marker) { marker = document.createElement("div"); marker.className = "drop-marker"; }
+  let ref = null;
+  for (const chip of chips) {
+    const r = chip.getBoundingClientRect();
+    if (e.clientY < r.top + r.height / 2) { ref = chip; break; }
+  }
+  if (ref) {
+    if (!(marker.parentElement === zone && marker.nextElementSibling === ref)) zone.insertBefore(marker, ref);
+  } else if (zone.lastElementChild !== marker) {
+    zone.appendChild(marker);
+  }
+}
+
+function dropMarkerIndex(zone) {
+  const marker = Array.from(zone.children).find(el => el.classList.contains("drop-marker"));
+  if (!marker) return null;
+  let index = 0;
+  let node = marker.previousElementSibling;
+  while (node) {
+    if (node.classList.contains("chip") && !node.classList.contains("dragging")) index++;
+    node = node.previousElementSibling;
+  }
+  return index;
+}
+
+$("#squad-board").addEventListener("dragstart", (e) => {
+  const src = e.target.closest("[data-drag]");
+  if (!src) return;
+  clanDrag.payload = {
+    kind: src.dataset.drag,
+    g: +src.dataset.g,
+    s: src.dataset.s === undefined ? null : +src.dataset.s,
+  };
+  if (e.dataTransfer) {
+    e.dataTransfer.effectAllowed = "move";
+    try { e.dataTransfer.setData("text/plain", JSON.stringify(clanDrag.payload)); } catch (err) {}
+  }
+  src.classList.add("dragging");
+  document.body.classList.add("is-dragging");
+  if (clanDrag.payload.kind === "sub") {
+    const promote = $("#squad-board .board__promote");
+    if (promote) promote.classList.add("is-ready");
+  }
+});
+
+$("#squad-board").addEventListener("dragend", () => {
+  $$("#squad-board .dragging").forEach(el => el.classList.remove("dragging"));
+  document.body.classList.remove("is-dragging");
+  boardClearMarks();
+  const promote = $("#squad-board .board__promote");
+  if (promote) promote.classList.remove("is-ready");
+  clanDrag.payload = null;
+});
+
+$("#squad-board").addEventListener("dragleave", (e) => {
+  if (!clanDrag.payload) return;
+  const board = $("#squad-board");
+  if (!board || (e.relatedTarget && board.contains(e.relatedTarget))) return;
+  boardClearMarks();
+});
+
+$("#squad-board").addEventListener("dragover", (e) => {
+  const payload = clanDrag.payload;
+  if (!payload) return;
+
+  if (payload.kind === "sub") {
+    const promote = e.target.closest(".board__promote");
+    if (promote) {
+      e.preventDefault();
+      if (e.dataTransfer) e.dataTransfer.dropEffect = "move";
+      $$("#squad-board .drop-marker").forEach(el => el.remove());
+      boardMarkHover(promote, "drop-over");
+      return;
+    }
+    const zone = e.target.closest(".board__chips");
+    if (!zone) {
+      const col = e.target.closest(".board__col");
+      if (!col) { boardClearMarks(); return; }
+      e.preventDefault();
+      if (e.dataTransfer) e.dataTransfer.dropEffect = "move";
+      $$("#squad-board .drop-marker").forEach(el => el.remove());
+      boardMarkHover(col, "drop-over");
+      return;
+    }
+    e.preventDefault();
+    if (e.dataTransfer) e.dataTransfer.dropEffect = "move";
+    boardMarkHover(zone, "drop-over");
+    $$("#squad-board .drop-marker").forEach(el => { if (el.parentElement !== zone) el.remove(); });
+    updateDropMarker(zone, e);
+    return;
+  }
+
+  const col = e.target.closest(".board__col");
+  if (!col) { boardClearMarks(); return; }
+  if (+col.dataset.main === payload.g) return;
+  e.preventDefault();
+  if (e.dataTransfer) e.dataTransfer.dropEffect = "move";
+  $$("#squad-board .drop-marker").forEach(el => el.remove());
+  boardMarkHover(col, "drop-target");
+});
+
+$("#squad-board").addEventListener("drop", (e) => {
+  const payload = clanDrag.payload;
+  if (!payload) return;
+  e.preventDefault();
+  const mains = mainSquads();
+  let changed = false;
+  let message = "";
+
+  if (payload.kind === "sub") {
+    const promote = e.target.closest(".board__promote");
+    const zone = e.target.closest(".board__chips");
+    const col = zone ? null : e.target.closest(".board__col");
+    if (promote) {
+      const owner = mains[payload.g];
+      const sub = owner ? clanSubs(owner)[payload.s] : null;
+      if (!sub) return;
+      const name = clanName(sub);
+      if (promoteSubToMain(payload.g, payload.s)) {
+        changed = true;
+        message = `«${name}» вынесен в основные кланы`;
+      }
+    } else if (zone || col) {
+      const targetG = +(zone ? zone.dataset.main : col.dataset.main);
+      const dest = mains[targetG];
+      const owner = mains[payload.g];
+      const sub = owner ? clanSubs(owner)[payload.s] : null;
+      if (!dest || !sub) return;
+      const markerIndex = zone ? dropMarkerIndex(zone) : null;
+      const index = markerIndex === null ? clanSubs(dest).length : markerIndex;
+      const name = clanName(sub);
+      const destName = clanName(dest);
+      if (moveSubToMain(payload.g, payload.s, targetG, index)) {
+        changed = true;
+        message = targetG === payload.g
+          ? `«${name}» перемещён внутри «${destName}»`
+          : `«${name}» перешёл в «${destName}»`;
+      }
+    }
+  } else {
+    const col = e.target.closest(".board__col");
+    if (!col) return;
+    const target = +col.dataset.main;
+    if (target === payload.g) return;
+    const to = target > payload.g ? target - 1 : target;
+    const [moved] = mains.splice(payload.g, 1);
+    mains.splice(to, 0, moved);
+    changed = true;
+    message = `«${clanName(moved)}» — ${to + 1}-е место среди основных кланов`;
+  }
+
+  if (changed) {
+    renderSquads();
+    markDirty("squads");
+    flashBoard(message);
+  }
+});
+
+// Клик по названию клана в схеме — открыть его карточку в редакторе.
+document.addEventListener("click", (e) => {
+  const opener = e.target.closest("[data-open-clan]");
+  if (!opener) return;
+  openClanCard(+opener.dataset.g, opener.dataset.s === undefined ? null : +opener.dataset.s);
+});
+
+document.addEventListener("keydown", (e) => {
+  const opener = e.target.closest ? e.target.closest("[data-open-clan]") : null;
+  if (!opener) return;
+  if (e.key !== "Enter" && e.key !== " ") return;
+  e.preventDefault();
+  openClanCard(+opener.dataset.g, opener.dataset.s === undefined ? null : +opener.dataset.s);
+});
+
+// Смена основного клана-владельца у поглощённого клана (селект в карточке).
+document.addEventListener("change", (e) => {
+  const sel = e.target.closest ? e.target.closest("[data-sub-owner]") : null;
+  if (!sel) return;
+  const g = +sel.dataset.g;
+  const s = +sel.dataset.s;
+  const targetG = +sel.value;
+  const mains = mainSquads();
+  if (targetG === g) return;
+  const sub = clanSubs(mains[g])[s];
+  if (!sub) return;
+  const name = clanName(sub);
+  const destName = clanName(mains[targetG]);
+  if (!moveSubToMain(g, s, targetG, null)) return;
+  renderSquads();
+  markDirty("squads");
+  flashBoard(`«${name}» перешёл в «${destName}»`);
 });
 
 /* ================== 2. РЕЙТИНГ ================== */
@@ -1908,6 +2593,13 @@ document.addEventListener("click", async (e) => {
     return;
   }
 
+  // Тип клана и схема кланов
+  if (act === "clan-make-main" || act === "clan-make-sub" ||
+      act === "clan-pick-confirm" || act === "clan-pick-cancel") {
+    if (state.tab === "squads") handleClanAction(act, actBtn);
+    return;
+  }
+
   // Действия над кланами, рейтингом, цитатами
   const m = currentModel();
   if (!m) return;
@@ -1946,9 +2638,7 @@ document.addEventListener("click", async (e) => {
     else return;
   }
   else if (act === "sub-promote") {
-    const [sub] = m.squads[g].subs.splice(s, 1);
-    sub.parent_label = ""; sub.parent = "";
-    m.squads.splice(g + 1, 0, sub);
+    if (!promoteSubToMain(g, s)) return;
   }
   else if (act === "ov-add") {
     const sq = squadByPath(actBtn.dataset.p);
@@ -2037,14 +2727,37 @@ document.addEventListener("input", (e) => {
     markDirty(state.tab);
     if (el.dataset.path.endsWith(".name") && el.closest("details.block")) {
       const det = el.closest("details.block");
-      const sum = det.querySelector("summary");
-      if (sum) {
-        const prefix = det.classList.contains("sub-card") ? "Поглощённый клан: " : "Клан: ";
-        sum.textContent = prefix + (el.value || "Без названия");
-      }
+      updateClanSummary(det, el.value);
+      syncClanBoardName(det.dataset.clanKey, el.value);
     }
   }
 });
+
+// Заголовок карточки клана: «Клан: Имя · поглощённых кланов: N».
+function updateClanSummary(det, name) {
+  const sum = det.querySelector("summary");
+  if (!sum) return;
+  const isSub = det.dataset.clanType === "sub";
+  const text = (isSub ? "Поглощённый клан: " : "Клан: ") + (name || "Без названия");
+  if (isSub) { sum.textContent = text; return; }
+  const g = +String(det.dataset.clanKey || "main:0").split(":")[1];
+  const n = clanSubs(mainSquads()[g]).length;
+  sum.textContent = text + (n ? " · поглощённых кланов: " + n : "");
+}
+
+// Название в схеме обновляется сразу при вводе, без полной перерисовки.
+function syncClanBoardName(key, name) {
+  if (!key) return;
+  const [kind, g, s] = key.split(":");
+  const label = name || "Без названия";
+  if (kind === "main") {
+    const title = document.querySelector(`#squad-board .board__col[data-main="${g}"] .board__title`);
+    if (title) title.textContent = label;
+  } else if (kind === "sub") {
+    const chip = document.querySelector(`#squad-board .chip[data-g="${g}"][data-s="${s}"] .chip__name`);
+    if (chip) chip.textContent = label;
+  }
+}
 
 function currentModel() {
   if (state.tab === "squads") return state.models.squads;
