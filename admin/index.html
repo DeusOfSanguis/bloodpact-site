@@ -368,6 +368,10 @@
   .preview-banner { display:flex; align-items:center; gap:12px; padding:13px 16px; margin:0 0 12px; border:1px solid rgba(216,188,82,.32); border-radius:14px; background:rgba(216,188,82,.07); color:var(--muted); font-size:12px; }
   .preview-banner strong { color:var(--gold); }
   .preview-banner__sigil { display:grid; place-items:center; width:30px; height:30px; flex:0 0 30px; border-radius:9px; background:rgba(216,188,82,.12); color:var(--gold); font-size:18px; }
+  .moon-editor__message:empty { display:none; }
+  .moon-person { display:flex; align-items:center; gap:8px; margin:7px 0; }
+  .moon-person input { flex:1; min-width:0; }
+  .moon-person button { flex:0 0 auto; }
   .li-rich {
     min-height:40px; width:100%; padding:9px 11px; border:1px solid var(--line);
     border-radius:9px; background:#100c0e; color:var(--text); outline:none; line-height:1.5;
@@ -643,12 +647,13 @@
             <button type="button" data-filter="all" class="on">Все</button>
             <button type="button" data-filter="main">Основные</button>
             <button type="button" data-filter="sub">Поглощённые</button>
+            <button type="button" data-filter="special">Особые</button>
           </div>
         </div>
-        <p class="hint">Тип клана переключается в карточке: «Основной» или «Поглощённый».
-          У поглощённого клана можно выбрать основного клана-владельца — клан сразу переедет к нему (это же работает на телефоне, где перетаскивание недоступно).</p>
+        <p class="hint">В карточке выберите тип: «Основной», «Поглощённый» или «Особое объединение». Особые объединения находятся вне схемы кланов. Тип можно изменить обратно; описание и задачи сохраняются и при необходимости редактируются вручную. При отделении подчинение сбрасывается, а поглощённые кланы станут основными после подтверждения.</p>
         <div id="squads-list"></div>
         <button class="ghost" id="add-squad">+ Добавить основной клан</button>
+        <button class="ghost" id="add-special">+ Добавить особое объединение</button>
       </div>
     </div>
 
@@ -1051,8 +1056,8 @@ function renderNavPageButtons() {
     const label = p.nav || (isIndex ? "Главная" : p.slug);
     const sigil = p.sigil || (isIndex ? "血" : "鬼");
     const btn = document.createElement("button");
-    btn.dataset.tab = p.slug;
-    btn.className = (state.tab === p.slug) ? "on" : "";
+    btn.dataset.tab = "page-" + p.slug;
+    btn.className = (state.tab === "page-" + p.slug) ? "on" : "";
     btn.innerHTML = `<i>${escapeHtml(sigil)}</i> ${escapeHtml(label)}`;
     container.appendChild(btn);
   });
@@ -1127,6 +1132,8 @@ $("#tabs").addEventListener("click", async (e) => {
 });
 
 function ensureDynamicPageContainer(slug) {
+  if (!slug.startsWith("page-")) return;
+  const pageSlug = slug.slice(5);
   let p = $("#tab-" + slug);
   if (!p) {
     const root = $("#dynamic-tab-pages");
@@ -1136,8 +1143,8 @@ function ensureDynamicPageContainer(slug) {
     p.innerHTML = `
       <div class="card">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
-          <h2 style="margin:0">Раздел «${escapeHtml(slug)}» (<code>content/${escapeHtml(slug)}.html</code>)</h2>
-          <button class="ghost mini" data-act="del-page" data-slug="${escapeHtml(slug)}" style="color:var(--err);border-color:rgba(255,92,92,0.4)">✕ Удалить страницу</button>
+          <h2 style="margin:0">Раздел «${escapeHtml(pageSlug)}» (<code>content/${escapeHtml(pageSlug)}.html</code>)</h2>
+          <button class="ghost mini" data-act="del-page" data-slug="${escapeAttr(pageSlug)}" style="color:var(--err);border-color:rgba(255,92,92,0.4)">✕ Удалить страницу</button>
         </div>
         <div id="page-editor-${slug}"></div>
       </div>
@@ -1173,6 +1180,7 @@ async function loadSquads() {
     state.models.squads = JSON.parse(f.text) || {};
     const m = state.models.squads;
     if (!Array.isArray(m.squads)) m.squads = [];
+    if (!Array.isArray(m.special)) m.special = [];
     const migrateOwner = sq => {
       if (!Array.isArray(sq.subs)) sq.subs = [];
       if (sq.owner_name === undefined) sq.owner_name = sq.owner || "";
@@ -1181,6 +1189,7 @@ async function loadSquads() {
       sq.subs.forEach(migrateOwner);
     };
     m.squads.forEach(migrateOwner);
+    m.special.forEach(migrateOwner);
   }
   if (!state.squadUI) state.squadUI = { filter: "all" };
   renderSquadFilter();
@@ -1326,6 +1335,7 @@ function clanTypeSwitchHtml(g, s) {
       <div class="seg" role="group" aria-label="Тип клана">
         <button type="button" class="${isSub ? "" : "on"}" data-act="clan-make-main" ${attrs} aria-pressed="${!isSub}">Основной</button>
         <button type="button" class="${isSub ? "on" : ""}" data-act="clan-make-sub" ${attrs} aria-pressed="${isSub}">Поглощённый</button>
+        <button type="button" data-act="clan-make-special" ${attrs} aria-pressed="false">Особое объединение</button>
       </div>
       <span class="clan-type__hint">${isSub
         ? "Входит в основной клан и показывается внутри его группы"
@@ -1371,11 +1381,16 @@ function renderSquadList() {
   const filter = (state.squadUI && state.squadUI.filter) || "all";
   root.innerHTML = "";
 
-  if (!mains.length) {
+  if (!mains.length && !(m.special || []).length) {
     const p = document.createElement("p");
     p.className = "hint";
     p.textContent = "Кланов пока нет — добавьте первый кнопкой ниже.";
     root.appendChild(p);
+    return;
+  }
+
+  if (filter === "special") {
+    renderSpecialCards(root);
     return;
   }
 
@@ -1428,6 +1443,45 @@ function renderSquadList() {
     if (subsHolder) subs.forEach((sub, si) => subsHolder.appendChild(renderSubCard(gi, si, sub, sq.name)));
     root.appendChild(det);
   });
+  if (filter === "all" && (m.special || []).length) renderSpecialCards(root);
+}
+
+function renderSpecialCards(root) {
+  const special = state.models.squads.special || [];
+  const head = document.createElement("div");
+  head.className = "subs-flat__head";
+  head.textContent = "Особые объединения · вне схемы кланов";
+  root.appendChild(head);
+  if (!special.length) {
+    const hint = document.createElement("p"); hint.className = "hint";
+    hint.textContent = "Особых объединений пока нет. Добавьте их ниже или измените тип существующего клана.";
+    root.appendChild(hint);
+  }
+  special.forEach((sq, i) => {
+    const det = document.createElement("details");
+    det.className = "block";
+    det.dataset.clanKey = `special:${i}`;
+    det.dataset.clanType = "special";
+    det.innerHTML = `
+      <summary>Особое объединение: ${escapeHtml(clanName(sq))}</summary>
+      <div class="clan-type">
+        <span class="clan-type__label">Тип объединения</span>
+        <div class="seg" role="group" aria-label="Тип объединения">
+          <button type="button" data-act="special-make-main" data-g="${i}" aria-pressed="false">Основной</button>
+          <button type="button" data-act="special-make-sub" data-g="${i}" aria-pressed="false">Поглощённый</button>
+          <button type="button" class="on" aria-pressed="true">Особое объединение</button>
+        </div>
+        <span class="clan-type__hint">Отдельно от основных и поглощённых кланов</span>
+      </div>
+      ${squadFieldsHtml(`special.${i}`, sq, null, true)}
+      <div class="item-toolbar">
+        <button class="ghost mini" data-act="special-up" data-g="${i}">↑ Выше</button>
+        <button class="ghost mini" data-act="special-down" data-g="${i}">↓ Ниже</button>
+        <button class="ghost mini" data-act="special-duplicate" data-g="${i}">Дублировать</button>
+        <button class="ghost mini" data-act="special-del" data-g="${i}">Удалить объединение</button>
+      </div>`;
+    root.appendChild(det);
+  });
 }
 
 function renderSubCard(gi, si, sub, parentName) {
@@ -1451,12 +1505,12 @@ function renderSubCard(gi, si, sub, parentName) {
 }
 
 
-function squadFieldsHtml(p, sq, parentName) {
+function squadFieldsHtml(p, sq, parentName, isSpecial = false) {
   const ovRows = (sq.overseers || []).map((ov, oi) => overseerHtml(p, oi, ov)).join("");
   return `
     <label>Название</label>
     <input type="text" data-path="${p}.name" value="${escapeAttr(sq.name || "")}">
-    <div class="row">
+    ${isSpecial ? "" : `<div class="row">
       <div>
         <label>Подпись подчинения (пусто = «Поглощённый клан»)</label>
         <input type="text" data-path="${p}.parent_label" value="${escapeAttr(sq.parent_label || "")}" placeholder="Поглощённый клан">
@@ -1465,7 +1519,7 @@ function squadFieldsHtml(p, sq, parentName) {
         <label>Чему подчинён (пусто = ${parentName ? escapeAttr(parentName) : "не указано"})</label>
         <input type="text" data-path="${p}.parent" value="${escapeAttr(sq.parent || "")}" placeholder="${parentName ? escapeAttr(parentName) : ""}">
       </div>
-    </div>
+    </div>`}
     <div class="row">
       <div>
         <label>Владелец: звание (например «Лорд Хаоса»)</label>
@@ -1478,10 +1532,18 @@ function squadFieldsHtml(p, sq, parentName) {
     </div>
     <label>Описание</label>
     <textarea data-path="${p}.description">${escapeHtml(sq.description || "")}</textarea>
-    <div class="pair">
-      <b style="font-size:13px;letter-spacing:.04em">Смотрящие</b>
+    <div class="pair moon-editor" data-moon-editor="${p}">
+      <b style="font-size:13px;letter-spacing:.04em">Смотрящие луны</b>
+      <p class="hint">Добавьте луну по имени, типу и рангу. Она появится в соответствующей группе смотрящих.</p>
+      <div class="row">
+        <div><label>Имя луны</label><input type="text" data-moon-name placeholder="Например, Кокушибо" aria-label="Имя луны"></div>
+        <div><label>Тип луны</label><select data-moon-kind aria-label="Тип луны"><option value="upper">Высшая луна</option><option value="lower">Низшая луна</option></select></div>
+        <div><label>Ранг</label><select data-moon-rank aria-label="Ранг луны"><option value="">Без указания ранга</option><option>Первая</option><option>Вторая</option><option>Третья</option><option>Четвёртая</option><option>Пятая</option><option>Шестая</option></select></div>
+      </div>
+      <div class="item-toolbar"><button type="button" data-act="moon-add" data-p="${p}">+ Добавить луну</button></div>
+      <p class="hint moon-editor__message" role="status" aria-live="polite"></p>
       <div data-ov="${p}">${ovRows}</div>
-      <button class="ghost mini" data-act="ov-add" data-p="${p}">+ Добавить роль смотрящего</button>
+      <button type="button" class="ghost mini" data-act="ov-add" data-p="${p}">+ Добавить другую роль смотрящего</button>
     </div>
     <div class="row">
       <div>
@@ -1504,20 +1566,27 @@ function squadFieldsHtml(p, sq, parentName) {
 }
 
 function overseerHtml(p, oi, ov) {
+  const people = Array.isArray(ov.people) ? ov.people : [];
   return `
     <div class="pair" style="margin:6px 0">
-      <div class="row">
-        <div>
-          <label>Роль (например «Смотрящая высшая луна»)</label>
-          <input type="text" data-path="${p}.overseers.${oi}.role" value="${escapeAttr(ov.role || "")}">
-        </div>
-      </div>
-      <label>Люди / демоны (по одной строке на демона, формат: <code>Звание: Имя</code> или просто <code>Имя</code>)</label>
-      <textarea data-lines="${p}.overseers.${oi}.people">${escapeHtml((ov.people || []).join("\n"))}</textarea>
+      <label>Роль смотрящего</label>
+      <input type="text" data-path="${p}.overseers.${oi}.role" value="${escapeAttr(ov.role || "")}">
+      <label>Луны / демоны</label>
+      ${people.length ? people.map((person, pi) => `
+        <div class="moon-person">
+          <input type="text" data-path="${p}.overseers.${oi}.people.${pi}" value="${escapeAttr(person || "")}" aria-label="Луна или демон ${pi + 1}">
+          <button type="button" class="ghost mini" data-act="moon-del" data-p="${p}" data-o="${oi}" data-person="${pi}" aria-label="Удалить ${escapeAttr(person || "луну")}">✕</button>
+        </div>`).join("") : '<p class="hint">В этой роли пока нет лун.</p>'}
       <div class="item-toolbar">
-        <button class="ghost mini" data-act="ov-del" data-p="${p}" data-o="${oi}">Удалить роль</button>
+        <button type="button" class="ghost mini" data-act="moon-blank" data-p="${p}" data-o="${oi}">+ Добавить участника в эту роль</button>
+        <button type="button" class="ghost mini" data-act="ov-del" data-p="${p}" data-o="${oi}">Удалить роль и её состав</button>
       </div>
     </div>`;
+}
+
+function renderOverseers(editor, path, squad) {
+  const container = editor.querySelector("[data-ov]");
+  container.innerHTML = (squad.overseers || []).map((ov, oi) => overseerHtml(path, oi, ov)).join("");
 }
 
 $("#add-squad").addEventListener("click", () => {
@@ -1528,6 +1597,18 @@ $("#add-squad").addEventListener("click", () => {
   renderSquadFilter();
   renderSquads();
   markDirty("squads");
+});
+
+$("#add-special").addEventListener("click", () => {
+  const m = state.models.squads;
+  if (!Array.isArray(m.special)) m.special = [];
+  const sq = emptySquad("Новое объединение");
+  sq.tasks_label = "Задачи объединения:";
+  m.special.push(sq);
+  state.squadUI.filter = "special";
+  renderSquadFilter(); renderSquads();
+  markDirty("squads");
+  openSpecialCard(m.special.length - 1);
 });
 
 /* ---------- фильтр карточек: все / основные / поглощённые ---------- */
@@ -1576,8 +1657,7 @@ function openClanPicker(btn, g) {
 
 function openClanCard(g, s) {
   const isSub = s !== null && s !== undefined;
-  if (isSub && state.squadUI.filter === "main") setSquadFilter("all");
-  if (!isSub && state.squadUI.filter === "sub") setSquadFilter("all");
+  if (state.squadUI.filter === "special" || (isSub && state.squadUI.filter === "main") || (!isSub && state.squadUI.filter === "sub")) setSquadFilter("all");
   const key = isSub ? `sub:${g}:${s}` : `main:${g}`;
   const el = document.querySelector(`#squads-list details[data-clan-key="${key}"]`);
   if (!el) return;
@@ -1592,6 +1672,25 @@ function openClanCard(g, s) {
   setTimeout(() => el.classList.remove("flash-card"), 1600);
 }
 
+function openSpecialCard(i) {
+  if (!["all", "special"].includes(state.squadUI.filter)) setSquadFilter("all");
+  const card = document.querySelector(`#squads-list details[data-clan-key="special:${i}"]`);
+  if (card) { card.open = true; if (card.scrollIntoView) card.scrollIntoView({ behavior: "smooth", block: "center" }); }
+}
+
+function openSpecialPicker(btn, i) {
+  const card = btn.closest("details.block"), mains = mainSquads();
+  if (!mains.length) { alert("Чтобы сделать объединение поглощённым, сначала добавьте основной клан."); return; }
+  let box = card.querySelector(".clan-picker");
+  if (box) { box.querySelector("select").focus(); return; }
+  box = document.createElement("div"); box.className = "clan-picker";
+  box.innerHTML = `<div><label>Основной клан-владелец</label><select>${mains.map((sq, g) => `<option value="${g}">${escapeHtml(clanName(sq))}</option>`).join("")}</select></div>
+    <div class="clan-picker__actions"><button type="button" data-act="special-pick-confirm" data-g="${i}">Сделать поглощённым</button>
+    <button type="button" class="ghost" data-act="clan-pick-cancel">Отмена</button></div>`;
+  card.querySelector(".clan-type").insertAdjacentElement("afterend", box);
+  box.querySelector("select").focus();
+}
+
 function handleClanAction(act, btn) {
   if (!state.models.squads) return;
   const mains = mainSquads();
@@ -1600,6 +1699,49 @@ function handleClanAction(act, btn) {
   const s = hasS ? +btn.dataset.s : null;
 
   if (act === "open-clan") { openClanCard(g, s); return; }
+
+  if (act === "clan-make-special") {
+    const source = hasS ? (mains[g] && clanSubs(mains[g])[s]) : mains[g];
+    if (!source) return;
+    const children = clanSubs(source);
+    if (children.length && !confirm(`У «${clanName(source)}» есть поглощённые кланы (${children.length}). Они станут основными кланами. Продолжить?`)) return;
+    const orphans = children.splice(0);
+    orphans.forEach(child => { child.parent = ""; child.parent_label = ""; });
+    if (hasS) clanSubs(mains[g]).splice(s, 1);
+    else mains.splice(g, 1);
+    mains.splice(Math.min(g, mains.length), 0, ...orphans);
+    source.parent = ""; source.parent_label = "";
+    const special = state.models.squads.special || (state.models.squads.special = []);
+    special.push(source);
+    state.squadUI.filter = "special";
+    renderSquadFilter(); renderSquads(); markDirty("squads");
+    openSpecialCard(special.length - 1);
+    flashBoard(`«${clanName(source)}» теперь особое объединение`);
+    return;
+  }
+
+  if (act === "special-make-sub") { openSpecialPicker(btn, g); return; }
+  if (act === "special-make-main" || act === "special-pick-confirm") {
+    const special = state.models.squads.special || [];
+    const source = special[g];
+    if (!source) return;
+    let target = null;
+    if (act === "special-pick-confirm") {
+      const sel = btn.closest(".clan-picker")?.querySelector("select");
+      if (!sel || !mains[+sel.value]) return;
+      target = mains[+sel.value];
+    }
+    special.splice(g, 1);
+    source.parent = ""; source.parent_label = "";
+    if (target) clanSubs(target).push(source);
+    else mains.push(source);
+    state.squadUI.filter = "all";
+    renderSquadFilter(); renderSquads(); markDirty("squads");
+    if (target) openClanCard(mains.indexOf(target), clanSubs(target).length - 1);
+    else openClanCard(mains.length - 1, null);
+    flashBoard(`«${clanName(source)}» теперь ${target ? "поглощённый" : "основной"} клан`);
+    return;
+  }
 
   // Поглощённый → основной
   if (act === "clan-make-main") {
@@ -2108,10 +2250,11 @@ $("#create-tab-btn").addEventListener("click", async () => {
   };
 
   state.models._pages.pages.push(newPageObj);
-  state.models[slug] = {
+  const tab = "page-" + slug;
+  state.models[tab] = {
     html: `<section class="s">\n  <p class="lead"><strong>${escapeHtml(title)}</strong> — новый раздел свитка.</p>\n  <p>Здесь можно разместить правила, условия и описание.</p>\n</section>\n`
   };
-  CONFIG.files[slug] = `content/${slug}.html`;
+  CONFIG.files[tab] = `content/${slug}.html`;
 
   hideNewTabModal();
   $("#new-slug").value = "";
@@ -2122,23 +2265,23 @@ $("#create-tab-btn").addEventListener("click", async () => {
   renderNavPageButtons();
   renderPagesList();
   markDirty("pages");
-  markDirty(slug);
+  markDirty(tab);
 
   // Переходим сразу на созданную страницу
-  state.tab = slug;
-  $$("#tabs button").forEach(b => b.classList.toggle("on", b.dataset.tab === slug));
+  state.tab = tab;
+  $$("#tabs button").forEach(b => b.classList.toggle("on", b.dataset.tab === tab));
   $$(".tab-page").forEach(p => p.classList.add("hidden"));
-  ensureDynamicPageContainer(slug);
-  const target = $("#tab-" + slug);
+  ensureDynamicPageContainer(tab);
+  const target = $("#tab-" + tab);
   if (target) target.classList.remove("hidden");
-  await loadTab(slug);
+  await loadTab(tab);
 });
 
 /* ================== РЕДАКТОР СВИТКОВ И РАЗДЕЛОВ (HTML) ================== */
 async function loadHtmlPage(slug) {
   ensureDynamicPageContainer(slug);
   if (!CONFIG.files[slug]) {
-    CONFIG.files[slug] = `content/${slug}.html`;
+    CONFIG.files[slug] = `content/${slug.slice(5)}.html`;
   }
   if (!state.models[slug]) {
     const defaultHtml = `<section class="s">\n  <p class="lead">Раздел <strong>${escapeHtml(slug)}</strong>.</p>\n  <p>Текст раздела...</p>\n</section>\n`;
@@ -2207,6 +2350,13 @@ function renderSectionsList(slug, sections) {
   if (!root) return;
   root.innerHTML = "";
   sections.forEach((sec, si) => {
+    if (sec.type === "passthrough") {
+      const info = document.createElement("p");
+      info.className = "hint";
+      info.textContent = sec.html.startsWith("<!--") ? "Служебный комментарий сохранён" : "Служебная вставка: " + sec.html;
+      root.appendChild(info);
+      return;
+    }
     if (sec.type === "hr") {
       const hr = document.createElement("div");
       hr.style.cssText = "display:flex;align-items:center;gap:10px;margin:12px 0";
@@ -2318,9 +2468,20 @@ function renderSectionItem(slug, si, ii, it) {
         <button class="ghost mini" data-act="del-item" data-slug="${slug}" data-si="${si}" data-ii="${ii}">✕</button>
       </div>`;
   } else {
+    const holder = document.createElement("div");
+    holder.innerHTML = it.html || "";
+    const candidates = Array.from(holder.querySelectorAll("h1,h2,h3,h4,h5,h6,p,li,summary,dt,dd,span"));
+    const fields = candidates.map((el, index) => ({ el, index })).filter(({el}) =>
+      el.textContent.trim() && !el.querySelector("h1,h2,h3,h4,h5,h6,p,li,summary,dt,dd") &&
+      !(el.tagName === "SPAN" && el.closest("h1,h2,h3,h4,h5,h6,p,li,summary,dt,dd")) &&
+      !el.closest("script,style,svg,button"));
     div.innerHTML = `
-      <label>Специальный / RAW блок</label>
-      <textarea data-item-field="html" data-slug="${slug}" data-si="${si}" data-ii="${ii}">${escapeHtml(it.html || "")}</textarea>
+      ${fields.length ? `<label>Текст внутри блока · разметка и оформление сохраняются</label>` + fields.map(({el, index}) => `
+        <div class="pair"><label>${escapeHtml(el.tagName.toLowerCase())}</label>
+        <textarea data-raw-field="${index}" data-slug="${slug}" data-si="${si}" data-ii="${ii}">${escapeHtml(el.innerHTML)}</textarea></div>`).join("") : '<p class="hint">Служебный или специальный блок.</p>'}
+      <details><summary>Исходный HTML блока</summary>
+        <textarea data-item-field="html" data-slug="${slug}" data-si="${si}" data-ii="${ii}">${escapeHtml(it.html || "")}</textarea>
+      </details>
       <div class="item-toolbar">
         <button class="ghost mini" data-act="del-item" data-slug="${slug}" data-si="${si}" data-ii="${ii}">✕</button>
       </div>`;
@@ -2333,43 +2494,46 @@ function parseHtmlSections(html) {
   const container = document.createElement("div");
   container.innerHTML = html;
   const sections = [];
-  let currentSec = { cls: "s", items: [] };
-
+  let currentSec = { root: true, items: [] };
   function pushCurrent() {
-    if (currentSec.items.length > 0) {
-      sections.push(currentSec);
-      currentSec = { cls: "s", items: [] };
-    }
+    if (currentSec.items.length) sections.push(currentSec);
+    currentSec = { root: true, items: [] };
   }
-
-  Array.from(container.children).forEach(child => {
+  Array.from(container.childNodes).forEach(child => {
+    if (child.nodeType !== Node.ELEMENT_NODE) {
+      // Шаблонные вставки и комментарии не должны исчезать при редактировании.
+      if (child.nodeType === Node.COMMENT_NODE || (child.textContent || "").trim()) {
+        pushCurrent();
+        const wrapper = document.createElement("div");
+        wrapper.appendChild(child.cloneNode(true));
+        sections.push({ type: "passthrough", html: wrapper.innerHTML });
+      }
+      return;
+    }
     const tag = child.tagName.toLowerCase();
     if (tag === "section") {
       pushCurrent();
-      const sec = { cls: child.className || "s", items: [] };
-      Array.from(child.children).forEach(el => sec.items.push(nodeToItem(el)));
-      sections.push(sec);
+      sections.push({ cls: child.className, attrs: attributesOf(child), items: Array.from(child.childNodes).filter(n => n.nodeType === Node.ELEMENT_NODE || n.nodeType === Node.COMMENT_NODE || (n.textContent || "").trim()).map(nodeToItem) });
     } else if (tag === "hr") {
       pushCurrent();
-      sections.push({ type: "hr" });
-    } else if (tag === "figure") {
-      pushCurrent();
-      const img = child.querySelector("img");
-      sections.push({
-        type: "figure",
-        cls: child.className || "img",
-        src: img ? img.getAttribute("src") || "" : "",
-        alt: img ? img.getAttribute("alt") || "" : "",
-      });
+      sections.push({ type: "hr", html: child.outerHTML });
     } else {
       currentSec.items.push(nodeToItem(child));
     }
   });
   pushCurrent();
-  if (sections.length === 0) {
-    sections.push({ cls: "s", items: [{ type: "p", noteType: "", text: container.textContent.trim() }] });
-  }
   return sections;
+}
+
+function attributesOf(el) {
+  return Array.from(el.attributes, a => [a.name, a.value]);
+}
+
+function elementHtml(tag, attrs, content) {
+  const el = document.createElement(tag);
+  (attrs || []).forEach(([name, value]) => el.setAttribute(name, value));
+  el.innerHTML = content;
+  return el.outerHTML;
 }
 
 
@@ -2402,9 +2566,15 @@ function cleanInlineHtml(html) {
 }
 
 function nodeToItem(el) {
+  if (el.nodeType === Node.COMMENT_NODE) return { type: "raw", html: `<!--${el.data}-->` };
+  if (el.nodeType === Node.TEXT_NODE) {
+    const wrapper = document.createElement("div");
+    wrapper.appendChild(el.cloneNode(true));
+    return { type: "raw", html: wrapper.innerHTML };
+  }
   const tag = el.tagName.toLowerCase();
   if (tag === "h2" || tag === "h3" || tag === "h4") {
-    return { type: tag, text: el.innerHTML.trim() };
+    return { type: tag, attrs: attributesOf(el), text: el.innerHTML };
   }
   if (tag === "p") {
     let noteType = "";
@@ -2413,53 +2583,41 @@ function nodeToItem(el) {
     else if (el.classList.contains("note--addition")) noteType = "addition";
     else if (el.classList.contains("note--example")) noteType = "example";
     else if (el.classList.contains("note")) noteType = "note";
-    return { type: "p", noteType: noteType, text: el.innerHTML.trim() };
+    return { type: "p", attrs: attributesOf(el), noteType: noteType, text: el.innerHTML };
   }
-  if (tag === "ul" || tag === "ol") {
+  if ((tag === "ul" || tag === "ol") && Array.from(el.children).every(li => li.tagName === "LI" && !li.attributes.length && !li.querySelector("ul, ol"))) {
     const items = Array.from(el.querySelectorAll(":scope > li")).map(li => li.innerHTML.trim());
-    return { type: "list", ordered: tag === "ol", items: items };
+    return { type: "list", attrs: attributesOf(el), ordered: tag === "ol", items: items };
   }
   return { type: "raw", html: el.outerHTML };
 }
 
 function serializeHtmlSections(sections) {
-  const parts = [];
-  sections.forEach(sec => {
-    if (sec.type === "hr") {
-      parts.push("<hr>");
-      return;
-    }
-    if (sec.type === "figure") {
-      parts.push(`<figure class="${escapeAttr(sec.cls || 'img')}">\n  <img src="${escapeAttr(sec.src || '')}" alt="${escapeAttr(sec.alt || '')}" loading="lazy">\n</figure>`);
-      return;
-    }
+  return sections.map(sec => {
+    if (sec.type === "passthrough") return sec.html || "";
+    if (sec.type === "hr") return sec.html || "<hr>";
     const inner = (sec.items || []).map(it => {
-      if (it.type === "h2" || it.type === "h3" || it.type === "h4") {
-        return `  <${it.type}>${it.text || ''}</${it.type}>`;
-      }
+      if (["h2", "h3", "h4"].includes(it.type)) return elementHtml(it.type, it.attrs, it.text || "");
       if (it.type === "p") {
-        let clsAttr = "";
-        if (it.noteType === "lead") clsAttr = ' class="lead"';
-        else if (it.noteType === "note") clsAttr = ' class="note"';
-        else if (it.noteType === "exception") clsAttr = ' class="note note--exception"';
-        else if (it.noteType === "addition") clsAttr = ' class="note note--addition"';
-        else if (it.noteType === "example") clsAttr = ' class="note note--example"';
-        return `  <p${clsAttr}>${it.text || ''}</p>`;
+        const attrs = (it.attrs || []).filter(([name]) => name !== "class");
+        const classes = ((it.attrs || []).find(([name]) => name === "class") || ["", ""])[1]
+          .split(/\s+/).filter(c => c && !["lead", "note", "note--exception", "note--addition", "note--example"].includes(c));
+        if (it.noteType === "lead") classes.push("lead");
+        else if (it.noteType) {
+          classes.push("note");
+          if (it.noteType !== "note") classes.push("note--" + it.noteType);
+        }
+        if (classes.length) attrs.push(["class", classes.join(" ")]);
+        return elementHtml("p", attrs, it.text || "");
       }
-      if (it.type === "list") {
-        const tag = it.ordered ? "ol" : "ul";
-        const lis = (it.items || []).map(li => `    <li>${li || ''}</li>`).join("\n");
-        return `  <${tag}>\n${lis}\n  </${tag}>`;
-      }
-      if (it.type === "raw") {
-        return `  ${it.html || ''}`;
-      }
-      return "";
-    }).filter(Boolean).join("\n\n");
-    
-    parts.push(`<section class="${escapeAttr(sec.cls || 's')}">\n${inner}\n</section>`);
-  });
-  return parts.join("\n\n<hr>\n\n") + "\n";
+      if (it.type === "list") return elementHtml(it.ordered ? "ol" : "ul", it.attrs, (it.items || []).map(li => `<li>${li || ""}</li>`).join("\n"));
+      return it.html || "";
+    }).join("\n");
+    if (sec.root) return inner;
+    const attrs = (sec.attrs || []).filter(([name]) => name !== "class");
+    if (sec.cls) attrs.push(["class", sec.cls]);
+    return elementHtml("section", attrs, "\n" + inner + "\n");
+  }).join("\n\n") + "\n";
 }
 
 /* ================== ОБРАБОТЧИКИ ДЕЙСТВИЙ И КНОПОК ================== */
@@ -2496,7 +2654,9 @@ document.addEventListener("click", async (e) => {
   const act = actBtn.dataset.act;
 
   if (act === "open-page-editor") {
-    const slug = actBtn.dataset.slug;
+    if (state.dirty && !confirm("Есть несохранённые изменения. Отменить их и перейти?")) return;
+    if (state.dirty) discardCurrentDraft();
+    const slug = "page-" + actBtn.dataset.slug;
     state.tab = slug;
     $$("#tabs button").forEach(b => b.classList.toggle("on", b.dataset.tab === slug));
     $$(".tab-page").forEach(p => p.classList.add("hidden"));
@@ -2528,8 +2688,8 @@ document.addEventListener("click", async (e) => {
     const arr = state.models._pages.pages;
     const idx = arr.findIndex(p => p.slug === slug);
     if (idx !== -1) arr.splice(idx, 1);
-    delete state.models[slug];
-    const pageDom = $("#tab-" + slug);
+    delete state.models["page-" + slug];
+    const pageDom = $("#tab-page-" + slug);
     if (pageDom) pageDom.remove();
     renderPagesList();
     renderNavPageButtons();
@@ -2593,8 +2753,69 @@ document.addEventListener("click", async (e) => {
     return;
   }
 
+  // Управление смотрящими обновляет только карточку лун, не закрывая клан.
+  if (["moon-add", "moon-del", "moon-blank", "ov-add", "ov-del"].includes(act) && state.tab === "squads") {
+    const path = actBtn.dataset.p;
+    const squad = getPath(state.models.squads, path);
+    const editor = actBtn.closest("[data-moon-editor]");
+    if (!squad || !editor) return;
+    if (!Array.isArray(squad.overseers)) squad.overseers = [];
+    const message = editor.querySelector(".moon-editor__message");
+    if (act === "moon-add") {
+      const nameInput = editor.querySelector("[data-moon-name]");
+      const name = nameInput.value.trim();
+      if (!name) {
+        message.textContent = "Введите имя луны.";
+        nameInput.focus();
+        return;
+      }
+      const kind = editor.querySelector("[data-moon-kind]").value;
+      const rank = editor.querySelector("[data-moon-rank]").value;
+      const typeName = kind === "upper" ? "Высшая" : "Низшая";
+      const role = kind === "upper" ? "Смотрящая высшая луна" : "Смотрящая низшая луна";
+      const person = rank ? `${name} - ${rank} ${typeName} Луна` : name;
+      let group = squad.overseers.find(ov => (ov.role || "").trim().toLocaleLowerCase("ru") === role.toLocaleLowerCase("ru"));
+      if (group && (group.people || []).some(personName => personName.trim().toLocaleLowerCase("ru") === person.toLocaleLowerCase("ru"))) {
+        message.textContent = "Такая луна уже есть в этой группе.";
+        return;
+      }
+      if (!group) { group = { role, people: [] }; squad.overseers.push(group); }
+      if (!Array.isArray(group.people)) group.people = [];
+      group.people.push(person);
+      nameInput.value = "";
+      message.textContent = `Луна «${name}» добавлена. Не забудьте сохранить изменения.`;
+    } else if (act === "moon-blank") {
+      const group = squad.overseers[+actBtn.dataset.o];
+      if (!group) return;
+      if (!Array.isArray(group.people)) group.people = [];
+      group.people.push("");
+      message.textContent = "Введите имя участника в новой строке.";
+    } else if (act === "moon-del") {
+      const group = squad.overseers[+actBtn.dataset.o];
+      if (!group || !Array.isArray(group.people)) return;
+      group.people.splice(+actBtn.dataset.person, 1);
+      message.textContent = "Луна удалена. Не забудьте сохранить изменения.";
+    } else if (act === "ov-add") {
+      squad.overseers.push({ role: "Новая роль смотрящего", people: [] });
+      message.textContent = "Добавлена новая роль. Измените её название и добавьте лун.";
+    } else {
+      const group = squad.overseers[+actBtn.dataset.o];
+      if (!group || !confirm(`Удалить роль «${group.role || "Без названия"}» вместе со всеми её лунами?`)) return;
+      squad.overseers.splice(+actBtn.dataset.o, 1);
+      message.textContent = "Роль удалена. Не забудьте сохранить изменения.";
+    }
+    renderOverseers(editor, path, squad);
+    if (act === "moon-blank") {
+      const inputs = editor.querySelectorAll(`[data-path="${path}.overseers.${actBtn.dataset.o}.people.${squad.overseers[+actBtn.dataset.o].people.length - 1}"]`);
+      if (inputs.length) inputs[0].focus();
+    }
+    markDirty("squads");
+    return;
+  }
+
   // Тип клана и схема кланов
-  if (act === "clan-make-main" || act === "clan-make-sub" ||
+  if (act === "clan-make-special" || act === "special-make-main" || act === "special-make-sub" ||
+      act === "special-pick-confirm" || act === "clan-make-main" || act === "clan-make-sub" ||
       act === "clan-pick-confirm" || act === "clan-pick-cancel") {
     if (state.tab === "squads") handleClanAction(act, actBtn);
     return;
@@ -2609,9 +2830,18 @@ document.addEventListener("click", async (e) => {
     const [x] = arr.splice(from, 1);
     arr.splice(to, 0, x);
   };
-  const squadByPath = (p) => getPath(m, p);
 
-  if (act === "squad-up") move(m.squads, g, g - 1);
+  if (act === "special-up") move(m.special, g, g - 1);
+  else if (act === "special-down") move(m.special, g, g + 1);
+  else if (act === "special-duplicate") {
+    const copy = JSON.parse(JSON.stringify(m.special[g])); copy.name = (copy.name || "Объединение") + " — копия";
+    m.special.splice(g + 1, 0, copy);
+  }
+  else if (act === "special-del") {
+    if (confirm(`Удалить особое объединение «${clanName(m.special[g])}»?`)) m.special.splice(g, 1);
+    else return;
+  }
+  else if (act === "squad-up") move(m.squads, g, g - 1);
   else if (act === "squad-down") move(m.squads, g, g + 1);
   else if (act === "squad-duplicate") {
     const copy = JSON.parse(JSON.stringify(m.squads[g])); copy.name = (copy.name || "Клан") + " — копия";
@@ -2640,15 +2870,6 @@ document.addEventListener("click", async (e) => {
   else if (act === "sub-promote") {
     if (!promoteSubToMain(g, s)) return;
   }
-  else if (act === "ov-add") {
-    const sq = squadByPath(actBtn.dataset.p);
-    sq.overseers = sq.overseers || [];
-    sq.overseers.push({ role: "Смотрящая высшая луна", people: [] });
-  }
-  else if (act === "ov-del") {
-    const sq = squadByPath(actBtn.dataset.p);
-    sq.overseers.splice(o, 1);
-  }
   else if (act === "entry-up" || act === "entry-down" || act === "entry-duplicate" || act === "entry-del") {
     const rating = m[actBtn.dataset.rankType || "personal"];
     if (!rating || !Array.isArray(rating.entries)) return;
@@ -2673,6 +2894,24 @@ document.addEventListener("click", async (e) => {
 document.addEventListener("input", (e) => {
   const el = e.target;
   
+  if (el.dataset.rawField !== undefined) {
+    const slug = el.dataset.slug, si = +el.dataset.si, ii = +el.dataset.ii;
+    const sections = parseHtmlSections(state.models[slug].html || "");
+    const item = sections[si] && sections[si].items && sections[si].items[ii];
+    if (item && item.type === "raw") {
+      const holder = document.createElement("div");
+      holder.innerHTML = item.html || "";
+      const target = holder.querySelectorAll("h1,h2,h3,h4,h5,h6,p,li,summary,dt,dd,span")[+el.dataset.rawField];
+      if (target) {
+        target.innerHTML = el.value;
+        item.html = holder.innerHTML;
+        state.models[slug].html = serializeHtmlSections(sections);
+        markDirty(slug);
+      }
+    }
+    return;
+  }
+
   if (el.dataset.itemField) {
     const slug = el.dataset.slug;
     const si = +el.dataset.si;
@@ -2738,6 +2977,7 @@ function updateClanSummary(det, name) {
   const sum = det.querySelector("summary");
   if (!sum) return;
   const isSub = det.dataset.clanType === "sub";
+  if (det.dataset.clanType === "special") { sum.textContent = "Особое объединение: " + (name || "Без названия"); return; }
   const text = (isSub ? "Поглощённый клан: " : "Клан: ") + (name || "Без названия");
   if (isSub) { sum.textContent = text; return; }
   const g = +String(det.dataset.clanKey || "main:0").split(":")[1];
@@ -2873,7 +3113,7 @@ $("#save-btn").addEventListener("click", async () => {
       sha = state.shas.pages;
     } else {
       key = state.tab;
-      path = CONFIG.files[state.tab] || `content/${state.tab}.html`;
+      path = CONFIG.files[state.tab] || `content/${state.tab.slice(5)}.html`;
       text = (state.models[state.tab] && state.models[state.tab].html) || "";
       message = "Админка: обновлена вкладка «" + state.tab + "»";
       sha = state.shas[state.tab];
@@ -2903,7 +3143,7 @@ $("#save-btn").addEventListener("click", async () => {
     if (e.status === 403) {
       s.textContent = "Нет прав на запись. Нужен доступ на запись к репозиторию (админ или коллаборатор) и токен с правами Contents: Read and write.";
     } else if (e.status === 409) {
-      s.textContent = "Конфликт версий: файл изменился с момента загрузки. Обновите страницу и повторите.";
+      s.textContent = "Конфликт версий: один из файлов изменился с момента загрузки. Обновите страницу и повторите.";
     } else {
       s.textContent = "Ошибка сохранения: " + e.message;
     }

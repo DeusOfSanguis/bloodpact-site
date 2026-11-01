@@ -344,13 +344,15 @@ def render_marquee(data=None, reverse=False):
 
 # ------------------------------------------------------- списки из data/ ---
 
-def render_squad_card(sq, parent_name=None, is_sub=False):
+def render_squad_card(sq, parent_name=None, is_sub=False, is_special=False):
     """Карточка клана/поглощённого клана из content/data/squads.json.
     parent_name — название родительского клана (для поглощённых кланов);
-    is_sub — поглощённый клан: заголовок уровнем ниже (h4) и подчинённое оформление."""
+    is_sub — поглощённый клан; is_special — самостоятельное особое объединение."""
     tag = "h4" if is_sub else "h3"
     parts = [f'<{tag} class="squad">{html.escape(str(sq.get("name", "")).strip())}</{tag}>']
-    if not is_sub:
+    if is_special:
+        parts.append('<p class="squad-parent"><strong>Особое объединение</strong></p>')
+    elif not is_sub:
         parts.append('<p class="squad-parent"><strong>Высший клан</strong></p>')
     parent = str(sq.get("parent", "") or "").strip()
     label = str(sq.get("parent_label", "") or "").strip()
@@ -360,7 +362,7 @@ def render_squad_card(sq, parent_name=None, is_sub=False):
     # У вложенного поглощённого клана родителя не повторяем: он и так показан внутри
     # группы своего основного клана. Плашка нужна только самостоятельным
     # кланам с явно указанным руководством.
-    if parent and not is_sub:
+    if parent and not is_sub and not is_special:
         label = label or "Поглощённый клан"
         parts.append(
             f'<p class="squad-parent"><strong>{html.escape(label)}:</strong> {html.escape(parent)}</p>'
@@ -371,7 +373,7 @@ def render_squad_card(sq, parent_name=None, is_sub=False):
     name = str(sq.get("owner_name", "") or "").strip() or str(sq.get("owner", "") or "").strip()
     if rank or name:
         big = name or rank
-        small = rank if rank and rank != big else "Глава клана"
+        small = rank if rank and rank != big else ("Руководитель" if is_special else "Глава клана")
         parts.append(
             '<div class="squad-owner">\n'
             '<span class="squad-owner__sigil" aria-hidden="true">主</span>\n'
@@ -405,7 +407,8 @@ def render_squad_card(sq, parent_name=None, is_sub=False):
         parts.append(f"<p>{html.escape(desc)}</p>")
     tasks = [str(t).strip() for t in (sq.get("tasks") or []) if str(t).strip()]
     if tasks:
-        label = str(sq.get("tasks_label", "") or "Задачи клана:").strip() or "Задачи клана:"
+        default_label = "Задачи объединения:" if is_special else "Задачи клана:"
+        label = str(sq.get("tasks_label", "") or default_label).strip() or default_label
         parts.append(f"<p><strong>{html.escape(label)}</strong></p>")
         parts.append("<ul>" + "".join(f"<li>{html.escape(t)}</li>" for t in tasks) + "</ul>")
     note_label = str(sq.get("note_label", "") or "").strip()
@@ -424,7 +427,7 @@ def render_squads(data):
     затем следующий основной клан и его поглощённые кланы, и так далее
     (порядок и вложенность — из content/data/squads.json: у клана есть subs).
     Каждый основной клан выводится отдельной группой (секцией), поглощённые кланы —
-    вложенным блоком внутри неё."""
+    вложенным блоком внутри неё. Особые объединения из special идут отдельно."""
     squads = ((data.get("lists") or {}).get("squads") or {}).get("squads") or []
     groups = []
     for sq in squads:
@@ -438,8 +441,11 @@ def render_squads(data):
             group.append("</div>")
         group.append("</section>")
         groups.append("\n".join(group))
-    if not groups:
-        return ""
+    special = ((data.get("lists") or {}).get("squads") or {}).get("special") or []
+    if special:
+        groups.append('<section class="s"><h2>Особые объединения</h2><p>Эти объединения находятся вне системы высших и поглощённых кланов.</p></section>')
+        for sq in special:
+            groups.append('<section class="s squad-group squad-group--special">\n' + render_squad_card(sq, is_special=True) + '\n</section>')
     return "\n".join(groups)
 
 
