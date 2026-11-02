@@ -1158,6 +1158,7 @@ html.bp-seen .preloader { display: none; }
 @media (min-width: 768px) { .squadcard p { font-size: 14px; } }
 
 .gloss { display: grid; gap: 16px; margin-top: 40px; }
+.gloss__cap { grid-column: 1 / -1; margin: 0; font-size: 11px; letter-spacing: 0.4em; text-transform: uppercase; color: var(--blood); }
 @media (min-width: 768px) { .gloss { grid-template-columns: 1fr 1fr; } }
 .gloss__card { border: 1px solid rgba(237, 228, 214, 0.1); border-radius: 12px; background: rgba(13, 8, 16, 0.5); padding: 24px; }
 .gloss__card h4 { margin: 0 0 8px; font-family: var(--font-display); font-weight: 700; text-transform: uppercase; font-size: 14px; color: rgba(237, 228, 214, 0.7); }
@@ -2749,6 +2750,56 @@ body.embed .hero__crest { display: none; }
 @media (min-width: 768px) { .clanrole > p { font-size: 16px; } }
 .clanrole > p:last-child { margin-bottom: 0; }
 .clanrole .permit__note { margin-top: 24px; }
+
+/* Совет 13 — отдельный выделенный блок под вкладками иерархии */
+.council-card {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  margin-top: 36px;
+  padding: 26px;
+  border: 1px solid rgba(211, 19, 42, 0.3);
+  border-radius: var(--radius);
+  background: radial-gradient(ellipse at 85% -20%, rgba(211, 19, 42, 0.18), transparent 55%), rgba(13, 8, 16, 0.7);
+}
+@media (min-width: 768px) { .council-card { margin-top: 44px; padding: 36px 40px; } }
+.council-card__k {
+  position: absolute;
+  z-index: -1;
+  top: -30px;
+  right: 10px;
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 150px;
+  line-height: 1;
+  color: rgba(211, 19, 42, 0.12);
+  pointer-events: none;
+  user-select: none;
+}
+.council-card__cap {
+  margin: 0 0 4px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  color: var(--blood);
+}
+.council-card__title {
+  margin: 0 0 14px;
+  font-family: var(--font-display);
+  font-weight: 800;
+  text-transform: uppercase;
+  font-size: clamp(20px, 3.4vw, 28px);
+  line-height: 1.15;
+}
+.council-card__lead {
+  margin: 0;
+  max-width: 760px;
+  font-size: 13.5px;
+  line-height: 1.75;
+  color: rgba(237, 228, 214, 0.78);
+}
+@media (min-width: 768px) { .council-card__lead { font-size: 15px; } }
 
 /* --- Совет 13: двенадцать мест + Прародитель --- */
 .council-seats {

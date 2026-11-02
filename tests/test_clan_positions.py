@@ -14,19 +14,20 @@ class ClanPositionsTests(unittest.TestCase):
         self.assertIn('Устройство иерархии внутри кланов', page)
         self.assertEqual(page.count('class="tabs hierarchy-tabs" data-tabs'), 1)
         for tab in ('clan-upper', 'clan-lower', 'clan-cmd', 'clan-deputy',
-                    'warlord', 'deathmaster', 'seer', 'council'):
+                    'warlord', 'deathmaster', 'seer'):
             self.assertIn(f'data-tab="{tab}"', page)
             self.assertIn(f'data-panel="{tab}"', page)
-        block = page[page.index('hierarchy-tabs'):page.index('class="gloss reveal"')]
-        self.assertEqual(block.count('data-tab="'), 8)
-        self.assertEqual(block.count('data-panel="'), 8)
+        block = page[page.index('hierarchy-tabs'):page.index('class="council-card reveal"')]
+        self.assertEqual(block.count('data-tab="'), 7)
+        self.assertEqual(block.count('data-panel="'), 7)
+        self.assertIn('class="council-card reveal"', page)
 
     def test_positions_and_council_are_explained(self):
         source = Path('content/index.html').read_text(encoding='utf-8')
         page = build.render_fragment(source, self.data)
         for office in ('Военачальник', 'Мастер смерти', 'Провидец'):
             self.assertIn(f'<h3>{office}</h3>', page)
-        self.assertIn('<h3>Совет 13</h3>', page)
+        self.assertIn('<h3 class="council-card__title">Совет 13</h3>', page)
         self.assertEqual(page.count('class="council-seat"'), 12)
         self.assertEqual(page.count('council-seat--progenitor'), 1)
         self.assertIn('Прародитель', page)
@@ -34,7 +35,7 @@ class ClanPositionsTests(unittest.TestCase):
     def test_council_is_explained_without_clan_attribution(self):
         source = Path('content/index.html').read_text(encoding='utf-8')
         page = build.render_fragment(source, self.data)
-        start = page.index('data-panel="council"')
+        start = page.index('class="council-card reveal"')
         block = page[start:page.index('</div>', page.index('council-sum', start))]
         for clan in ('Обигири', 'Цербер', 'Полумесяц', 'Ямигири', 'Раншики'):
             self.assertNotIn(clan, block)
