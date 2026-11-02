@@ -2735,122 +2735,27 @@ body.embed .hero__crest { display: none; }
 @media (min-width: 768px) { .permit__detail { font-size: 14px; } }
 
 /* =====================================================================
-   ДОЛЖНОСТИ КЛАНА И СОВЕТ 13 — блок «Устройство иерархии внутри кланов»
+   ИЕРАРХИЯ КЛАНОВ И СОВЕТ 13 — вкладки как в «Привилегиях должностей»
    (главная страница, content/index.html)
    ===================================================================== */
-.squadgrid__cap--sub { margin-top: 56px; }
-@media (min-width: 768px) { .squadgrid__cap--sub { margin-top: 72px; } }
-
-.offices { display: grid; gap: 16px; }
-@media (min-width: 780px) { .offices { grid-template-columns: repeat(3, 1fr); } }
-
-.office {
-  position: relative;
-  isolation: isolate;
-  overflow: hidden;
-  padding: 24px;
-  border: 1px solid rgba(237, 228, 214, 0.1);
-  border-radius: 12px;
-  background: linear-gradient(160deg, rgba(211, 19, 42, 0.1), rgba(6, 3, 9, 0.6));
-  transition: border-color 0.3s, transform 0.3s;
-}
-@media (min-width: 768px) { .office { padding: 28px; } }
-.office:hover { border-color: rgba(211, 19, 42, 0.5); transform: translateY(-2px); }
-.office__k {
-  position: absolute;
-  z-index: -1;
-  top: -16px;
-  right: 6px;
-  font-family: var(--font-display);
-  font-weight: 900;
-  font-size: 96px;
-  line-height: 1;
-  color: rgba(211, 19, 42, 0.15);
-  pointer-events: none;
-  user-select: none;
-}
-.office__en {
-  margin: 0 0 4px;
-  font-family: var(--font-display);
-  font-size: 9px;
-  font-weight: 600;
-  letter-spacing: 0.34em;
-  text-transform: uppercase;
-  color: var(--blood);
-}
-.office__name {
-  margin: 0 0 12px;
-  font-family: var(--font-display);
-  font-weight: 700;
-  text-transform: uppercase;
-  font-size: 16px;
-  line-height: 1.3;
-}
-@media (min-width: 768px) { .office__name { font-size: 18px; } }
-.office p:not(.office__en) {
-  margin: 0;
-  font-size: 12.5px;
-  line-height: 1.7;
-  color: var(--ash);
-}
-@media (min-width: 768px) { .office p:not(.office__en) { font-size: 13.5px; } }
-
-/* --- Совет 13: объяснение и двенадцать мест + Прародитель --- */
-.council-card {
-  position: relative;
-  isolation: isolate;
-  overflow: hidden;
-  margin-top: 16px;
-  padding: 26px;
-  border: 1px solid rgba(211, 19, 42, 0.3);
-  border-radius: var(--radius);
-  background: radial-gradient(ellipse at 85% -20%, rgba(211, 19, 42, 0.18), transparent 55%), rgba(13, 8, 16, 0.7);
-}
-@media (min-width: 768px) { .council-card { margin-top: 20px; padding: 36px 40px; } }
-.council-card__k {
-  position: absolute;
-  z-index: -1;
-  top: -30px;
-  right: 10px;
-  font-family: var(--font-display);
-  font-weight: 900;
-  font-size: 150px;
-  line-height: 1;
-  color: rgba(211, 19, 42, 0.12);
-  pointer-events: none;
-  user-select: none;
-}
-.council-card__cap {
-  margin: 0 0 4px;
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.34em;
-  text-transform: uppercase;
-  color: var(--blood);
-}
-.council-card__title {
-  margin: 0 0 14px;
-  font-family: var(--font-display);
-  font-weight: 800;
-  text-transform: uppercase;
-  font-size: clamp(20px, 3.4vw, 28px);
-  line-height: 1.15;
-}
-.council-card p:not(.council-card__cap):not(.council-card__legend):not(.council-card__sum) {
-  margin: 0;
-  max-width: 760px;
-  font-size: 13.5px;
+.hierarchy-tabs { margin-top: 4px; }
+.clanrole { max-width: 860px; }
+.clanrole > p {
+  margin: 0 0 16px;
+  font-size: 15px;
   line-height: 1.75;
-  color: rgba(237, 228, 214, 0.78);
+  color: rgba(237, 228, 214, 0.8);
 }
-@media (min-width: 768px) {
-  .council-card p:not(.council-card__cap):not(.council-card__legend):not(.council-card__sum) { font-size: 15px; }
-}
+@media (min-width: 768px) { .clanrole > p { font-size: 16px; } }
+.clanrole > p:last-child { margin-bottom: 0; }
+.clanrole .permit__note { margin-top: 24px; }
+
+/* --- Совет 13: двенадцать мест + Прародитель --- */
 .council-seats {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin: 24px 0 16px;
+  margin: 26px 0 16px;
 }
 .council-seat {
   display: grid;
@@ -2876,7 +2781,7 @@ body.embed .hero__crest { display: none; }
   box-shadow: 0 0 24px -6px rgba(211, 19, 42, 0.8);
 }
 .council-seat--progenitor b { color: var(--ember); }
-.council-card__legend {
+.council-legend {
   display: flex;
   flex-wrap: wrap;
   gap: 6px 18px;
@@ -2885,13 +2790,13 @@ body.embed .hero__crest { display: none; }
   letter-spacing: 0.04em;
   color: var(--ash);
 }
-.council-card__legend b {
+.council-legend b {
   margin-right: 5px;
   font-family: var(--font-display);
   font-size: 13px;
   color: var(--blood);
 }
-.council-card__sum {
+.council-sum {
   margin: 0;
   padding-top: 16px;
   border-top: 1px solid rgba(237, 228, 214, 0.1);
@@ -2902,5 +2807,5 @@ body.embed .hero__crest { display: none; }
   text-transform: uppercase;
   color: var(--ash);
 }
-.council-card__sum span { margin: 0 6px; color: var(--blood); }
-.council-card__sum strong { color: var(--ember); font-size: 18px; vertical-align: -1px; }
+.council-sum span { margin: 0 6px; color: var(--blood); }
+.council-sum strong { color: var(--ember); font-size: 18px; vertical-align: -1px; }
