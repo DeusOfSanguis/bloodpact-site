@@ -1158,6 +1158,7 @@ html.bp-seen .preloader { display: none; }
 @media (min-width: 768px) { .squadcard p { font-size: 14px; } }
 
 .gloss { display: grid; gap: 16px; margin-top: 40px; }
+.gloss__cap { grid-column: 1 / -1; margin: 0; font-size: 11px; letter-spacing: 0.4em; text-transform: uppercase; color: var(--blood); }
 @media (min-width: 768px) { .gloss { grid-template-columns: 1fr 1fr; } }
 .gloss__card { border: 1px solid rgba(237, 228, 214, 0.1); border-radius: 12px; background: rgba(13, 8, 16, 0.5); padding: 24px; }
 .gloss__card h4 { margin: 0 0 8px; font-family: var(--font-display); font-weight: 700; text-transform: uppercase; font-size: 14px; color: rgba(237, 228, 214, 0.7); }
@@ -2733,3 +2734,183 @@ body.embed .hero__crest { display: none; }
 }
 .permit__detail--warning { border-left-color: rgba(255, 46, 66, 0.7); }
 @media (min-width: 768px) { .permit__detail { font-size: 14px; } }
+
+/* =====================================================================
+   ИЕРАРХИЯ КЛАНОВ И СОВЕТ 13 — вкладки как в «Привилегиях должностей»
+   (главная страница, content/index.html)
+   ===================================================================== */
+.hierarchy-tabs { margin-top: 4px; }
+.clanrole { max-width: 860px; }
+.clanrole > p {
+  margin: 0 0 16px;
+  font-size: 15px;
+  line-height: 1.75;
+  color: rgba(237, 228, 214, 0.8);
+}
+@media (min-width: 768px) { .clanrole > p { font-size: 16px; } }
+.clanrole > p:last-child { margin-bottom: 0; }
+.clanrole .permit__note { margin-top: 24px; }
+
+/* Совет 13 — отдельный выделенный блок под вкладками иерархии */
+.council-card {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  margin-top: 36px;
+  padding: 26px;
+  border: 1px solid rgba(211, 19, 42, 0.3);
+  border-radius: var(--radius);
+  background: radial-gradient(ellipse at 85% -20%, rgba(211, 19, 42, 0.18), transparent 55%), rgba(13, 8, 16, 0.7);
+}
+@media (min-width: 768px) { .council-card { margin-top: 44px; padding: 36px 40px; } }
+.council-card__k {
+  position: absolute;
+  z-index: -1;
+  top: -30px;
+  right: 10px;
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 150px;
+  line-height: 1;
+  color: rgba(211, 19, 42, 0.12);
+  pointer-events: none;
+  user-select: none;
+}
+.council-card__cap {
+  margin: 0 0 4px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  color: var(--blood);
+}
+.council-card__title {
+  margin: 0 0 14px;
+  font-family: var(--font-display);
+  font-weight: 800;
+  text-transform: uppercase;
+  font-size: clamp(20px, 3.4vw, 28px);
+  line-height: 1.15;
+}
+.council-card__lead {
+  margin: 0;
+  max-width: 760px;
+  font-size: 13.5px;
+  line-height: 1.75;
+  color: rgba(237, 228, 214, 0.78);
+}
+@media (min-width: 768px) { .council-card__lead { font-size: 15px; } }
+
+/* --- Совет 13: двенадцать мест + Прародитель --- */
+.council-seats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 26px 0 16px;
+}
+.council-seat {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border: 1px solid rgba(237, 228, 214, 0.18);
+  border-radius: 50%;
+  background: rgba(6, 3, 9, 0.6);
+}
+.council-seat b {
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--blood);
+}
+.council-seat--progenitor {
+  width: 46px;
+  height: 46px;
+  border-color: var(--blood);
+  background: rgba(211, 19, 42, 0.2);
+  box-shadow: 0 0 24px -6px rgba(211, 19, 42, 0.8);
+}
+.council-seat--progenitor b { color: var(--ember); }
+.council-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  margin: 0 0 20px;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--ash);
+}
+.council-legend b {
+  margin-right: 5px;
+  font-family: var(--font-display);
+  font-size: 13px;
+  color: var(--blood);
+}
+.council-sum {
+  margin: 0;
+  padding-top: 16px;
+  border-top: 1px solid rgba(237, 228, 214, 0.1);
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ash);
+}
+.council-sum span { margin: 0 6px; color: var(--blood); }
+.council-sum strong { color: var(--ember); font-size: 18px; vertical-align: -1px; }
+
+/* =====================================================================
+   ВЫГОВОРЫ — раздел демонического закона (content/law.html)
+   ===================================================================== */
+.reprimands { display: grid; gap: 14px; margin: 28px 0 8px; }
+@media (min-width: 768px) { .reprimands { grid-template-columns: repeat(3, 1fr); } }
+
+.reprimand {
+  position: relative;
+  overflow: hidden;
+  padding: 24px;
+  border: 1px solid rgba(237, 228, 214, 0.12);
+  border-radius: 12px;
+  background: linear-gradient(160deg, rgba(211, 19, 42, 0.08), rgba(6, 3, 9, 0.55));
+}
+.reprimand--final {
+  border-color: rgba(211, 19, 42, 0.5);
+  background: linear-gradient(160deg, rgba(211, 19, 42, 0.2), rgba(6, 3, 9, 0.65));
+}
+.reprimand__num {
+  display: block;
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 38px;
+  line-height: 1;
+  color: rgba(211, 19, 42, 0.42);
+  font-variant-numeric: tabular-nums;
+}
+.reprimand--final .reprimand__num { color: var(--blood); }
+.reprimand__cap {
+  margin: 12px 0 0;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--blood);
+}
+.reprimand h4 {
+  margin: 4px 0 8px;
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.3;
+  text-transform: uppercase;
+}
+.reprimand p:not(.reprimand__cap) {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.7;
+  color: var(--ash);
+}
+
+.reprimand-reasons li { margin-bottom: 12px; }
+.reprimand-reasons li:last-child { margin-bottom: 0; }
