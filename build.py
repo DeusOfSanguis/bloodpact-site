@@ -58,7 +58,6 @@ SIGIL = {
     "law": "法",
     "elevation": "昇",
     "squads": "族",
-    "council": "議",
     "scars": "傷",
     "limits": "限",
     "bloodbattle": "闘",

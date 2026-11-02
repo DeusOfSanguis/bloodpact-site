@@ -59,16 +59,6 @@
       "cover_image": "blood-moon.jpg"
     },
     {
-      "slug": "council",
-      "source": "https://bloodpact.su/council/",
-      "title": "Совет кланов",
-      "nav": "Совет",
-      "sigil": "議",
-      "cover_uptitle": "Пакт крови",
-      "cover_title": "Совет 13",
-      "cover_image": "blood-moon.jpg"
-    },
-    {
       "slug": "scars",
       "source": "https://bloodpact-yufu.tilda.ws/scars",
       "title": "Шрамы",
