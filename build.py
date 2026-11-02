@@ -58,6 +58,7 @@ SIGIL = {
     "law": "法",
     "elevation": "昇",
     "squads": "族",
+    "council": "議",
     "scars": "傷",
     "limits": "限",
     "bloodbattle": "闘",
@@ -443,7 +444,7 @@ def render_squads(data):
         groups.append("\n".join(group))
     special = ((data.get("lists") or {}).get("squads") or {}).get("special") or []
     if special:
-        groups.append('<section class="s"><h2>Особые объединения</h2><p>Эти объединения находятся вне системы высших и поглощённых кланов.</p></section>')
+        groups.append('<section class="s"><h2>Особые объединения</h2><p>Эти объединения находятся вне обычной системы высших и поглощённых кланов.</p></section>')
         for sq in special:
             groups.append('<section class="s squad-group squad-group--special">\n' + render_squad_card(sq, is_special=True) + '\n</section>')
     return "\n".join(groups)

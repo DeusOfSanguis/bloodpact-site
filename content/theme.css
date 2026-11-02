@@ -2733,3 +2733,125 @@ body.embed .hero__crest { display: none; }
 }
 .permit__detail--warning { border-left-color: rgba(255, 46, 66, 0.7); }
 @media (min-width: 768px) { .permit__detail { font-size: 14px; } }
+
+/* =====================================================================
+   СОВЕТ 13 — должности кланов и состав Совета (content/council.html)
+   ===================================================================== */
+.offices { display: grid; gap: 20px; margin-top: 8px; }
+@media (min-width: 900px) { .offices { grid-template-columns: repeat(3, 1fr); } }
+
+.office {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  padding: 28px;
+  border: 1px solid rgba(237, 228, 214, 0.12);
+  border-radius: var(--radius);
+  background: linear-gradient(160deg, rgba(211, 19, 42, 0.09), rgba(6, 3, 9, 0.55));
+  transition: border-color 0.3s, transform 0.3s;
+}
+@media (min-width: 768px) { .office { padding: 34px; } }
+.office:hover { border-color: rgba(211, 19, 42, 0.5); transform: translateY(-2px); }
+.office__k {
+  position: absolute;
+  z-index: -1;
+  top: -18px;
+  right: 8px;
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 110px;
+  line-height: 1;
+  color: rgba(211, 19, 42, 0.14);
+  pointer-events: none;
+  user-select: none;
+}
+.office__en {
+  margin: 0 0 4px;
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.38em;
+  text-transform: uppercase;
+  color: var(--blood);
+}
+.article .s .office h3 {
+  margin: 0 0 14px;
+  font-size: clamp(19px, 2.6vw, 23px);
+}
+.article .s .office p { margin: 0 0 16px; font-size: 14px; line-height: 1.7; color: rgba(237, 228, 214, 0.78); }
+.article .s .office ul { margin: 0; padding-left: 18px; font-size: 14px; line-height: 1.7; color: rgba(237, 228, 214, 0.72); }
+.article .s .office li { margin: 0 0 7px; }
+@media (min-width: 768px) {
+  .article .s .office p { font-size: 15px; }
+  .article .s .office ul { font-size: 15px; }
+}
+
+/* --- состав Совета: четыре делегации по три места + Прародитель --- */
+.council {
+  margin-top: 28px;
+  padding: 22px;
+  border: 1px solid rgba(211, 19, 42, 0.25);
+  border-radius: var(--radius);
+  background: radial-gradient(ellipse at 50% 0%, rgba(211, 19, 42, 0.1), transparent 60%), rgba(6, 3, 9, 0.5);
+}
+@media (min-width: 768px) { .council { padding: 32px; } }
+.council__grid { display: grid; gap: 14px; }
+@media (min-width: 640px) { .council__grid { grid-template-columns: 1fr 1fr; } }
+@media (min-width: 1100px) { .council__grid { grid-template-columns: repeat(5, 1fr); } }
+
+.delegation {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid rgba(237, 228, 214, 0.09);
+  border-radius: 12px;
+  background: rgba(13, 8, 16, 0.6);
+}
+.delegation--progenitor {
+  border-color: rgba(211, 19, 42, 0.45);
+  background: linear-gradient(160deg, rgba(211, 19, 42, 0.16), rgba(13, 8, 16, 0.7));
+}
+.delegation__cap {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ash);
+}
+.delegation--progenitor .delegation__cap { color: var(--ember); }
+.delegation__seats { display: flex; flex-direction: column; gap: 7px; }
+.seat {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 10px;
+  border: 1px solid rgba(237, 228, 214, 0.1);
+  border-radius: 9px;
+  background: rgba(6, 3, 9, 0.55);
+}
+.seat b {
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--blood);
+}
+.seat i { font-style: normal; font-size: 12px; line-height: 1.3; color: rgba(237, 228, 214, 0.82); }
+.seat--progenitor { border-color: rgba(211, 19, 42, 0.45); }
+.seat--progenitor b { color: var(--ember); }
+.seat--progenitor i { color: var(--bone); font-weight: 600; }
+
+.council__sum {
+  margin: 22px 0 0;
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ash);
+}
+.council__sum strong { color: var(--ember); font-size: 20px; vertical-align: -1px; }
