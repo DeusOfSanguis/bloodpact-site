@@ -8,25 +8,23 @@ class ClanPositionsTests(unittest.TestCase):
     def setUp(self):
         self.data, _, _ = build.load()
 
-    def test_hierarchy_is_tabbed_like_privileges(self):
+    def test_four_clan_roles_are_cards_not_tabs(self):
         source = Path('content/index.html').read_text(encoding='utf-8')
         page = build.render_fragment(source, self.data)
         self.assertIn('Устройство иерархии внутри кланов', page)
-        self.assertEqual(page.count('class="tabs hierarchy-tabs" data-tabs'), 1)
-        for tab in ('clan-upper', 'clan-lower', 'clan-cmd', 'clan-deputy'):
-            self.assertIn(f'data-tab="{tab}"', page)
-            self.assertIn(f'data-panel="{tab}"', page)
-        block = page[page.index('hierarchy-tabs'):page.index('class="council-card reveal"')]
-        self.assertEqual(block.count('data-tab="'), 4)
-        self.assertEqual(block.count('data-panel="'), 4)
-        self.assertIn('class="council-card reveal"', page)
+        self.assertNotIn('hierarchy-tabs', page)
+        block = page[page.index('squadgrid__in'):page.index('class="council-card reveal"')]
+        self.assertEqual(block.count('class="squadcard"'), 4)
+        for role in ('Высшая луна', 'Низшая луна', 'КМД', 'Зам. КМД'):
+            self.assertIn(f'<h4>{role}</h4>', block)
+        self.assertIn('Уточнение к роли высшей луны клана', block)
 
-    def test_council_roles_are_moved_out_of_the_hierarchy_tabs(self):
+    def test_council_roles_are_outside_the_hierarchy_cards(self):
         source = Path('content/index.html').read_text(encoding='utf-8')
         page = build.render_fragment(source, self.data)
-        for tab in ('warlord', 'deathmaster', 'seer'):
-            self.assertNotIn(f'data-tab="{tab}"', page)
+        cards = page[page.index('squadgrid__in'):page.index('class="council-card reveal"')]
         for role in ('Военачальник', 'Мастер смерти', 'Провидец'):
+            self.assertNotIn(f'<h4>{role}</h4>', cards)
             self.assertIn(f'<h4 class="council-role__name">{role}</h4>', page)
         self.assertEqual(page.count('class="council-role"'), 3)
 

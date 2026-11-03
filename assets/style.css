@@ -2736,22 +2736,9 @@ body.embed .hero__crest { display: none; }
 @media (min-width: 768px) { .permit__detail { font-size: 14px; } }
 
 /* =====================================================================
-   ИЕРАРХИЯ КЛАНОВ И СОВЕТ 13 — вкладки как в «Привилегиях должностей»
+   ИЕРАРХИЯ КЛАНОВ — четыре карточки командования; СОВЕТ 13 — отдельный блок
    (главная страница, content/index.html)
    ===================================================================== */
-.hierarchy-tabs { margin-top: 4px; }
-.clanrole { max-width: 860px; }
-.clanrole > p {
-  margin: 0 0 16px;
-  font-size: 15px;
-  line-height: 1.75;
-  color: rgba(237, 228, 214, 0.8);
-}
-@media (min-width: 768px) { .clanrole > p { font-size: 16px; } }
-.clanrole > p:last-child { margin-bottom: 0; }
-.clanrole .permit__note { margin-top: 24px; }
-
-/* Совет 13 — отдельный выделенный блок под вкладками иерархии */
 .council-card {
   position: relative;
   isolation: isolate;
