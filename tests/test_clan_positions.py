@@ -13,24 +13,30 @@ class ClanPositionsTests(unittest.TestCase):
         page = build.render_fragment(source, self.data)
         self.assertIn('Устройство иерархии внутри кланов', page)
         self.assertEqual(page.count('class="tabs hierarchy-tabs" data-tabs'), 1)
-        for tab in ('clan-upper', 'clan-lower', 'clan-cmd', 'clan-deputy',
-                    'warlord', 'deathmaster', 'seer'):
+        for tab in ('clan-upper', 'clan-lower', 'clan-cmd', 'clan-deputy'):
             self.assertIn(f'data-tab="{tab}"', page)
             self.assertIn(f'data-panel="{tab}"', page)
         block = page[page.index('hierarchy-tabs'):page.index('class="council-card reveal"')]
-        self.assertEqual(block.count('data-tab="'), 7)
-        self.assertEqual(block.count('data-panel="'), 7)
+        self.assertEqual(block.count('data-tab="'), 4)
+        self.assertEqual(block.count('data-panel="'), 4)
         self.assertIn('class="council-card reveal"', page)
 
-    def test_positions_and_council_are_explained(self):
+    def test_council_roles_are_moved_out_of_the_hierarchy_tabs(self):
         source = Path('content/index.html').read_text(encoding='utf-8')
         page = build.render_fragment(source, self.data)
-        for office in ('Военачальник', 'Мастер смерти', 'Провидец'):
-            self.assertIn(f'<h3>{office}</h3>', page)
+        for tab in ('warlord', 'deathmaster', 'seer'):
+            self.assertNotIn(f'data-tab="{tab}"', page)
+        for role in ('Военачальник', 'Мастер смерти', 'Провидец'):
+            self.assertIn(f'<h4 class="council-role__name">{role}</h4>', page)
+        self.assertEqual(page.count('class="council-role"'), 3)
+
+    def test_council_seats_and_eligibility(self):
+        source = Path('content/index.html').read_text(encoding='utf-8')
+        page = build.render_fragment(source, self.data)
         self.assertIn('<h3 class="council-card__title">Совет 13</h3>', page)
         self.assertEqual(page.count('class="council-seat"'), 12)
         self.assertEqual(page.count('council-seat--progenitor'), 1)
-        self.assertIn('Прародитель', page)
+        self.assertIn('может стать любой демон в клане — кроме Луны', page)
 
     def test_council_is_explained_without_clan_attribution(self):
         source = Path('content/index.html').read_text(encoding='utf-8')
