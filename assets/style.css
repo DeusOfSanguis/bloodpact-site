@@ -2736,22 +2736,9 @@ body.embed .hero__crest { display: none; }
 @media (min-width: 768px) { .permit__detail { font-size: 14px; } }
 
 /* =====================================================================
-   ИЕРАРХИЯ КЛАНОВ И СОВЕТ 13 — вкладки как в «Привилегиях должностей»
+   ИЕРАРХИЯ КЛАНОВ — четыре карточки командования; СОВЕТ 13 — отдельный блок
    (главная страница, content/index.html)
    ===================================================================== */
-.hierarchy-tabs { margin-top: 4px; }
-.clanrole { max-width: 860px; }
-.clanrole > p {
-  margin: 0 0 16px;
-  font-size: 15px;
-  line-height: 1.75;
-  color: rgba(237, 228, 214, 0.8);
-}
-@media (min-width: 768px) { .clanrole > p { font-size: 16px; } }
-.clanrole > p:last-child { margin-bottom: 0; }
-.clanrole .permit__note { margin-top: 24px; }
-
-/* Совет 13 — отдельный выделенный блок под вкладками иерархии */
 .council-card {
   position: relative;
   isolation: isolate;
@@ -2800,6 +2787,58 @@ body.embed .hero__crest { display: none; }
   color: rgba(237, 228, 214, 0.78);
 }
 @media (min-width: 768px) { .council-card__lead { font-size: 15px; } }
+
+.council-roles { display: grid; gap: 12px; margin: 22px 0 0; }
+@media (min-width: 768px) { .council-roles { grid-template-columns: repeat(3, 1fr); } }
+.council-role {
+  padding: 18px;
+  border: 1px solid rgba(237, 228, 214, 0.12);
+  border-radius: 12px;
+  background: rgba(6, 3, 9, 0.5);
+}
+.council-role__k {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 21px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--blood);
+}
+.council-role__en {
+  margin: 7px 0 0;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--blood);
+}
+.council-role__name {
+  margin: 2px 0 8px;
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.3;
+  text-transform: uppercase;
+}
+.council-role p:not(.council-role__en) {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.65;
+  color: var(--ash);
+}
+@media (min-width: 1024px) { .council-role p:not(.council-role__en) { font-size: 13px; } }
+
+.council-eligibility {
+  margin: 18px 0 0;
+  padding: 12px 16px;
+  border-left: 2px solid var(--blood);
+  border-radius: 0 8px 8px 0;
+  background: rgba(211, 19, 42, 0.1);
+  font-size: 13.5px;
+  line-height: 1.7;
+  color: rgba(237, 228, 214, 0.82);
+}
+.council-eligibility strong { color: var(--bone); }
 
 /* --- Совет 13: двенадцать мест + Прародитель --- */
 .council-seats {
