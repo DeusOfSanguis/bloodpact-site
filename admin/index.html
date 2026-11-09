@@ -557,6 +557,7 @@
       <div class="quick-actions">
         <button class="ghost mini" id="expand-all">Раскрыть всё</button>
         <button class="ghost mini" id="collapse-all">Свернуть всё</button>
+        <button class="ghost mini hidden" id="rebuild-btn">Пересобрать сайт</button>
         <button class="ghost mini" id="export-current">Скачать копию</button>
       </div>
     </div>
@@ -760,6 +761,34 @@
 "use strict";
 /* ================== конфигурация ================== */
 const LOCAL_PREVIEW = location.hostname === "localhost" || location.hostname === "127.0.0.1" || location.hostname.endsWith(".e2b.app");
+// Локальный сервер serve.py умеет писать файлы на диск. Проверяем его при старте:
+// есть — сохранение идёт в файлы на ПК, нет — только чтение, как раньше.
+let LOCAL_WRITE = false;
+const LOCAL_API = "/__local";
+
+async function localFetch(what, opts) {
+  const res = await fetch(LOCAL_API + what, opts || {});
+  const text = await res.text();
+  let data = null;
+  try { data = text ? JSON.parse(text) : null; } catch (e) { data = null; }
+  if (!res.ok) {
+    const err = new Error((data && data.error) || ("Локальный сервер: HTTP " + res.status));
+    err.status = res.status;
+    throw err;
+  }
+  return data;
+}
+
+async function detectLocalServer() {
+  if (!LOCAL_PREVIEW) return false;
+  try {
+    const ping = await localFetch("/ping");
+    return !!(ping && ping.writes);
+  } catch (e) {
+    return false;
+  }
+}
+
 const CONFIG = {
   owner: "DeusOfSanguis",
   repo: "bloodpact-site",
@@ -845,6 +874,10 @@ async function gh(path, opts) {
 
 async function getFile(path) {
   if (LOCAL_PREVIEW) {
+    if (LOCAL_WRITE) {
+      const data = await localFetch(`/file?path=${encodeURIComponent(path)}`);
+      return { sha: "", text: data.text };
+    }
     const localUrl = "../" + path.split("/").map(encodeURIComponent).join("/");
     const res = await fetch(localUrl, { cache: "no-store" });
     if (!res.ok) {
@@ -876,12 +909,30 @@ function noteMissing(path) {
   const s = $("#save-status");
   s.className = "status";
   s.style.color = "#e8b34b";
-  s.textContent = "Файла " + path + " нет на ветке «" + (state.branch || getBranch()) +
-    "» — он будет создан при первом сохранении.";
+  s.textContent = LOCAL_PREVIEW
+    ? "Файла " + path + " нет на диске — он будет создан при первом сохранении."
+    : "Файла " + path + " нет на ветке «" + (state.branch || getBranch()) +
+      "» — он будет создан при первом сохранении.";
 }
 
 async function saveFile(path, text, message, sha) {
-  if (LOCAL_PREVIEW) throw new Error("Запись в GitHub отключена в локальном предпросмотре. Скачайте черновик или откройте опубликованную админку.");
+  if (LOCAL_PREVIEW) {
+    if (!LOCAL_WRITE) {
+      throw new Error("Локальный сервер не умеет писать файлы. Запустите сайт через preview.cmd (serve.py) — тогда админка сможет сохранять правки на диск.");
+    }
+    const res = await localFetch(`/file?path=${encodeURIComponent(path)}&build=1`, {
+      method: "PUT",
+      headers: { "Content-Type": "text/plain; charset=utf-8" },
+      body: text,
+    });
+    if (res && res.build && res.build.ok === false) {
+      const tail = String(res.build.output || "").trim().split("\n").slice(-4).join(" ");
+      const err = new Error("Файл сохранён, но сборка упала: " + tail);
+      err.savedLocally = true;
+      throw err;
+    }
+    return { content: { sha: "" }, local: true, build: (res && res.build) || null };
+  }
   const body = {
     message: message,
     content: b64encode(text),
@@ -918,12 +969,12 @@ function markDirty(key) {
   if (key) state.dirtyFiles.add(key);
   const save = $("#save-btn");
   const discard = $("#discard-btn");
-  if (save) save.disabled = LOCAL_PREVIEW;
+  if (save) save.disabled = LOCAL_PREVIEW && !LOCAL_WRITE;
   if (discard) discard.disabled = false;
   const names = [...state.dirtyFiles].join(", ");
   $("#save-status").className = "status";
-  $("#save-status").textContent = LOCAL_PREVIEW
-    ? `Предпросмотр · локальные изменения${names ? ` · ${names}` : ""} · сохраните копию`
+  $("#save-status").textContent = LOCAL_PREVIEW && !LOCAL_WRITE
+    ? `Предпросмотр · локальные изменения${names ? ` · ${names}` : ""} · запись выключена, скачайте копию`
     : `Есть несохранённые изменения${names ? ` · ${names}` : ""}`;
 }
 
@@ -1024,7 +1075,10 @@ async function boot() {
   const bi = $("#branch");
   if (bi) bi.value = state.branch;
   if (LOCAL_PREVIEW) {
-    state.user = { login: "локальный предпросмотр", name: "Предпросмотр" };
+    LOCAL_WRITE = await detectLocalServer();
+    state.user = LOCAL_WRITE
+      ? { login: "локальный режим", name: "Файлы на ПК" }
+      : { login: "локальный предпросмотр", name: "Предпросмотр" };
     await enterApp();
     return;
   }
@@ -1040,10 +1094,21 @@ async function boot() {
 
 async function enterApp() {
   showApp();
-  $("#local-preview-banner").classList.toggle("hidden", !LOCAL_PREVIEW);
+  renderLocalBanner();
   await ensurePagesJson();
   renderNavPageButtons();
   await loadTab(state.tab || "squads");
+}
+
+function renderLocalBanner() {
+  const banner = $("#local-preview-banner");
+  if (banner) banner.classList.toggle("hidden", !LOCAL_PREVIEW);
+  const rebuild = $("#rebuild-btn");
+  if (rebuild) rebuild.classList.toggle("hidden", !(LOCAL_PREVIEW && LOCAL_WRITE));
+  if (!LOCAL_PREVIEW || !banner) return;
+  banner.innerHTML = LOCAL_WRITE
+    ? '<span class="preview-banner__sigil">墨</span><span><strong>Локальный режим</strong> · «Сохранить» пишет правки прямо в файлы на этом компьютере и пересобирает сайт. В GitHub ничего не уходит, bloodpact.su не меняется.</span>'
+    : '<span class="preview-banner__sigil">眼</span><span><strong>Локальный предпросмотр</strong> · данные читаются из файлов на ПК, но запись выключена. Запустите сайт через <b>preview.cmd</b> (он поднимает <code>serve.py</code>) — тогда админка сможет сохранять.</span>';
 }
 
 function renderNavPageButtons() {
@@ -1093,6 +1158,29 @@ $("#quick-filter").addEventListener("input", applyNavFilter);
 $("#expand-all").addEventListener("click", () => $$(".tab-page:not(.hidden) details.block").forEach(d => d.open = true));
 $("#collapse-all").addEventListener("click", () => $$(".tab-page:not(.hidden) details.block").forEach(d => d.open = false));
 $("#export-current").addEventListener("click", exportCurrentDraft);
+$("#rebuild-btn").addEventListener("click", async () => {
+  const btn = $("#rebuild-btn");
+  const s = $("#save-status");
+  btn.disabled = true;
+  s.style.color = "";
+  s.className = "status";
+  s.textContent = "Пересборка…";
+  try {
+    const r = await localFetch("/build", { method: "POST" });
+    if (r && r.ok) {
+      s.className = "status ok";
+      s.textContent = "Сайт пересобран локально. Обновите вкладку с сайтом (F5).";
+    } else {
+      s.className = "status err";
+      s.textContent = "Сборка упала: " + String((r && r.output) || "").trim().split("\n").slice(-4).join(" ");
+    }
+  } catch (e) {
+    s.className = "status err";
+    s.textContent = "Ошибка пересборки: " + e.message;
+  } finally {
+    btn.disabled = false;
+  }
+});
 window.addEventListener("beforeunload", (e) => {
   if (!state.dirty) return;
   e.preventDefault(); e.returnValue = "";
@@ -3064,10 +3152,6 @@ $("#file-reload").addEventListener("click", () => {
 
 /* ================== СОХРАНЕНИЕ ================== */
 $("#save-btn").addEventListener("click", async () => {
-  if (LOCAL_PREVIEW) {
-    $("#save-status").textContent = "Локальный предпросмотр: сохранение в GitHub отключено. Используйте «Скачать копию».";
-    return;
-  }
   const btn = $("#save-btn");
   const s = $("#save-status");
   btn.disabled = true;
@@ -3136,8 +3220,13 @@ $("#save-btn").addEventListener("click", async () => {
     $("#save-btn").disabled = true; $("#discard-btn").disabled = true;
     state.missingNoted = {};
     s.className = "status ok";
-    s.innerHTML = "Сохранено в ветку «" + (state.branch || getBranch()) + "»! Сайт пересоберётся автоматически и обновится на bloodpact.su за 1–2 минуты. " +
-      `<a href="${CONFIG.actionsUrl}" target="_blank" rel="noopener">Смотреть сборку →</a>`;
+    if (LOCAL_PREVIEW) {
+      s.innerHTML = "Сохранено в файл <code>" + escapeHtml(path) + "</code> на этом ПК · сайт пересобран локально. " +
+        'Обновите вкладку с сайтом (F5), чтобы увидеть правки.';
+    } else {
+      s.innerHTML = "Сохранено в ветку «" + (state.branch || getBranch()) + "»! Сайт пересоберётся автоматически и обновится на bloodpact.su за 1–2 минуты. " +
+        `<a href="${CONFIG.actionsUrl}" target="_blank" rel="noopener">Смотреть сборку →</a>`;
+    }
   } catch (e) {
     s.className = "status err";
     if (e.status === 403) {
