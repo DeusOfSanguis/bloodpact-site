@@ -496,6 +496,74 @@
   .subs-flat__sigil { color:var(--red2); }
   .subs-flat__count { font-size:11px; font-weight:500; color:var(--muted); border:1px solid var(--line); border-radius:99px; padding:1px 7px; }
   details.block.flash-card { border-color:var(--gold); box-shadow:0 0 0 2px rgba(216,188,82,.18); }
+
+  /* Полка лун: перетаскивание на клан в схеме */
+  .moonpal {
+    display:flex; flex-wrap:wrap; gap:8px; align-items:center;
+    margin:0 0 14px; padding:10px 12px;
+    border:1px dashed rgba(216,188,82,.3); border-radius:12px;
+    background:rgba(216,188,82,.04);
+  }
+  .moonpal__cap {
+    flex:0 0 100%; margin:0 0 2px;
+    font-size:10.5px; letter-spacing:.22em; text-transform:uppercase; color:var(--gold);
+  }
+  .moonpal__item {
+    display:inline-flex; align-items:center; gap:6px;
+    padding:5px 9px; border:1px solid var(--line); border-radius:9px;
+    background:var(--panel3); font-size:12px; cursor:grab; user-select:none;
+    transition:border-color .15s, background .15s, opacity .15s;
+  }
+  .moonpal__item:hover { border-color:rgba(227,59,73,.45); }
+  .moonpal__item.dragging { opacity:.4; }
+  .moonpal__k { color:var(--gold); font-size:11px; }
+  .moonpal__rank { color:var(--muted); font-size:11px; }
+  .moonpal__count { color:var(--gold); font-size:11px; opacity:.85; }
+  .moonpal__num { color:var(--red2); font-weight:700; }
+  .chip.drop-over, .board__col.drop-over { border-color:var(--gold); }
+  .moonpal__group { flex:1 1 100%; display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
+  .moonpal__group + .moonpal__group { margin-top:6px; }
+  .moonpal__group .moonpal__cap { margin:0 0 2px; }
+
+  /* Луны на карточках кланов в схеме */
+  .chip { flex-wrap:wrap; }
+  .board__moons { display:flex; flex-wrap:wrap; gap:4px; padding:8px 10px 0; }
+  .chip__moons { flex:1 0 100%; display:flex; flex-wrap:wrap; gap:4px; margin-top:2px; }
+  .moon-tag {
+    display:inline-flex; align-items:center; gap:4px;
+    padding:2px 6px; border:1px solid rgba(216,188,82,.35); border-radius:7px;
+    background:rgba(216,188,82,.08); font-size:11px; line-height:1.4;
+    cursor:grab; user-select:none; white-space:nowrap;
+    transition:border-color .15s, background .15s, opacity .15s;
+  }
+  .moon-tag:hover { border-color:rgba(227,59,73,.5); }
+  .moon-tag.dragging { opacity:.4; }
+  .moon-tag--upper { border-color:rgba(227,59,73,.45); background:rgba(227,59,73,.1); }
+  .moon-tag--lower { border-color:rgba(120,140,200,.4); background:rgba(120,140,200,.1); }
+  .board__special { margin-top:18px; }
+  .board__col--special { border-style:dashed; border-color:rgba(216,188,82,.28); }
+  .board__col--special .board__head { cursor:default; }
+
+  /* Перетаскивание лун мышью */
+  body.is-moon-dragging { cursor:grabbing; user-select:none; }
+  .moon-ghost {
+    position:fixed; z-index:9999; pointer-events:none;
+    padding:5px 10px; border:1px solid var(--gold); border-radius:9px;
+    background:rgba(20,12,18,.95); color:var(--text); font-size:12px;
+    box-shadow:0 8px 24px rgba(0,0,0,.45); transform:translate(0,0);
+  }
+  .moon-trash {
+    position:fixed; right:20px; bottom:20px; z-index:9998;
+    display:flex; align-items:center; gap:8px;
+    padding:12px 16px; border:1px dashed rgba(255,92,92,.55); border-radius:12px;
+    background:rgba(40,10,14,.92); color:#ffb4b4; font-size:12.5px;
+    opacity:0; transform:translateY(10px); pointer-events:none;
+    transition:opacity .15s, transform .15s, border-color .15s, background .15s;
+  }
+  body.is-moon-dragging .moon-trash { opacity:1; transform:none; pointer-events:auto; }
+  .moon-trash.over { border-color:#ff6b6b; border-style:solid; background:rgba(90,16,22,.95); color:#fff; }
+  .moon-trash__k { font-size:14px; }
+
   @media (max-width:640px) {
     .board__grid { grid-template-columns:1fr; }
     .seg { width:100%; }
@@ -639,6 +707,7 @@
           Перетащите поглощённый клан в колонку другого основного клана, чтобы сменить владельца, или в зону «Высшие кланы», чтобы сделать его основным.
           Внутри колонки кланы так же меняются местами перетаскиванием, а заголовок колонки меняет порядок основных кланов.
           Клик по названию клана открывает его карточку в редакторе.</p>
+        <div class="moonpal" id="moon-palette" aria-label="Луны: перетащите луну на клан в схеме"></div>
         <div id="squad-board" class="board"></div>
       </div>
       <div class="card">
@@ -962,6 +1031,7 @@ const state = {
   fileDirty: false,
   missingNoted: {},
   squadUI: { filter: "all" }, // фильтр карточек кланов: all | main | sub
+  moonQuery: "", // поиск по вкладке «Луны»
 };
 
 function markDirty(key) {
@@ -1219,6 +1289,274 @@ $("#tabs").addEventListener("click", async (e) => {
   await loadTab(state.tab);
 });
 
+/* ================== 1.1 ЛУНЫ И ИХ КЛАНЫ (динамический список) ================== */
+// Собирается из тех же данных, что и «Кланы»: любое изменение в карточке клана
+// сразу перерисовывает список, отдельного сохранения не требуется.
+const MOON_ORDINALS = {
+  первая: 1, первой: 1, вторая: 2, второй: 2, третья: 3, третьей: 3,
+  четвертая: 4, четвёртая: 4, четвертой: 4, четвёртой: 4,
+  пятая: 5, пятой: 5, шестая: 6, шестой: 6,
+};
+const MOON_ORD_WORDS = ["", "Первая", "Вторая", "Третья", "Четвёртая", "Пятая", "Шестая"];
+
+function moonRank(text) {
+  const t = String(text || "").toLocaleLowerCase("ru");
+  const kind = /высш/.test(t) ? "upper" : /низш/.test(t) ? "lower" : "";
+  let num = 0;
+  const digits = t.match(/\d+/);
+  if (digits) num = parseInt(digits[0], 10);
+  if (!num) {
+    for (const word in MOON_ORDINALS) {
+      if (t.includes(word)) { num = MOON_ORDINALS[word]; break; }
+    }
+  }
+  if (!(num >= 1 && num <= 12)) num = 0;
+  return { kind, num };
+}
+
+function moonLabel(kind, num) {
+  const ord = num ? (MOON_ORD_WORDS[num] || `${num}-я`) : "";
+  const side = kind === "upper" ? "высшая луна" : kind === "lower" ? "низшая луна" : "";
+  if (!side) return ord ? `${ord} луна` : "";
+  const txt = ord ? `${ord} ${side}` : side;
+  return txt.charAt(0).toLocaleUpperCase("ru") + txt.slice(1);
+}
+
+function parseMoonPerson(person, role) {
+  const raw = String(person || "").trim();
+  if (!raw) return null;
+  let name = raw;
+  let tail = "";
+  const dash = raw.search(/[–—-]/);
+  if (dash > -1) {
+    name = raw.slice(0, dash).trim();
+    tail = raw.slice(dash + 1).trim();
+  }
+  if (!name) return null;
+  const fromTail = moonRank(tail);
+  const fromRole = moonRank(role);
+  const kind = fromTail.kind || fromRole.kind;
+  const num = fromTail.num || fromRole.num;
+  return { name, kind, num, label: moonLabel(kind, num) || tail };
+}
+
+function collectMoons() {
+  const m = state.models.squads || { squads: [], special: [] };
+  const moons = new Map();
+
+  const addPerson = (person, role, clan, place) => {
+    const parsed = parseMoonPerson(person, role);
+    if (!parsed) return;
+    const { name, kind, num, label } = parsed;
+    const key = name.toLocaleLowerCase("ru");
+    let rec = moons.get(key);
+    if (!rec) {
+      rec = { name, kind: "", num: 0, label: "", places: [] };
+      moons.set(key, rec);
+    }
+    if (kind && (!rec.kind || (!rec.num && num))) {
+      rec.kind = kind;
+      rec.num = num;
+      rec.label = moonLabel(kind, num);
+    }
+    if (!rec.label && label) rec.label = label;
+    rec.places.push({ clan, role: role || "смотрящая", place });
+  };
+
+  const walk = (sq, parentName, special) => {
+    (sq.overseers || []).forEach(ov => {
+      (ov.people || []).forEach(person => addPerson(person, ov.role || "", clanName(sq), { parentName, special }));
+    });
+    (sq.subs || []).forEach(sub => walk(sub, clanName(sq), false));
+  };
+  (m.squads || []).forEach(sq => walk(sq, "", false));
+  (m.special || []).forEach(sq => walk(sq, "", true));
+
+  const weight = rec => (rec.kind === "upper" ? 0 : rec.kind === "lower" ? 100 : 200) + (rec.num || 99);
+  return [...moons.values()].sort((a, b) => weight(a) - weight(b) || a.name.localeCompare(b.name, "ru"));
+}
+
+function renderMoons() {
+  const root = $("#moons-list");
+  if (!root) return;
+  const query = (state.moonQuery || "").trim().toLocaleLowerCase("ru");
+  const all = collectMoons();
+  const list = query
+    ? all.filter(rec => rec.name.toLocaleLowerCase("ru").includes(query) ||
+        (rec.label || "").toLocaleLowerCase("ru").includes(query) ||
+        rec.places.some(p => String(p.clan).toLocaleLowerCase("ru").includes(query)))
+    : all;
+
+  root.innerHTML = "";
+
+  const head = document.createElement("p");
+  head.className = "hint";
+  const placesCount = all.reduce((n, rec) => n + rec.places.length, 0);
+  head.textContent = all.length
+    ? `Лун в списке: ${all.length} · назначений: ${placesCount}${query ? ` · показано: ${list.length}` : ""}`
+    : "Луны пока ни за кем не закреплены — назначьте их в карточках кланов.";
+  root.appendChild(head);
+
+  if (!list.length) {
+    if (query) {
+      const empty = document.createElement("p");
+      empty.className = "hint";
+      empty.textContent = "По запросу ничего не найдено.";
+      root.appendChild(empty);
+    }
+    return;
+  }
+
+  const groups = [
+    ["Высшие луны", list.filter(r => r.kind === "upper")],
+    ["Низшие луны", list.filter(r => r.kind === "lower")],
+    ["Без ранга", list.filter(r => r.kind !== "upper" && r.kind !== "lower")],
+  ].filter(([, items]) => items.length);
+
+  groups.forEach(([title, items]) => {
+    const groupHead = document.createElement("div");
+    groupHead.className = "subs-flat__head";
+    groupHead.innerHTML = `<span class="subs-flat__sigil" aria-hidden="true">月</span><span>${escapeHtml(title)}</span>` +
+      `<span class="subs-flat__count">${items.length}</span>`;
+    root.appendChild(groupHead);
+
+    items.forEach(rec => {
+      const det = document.createElement("details");
+      det.className = "block";
+      det.open = Boolean(query);
+      const title = rec.label ? `${rec.name} — ${rec.label}` : rec.name;
+      const rows = rec.places.map(p => {
+        const where = p.place.special
+          ? `${p.clan} · особое объединение`
+          : p.place.parentName
+            ? `${p.clan} · поглощённый клан «${p.place.parentName}»`
+            : `${p.clan} · высший клан`;
+        return `<li><b>${escapeHtml(where)}</b><span class="hint" style="display:block">${escapeHtml(p.role)}</span></li>`;
+      }).join("");
+      det.innerHTML = `<summary>月 ${escapeHtml(title)} — кланов: ${rec.places.length}</summary><ul>${rows}</ul>`;
+      root.appendChild(det);
+    });
+  });
+}
+
+async function loadMoons() {
+  await loadSquads();
+  renderMoons();
+}
+
+/* ---------- полка лун в схеме кланов + перетаскивание на клан ---------- */
+const moonDrag = { payload: null };
+
+function renderMoonPalette() {
+  const root = $("#moon-palette");
+  if (!root) return;
+  const list = collectMoons();
+  root.innerHTML = "";
+
+  const makeChip = rec => {
+    const chip = document.createElement("span");
+    chip.className = "moonpal__item";
+    chip.draggable = true;
+    chip.dataset.moonKey = rec.name.toLocaleLowerCase("ru");
+    chip.title = "Перетащите на клан в схеме";
+    chip.innerHTML = `<span class="moonpal__k">月</span>${escapeHtml(rec.name)}` +
+      (rec.label ? `<span class="moonpal__rank">${escapeHtml(rec.label)}</span>` : "") +
+      `<span class="moonpal__count" title="Кланов, где следит: ${rec.places.length}">| <b class="moonpal__num">${rec.places.length}</b> |</span>`;
+    return chip;
+  };
+
+  if (!list.length) {
+    const cap = document.createElement("p");
+    cap.className = "moonpal__cap";
+    cap.textContent = "Луны · пока ни за кем не закреплены";
+    root.appendChild(cap);
+    return;
+  }
+
+  const groups = [
+    { title: "Высшие луны", items: list.filter(r => r.kind === "upper") },
+    { title: "Низшие луны", items: list.filter(r => r.kind === "lower") },
+    { title: "Без ранга", items: list.filter(r => r.kind !== "upper" && r.kind !== "lower") },
+  ].filter(g => g.items.length);
+
+  groups.forEach(group => {
+    const wrap = document.createElement("div");
+    wrap.className = "moonpal__group";
+    const cap = document.createElement("p");
+    cap.className = "moonpal__cap";
+    cap.textContent = `${group.title} · перетащите на клан, чтобы назначить смотрящей`;
+    wrap.appendChild(cap);
+    group.items.forEach(rec => wrap.appendChild(makeChip(rec)));
+    root.appendChild(wrap);
+  });
+}
+
+function moonToSquad(squad, moon) {
+  if (!squad || !moon) return { ok: false };
+  const name = String(moon.name || "").trim();
+  if (!name) return { ok: false };
+  if (!Array.isArray(squad.overseers)) squad.overseers = [];
+  const role = moon.kind === "upper"
+    ? "Смотрящая высшая луна"
+    : moon.kind === "lower" ? "Смотрящая низшая луна" : "Смотрящая луна";
+  const person = moon.label ? `${name} - ${moon.label}` : name;
+  let group = squad.overseers.find(o => (o.role || "").trim().toLocaleLowerCase("ru") === role.toLocaleLowerCase("ru"));
+  if (!group) {
+    group = { role, people: [] };
+    squad.overseers.push(group);
+  }
+  if (!Array.isArray(group.people)) group.people = [];
+  if (group.people.some(p => String(p).trim().toLocaleLowerCase("ru") === person.toLocaleLowerCase("ru"))) {
+    return { ok: false, duplicate: true, person };
+  }
+  group.people.push(person);
+  const order = { "смотрящая высшая луна": 0, "смотрящая низшая луна": 1 };
+  squad.overseers.sort((a, b) =>
+    (order[(a.role || "").trim().toLocaleLowerCase("ru")] ?? 2) - (order[(b.role || "").trim().toLocaleLowerCase("ru")] ?? 2));
+  return { ok: true, person };
+}
+
+function removeMoonFromSquad(squad, moonName) {
+  const key = String(moonName || "").trim().toLocaleLowerCase("ru");
+  if (!squad || !key || !Array.isArray(squad.overseers)) return false;
+  let removed = false;
+  squad.overseers.forEach(ov => {
+    if (!Array.isArray(ov.people)) return;
+    const before = ov.people.length;
+    ov.people = ov.people.filter(p => {
+      const parsed = parseMoonPerson(p, ov.role);
+      return !(parsed && parsed.name.toLocaleLowerCase("ru") === key);
+    });
+    if (ov.people.length !== before) removed = true;
+  });
+  squad.overseers = squad.overseers.filter(ov => (ov.people || []).length);
+  return removed;
+}
+
+// Луны прямо на карточке клана в схеме: их можно перетащить в другой клан.
+function moonTagsHtml(squad, g, s, special) {
+  const tags = [];
+  const isSpecial = special !== undefined && special !== null;
+  (squad.overseers || []).forEach(ov => {
+    (ov.people || []).forEach(person => {
+      const parsed = parseMoonPerson(person, ov.role);
+      if (!parsed) return;
+      const cls = parsed.kind === "upper" ? " moon-tag--upper" : parsed.kind === "lower" ? " moon-tag--lower" : "";
+      const key = `data-drag-moon="1" data-moon-key="${escapeAttr(parsed.name.toLocaleLowerCase("ru"))}"`;
+      const attrs = isSpecial
+        ? `${key} data-special="${special}"`
+        : `${key} data-g="${g}"` + (s === null || s === undefined ? "" : ` data-s="${s}"`);
+      tags.push(`<span class="moon-tag${cls}" draggable="true" ${attrs} title="Перетащите на другой клан, чтобы перевести">月 ${escapeHtml(parsed.name)}</span>`);
+    });
+  });
+  return tags.join("");
+}
+
+$("#moon-search")?.addEventListener("input", (e) => {
+  state.moonQuery = e.target.value;
+  renderMoons();
+});
+
 function ensureDynamicPageContainer(slug) {
   if (!slug.startsWith("page-")) return;
   const pageSlug = slug.slice(5);
@@ -1379,7 +1717,25 @@ function renderSquadBoard() {
         ? mains.map((sq, gi) => boardColumnHtml(sq, gi)).join("")
         : '<p class="hint">Кланов пока нет — добавьте первый в редакторе ниже.</p>'}
     </div>
+    ${(m.special || []).length ? `
+    <div class="board__special">
+      <div class="board__top"><div class="board__top-title">Особые объединения</div><div class="board__top-stats">${m.special.length}</div></div>
+      <div class="board__grid">
+        ${m.special.map((sq, i) => boardSpecialCardHtml(sq, i)).join("")}
+      </div>
+    </div>` : ""}
     <p class="board__flash" id="squad-board-flash" role="status" aria-live="polite"></p>`;
+}
+
+function boardSpecialCardHtml(sq, i) {
+  return `
+    <section class="board__col board__col--special" data-special="${i}">
+      <header class="board__head" title="Особое объединение вне схемы кланов">
+        <span class="board__grip" aria-hidden="true">異</span>
+        <span class="board__title">${escapeHtml(clanName(sq))}</span>
+      </header>
+      <div class="board__moons">${moonTagsHtml(sq, null, null, i)}</div>
+    </section>`;
 }
 
 function boardColumnHtml(sq, gi) {
@@ -1391,6 +1747,7 @@ function boardColumnHtml(sq, gi) {
         <span class="board__title">${escapeHtml(clanName(sq))}</span>
         <span class="board__count" title="Поглощённых кланов: ${subs.length}">${subs.length}</span>
       </header>
+      <div class="board__moons">${moonTagsHtml(sq, gi, null)}</div>
       <div class="board__chips" data-main="${gi}" data-drop="clan" aria-label="Поглощённые кланы клана ${escapeAttr(clanName(sq))}">${subs.length ? "\n" + subs.map((sub, si) => boardChipHtml(sub, gi, si)).join("\n") + "\n      " : ""}</div>
     </section>`;
 }
@@ -1401,6 +1758,7 @@ function boardChipHtml(sub, gi, si) {
       <span class="chip__grip" aria-hidden="true">⠿</span>
       <span class="chip__name" role="button" tabindex="0" data-open-clan data-g="${gi}" data-s="${si}" title="Открыть клан в редакторе">${escapeHtml(clanName(sub))}</span>
       <button type="button" class="chip__btn" data-act="clan-make-main" data-g="${gi}" data-s="${si}" title="Вынести в основные кланы" aria-label="Вынести «${escapeAttr(clanName(sub))}» в основные кланы">↑</button>
+      <span class="chip__moons">${moonTagsHtml(sub, gi, si)}</span>
     </div>`;
 }
 
@@ -1454,6 +1812,7 @@ function subOwnerHtml(g, s) {
 function renderSquads() {
   renderSquadBoard();
   renderSquadList();
+  renderMoonPalette();
 }
 
 function renderSquadFilter() {
@@ -1926,6 +2285,186 @@ function dropMarkerIndex(zone) {
   }
   return index;
 }
+
+/* ---------- перетаскивание лун: pointer-события (надёжнее HTML5 DnD) ---------- */
+const moonDragState = { ready: false, active: false, el: null, payload: null, sx: 0, sy: 0, ghost: null, drop: null };
+
+function moonPayloadFromTag(tag) {
+  const key = tag.dataset.moonKey;
+  const rec = collectMoons().find(r => r.name.toLocaleLowerCase("ru") === key);
+  return {
+    name: rec ? rec.name : tag.textContent.replace(/^月\s*/, "").trim(),
+    label: rec ? rec.label || "" : "",
+    kind: rec ? rec.kind || "" : "",
+    from: tag.dataset.special !== undefined
+      ? { special: +tag.dataset.special }
+      : { g: +tag.dataset.g, s: tag.dataset.s === undefined ? null : +tag.dataset.s },
+  };
+}
+
+function moonPayloadFromPalette(item) {
+  const rec = collectMoons().find(r => r.name.toLocaleLowerCase("ru") === item.dataset.moonKey);
+  if (!rec) return null;
+  return { name: rec.name, label: rec.label || "", kind: rec.kind || "" };
+}
+
+function moonTrashEl() {
+  let el = document.getElementById("moon-trash");
+  if (el) return el;
+  el = document.createElement("div");
+  el.id = "moon-trash";
+  el.className = "moon-trash";
+  el.innerHTML = '<span class="moon-trash__k">✕</span><span class="moon-trash__t">Убрать с клана</span>';
+  document.body.appendChild(el);
+  return el;
+}
+
+function moonResolveSquad(from) {
+  const model = state.models.squads || {};
+  if (!from) return null;
+  if (from.special !== undefined) return (model.special || [])[from.special] || null;
+  const owner = (model.squads || [])[from.g];
+  if (!owner) return null;
+  return from.s === null ? owner : (owner.subs || [])[from.s] || null;
+}
+
+function moonClearHover() {
+  $$(".drop-over").forEach(el => el.classList.remove("drop-over"));
+  $$(".moon-tag.dragging").forEach(el => el.classList.remove("dragging"));
+  $$(".moonpal__item.dragging").forEach(el => el.classList.remove("dragging"));
+  const trash = document.getElementById("moon-trash");
+  if (trash) trash.classList.remove("over");
+}
+
+function moonEndDrag() {
+  const st = moonDragState;
+  st.ready = false;
+  st.active = false;
+  st.el = null;
+  st.payload = null;
+  st.drop = null;
+  if (st.ghost) { st.ghost.remove(); st.ghost = null; }
+  document.body.classList.remove("is-moon-dragging");
+  moonClearHover();
+}
+
+document.addEventListener("pointerdown", (e) => {
+  if (e.button !== 0) return;
+  const tag = e.target.closest("[data-drag-moon]");
+  const item = tag ? null : e.target.closest("#moon-palette .moonpal__item");
+  const el = tag || item;
+  if (!el) return;
+  const payload = tag ? moonPayloadFromTag(tag) : moonPayloadFromPalette(item);
+  if (!payload) return;
+  e.preventDefault();
+  moonDragState.ready = true;
+  moonDragState.el = el;
+  moonDragState.payload = payload;
+  moonDragState.sx = e.clientX;
+  moonDragState.sy = e.clientY;
+});
+
+document.addEventListener("pointermove", (e) => {
+  const st = moonDragState;
+  if (!st.ready) return;
+  if (!st.active) {
+    if (Math.abs(e.clientX - st.sx) < 4 && Math.abs(e.clientY - st.sy) < 4) return;
+    st.active = true;
+    st.el.classList.add("dragging");
+    document.body.classList.add("is-moon-dragging");
+    moonTrashEl();
+    const ghost = document.createElement("div");
+    ghost.className = "moon-ghost";
+    ghost.textContent = "月 " + st.payload.name;
+    document.body.appendChild(ghost);
+    st.ghost = ghost;
+  }
+  e.preventDefault();
+  if (st.ghost) {
+    st.ghost.style.left = e.clientX + 12 + "px";
+    st.ghost.style.top = e.clientY + 10 + "px";
+  }
+  const under = document.elementFromPoint(e.clientX, e.clientY);
+  const trash = under ? under.closest("#moon-trash") : null;
+  const target = under ? under.closest(".chip[data-g], .board__col") : null;
+  moonClearHover();
+  if (trash) trash.classList.add("over");
+  else if (target) target.classList.add("drop-over");
+  st.drop = trash ? { trash: true } : target ? { el: target } : null;
+});
+
+document.addEventListener("pointerup", (e) => {
+  const st = moonDragState;
+  if (!st.ready) return;
+  const payload = st.payload;
+  const wasActive = st.active;
+  let dropInfo = null;
+  if (wasActive) {
+    const under = document.elementFromPoint(e.clientX, e.clientY);
+    const trash = under ? under.closest("#moon-trash") : null;
+    const target = under ? under.closest(".chip[data-g], .board__col") : null;
+    dropInfo = trash ? { trash: true } : target ? { el: target } : null;
+  }
+  moonEndDrag();
+  if (!wasActive || !dropInfo || !payload) return;
+
+  const model = state.models.squads || {};
+
+  // Убрать с клана
+  if (dropInfo.trash) {
+    if (!payload.from) return;
+    const src = moonResolveSquad(payload.from);
+    if (!src) return;
+    if (removeMoonFromSquad(src, payload.name)) {
+      renderSquads();
+      markDirty("squads");
+      flashBoard(`«${payload.name}» снята с клана «${clanName(src)}»`);
+    }
+    return;
+  }
+
+  const el = dropInfo.el;
+  const mains = mainSquads();
+  const specials = model.special || [];
+  const chip = el.classList.contains("chip") ? el : null;
+  const specialCard = !chip && el.dataset.special !== undefined ? el : null;
+  const targetG = chip ? +chip.dataset.g : !specialCard ? +el.dataset.main : null;
+  const targetS = chip ? +chip.dataset.s : null;
+  const targetSpecial = specialCard ? +specialCard.dataset.special : null;
+  let squad = null;
+  if (chip) {
+    const owner = mains[targetG];
+    squad = owner ? clanSubs(owner)[targetS] : null;
+  } else if (specialCard) {
+    squad = specials[targetSpecial];
+  } else {
+    squad = mains[targetG];
+  }
+  if (!squad) return;
+
+  const from = payload.from || null;
+  if (from) {
+    const same = from.special !== undefined
+      ? from.special === targetSpecial
+      : !specialCard && from.g === targetG && (from.s === null ? targetS === null : from.s === targetS);
+    if (same) return;
+    const src = moonResolveSquad(from);
+    if (src) removeMoonFromSquad(src, payload.name);
+  }
+
+  const res = moonToSquad(squad, payload);
+  if (res.ok) {
+    renderSquads();
+    markDirty("squads");
+    flashBoard(from
+      ? `«${payload.name}» переведена в «${clanName(squad)}»`
+      : `«${payload.name}» теперь смотрит за «${clanName(squad)}»`);
+  } else if (res.duplicate) {
+    flashBoard(`«${payload.name}» уже смотрит за «${clanName(squad)}»`);
+  }
+});
+
+document.addEventListener("pointercancel", () => moonEndDrag());
 
 $("#squad-board").addEventListener("dragstart", (e) => {
   const src = e.target.closest("[data-drag]");
@@ -3052,6 +3591,7 @@ document.addEventListener("input", (e) => {
     const val = el.dataset.type === "bool" ? el.checked : el.value;
     setPath(model, el.dataset.path, val);
     markDirty(state.tab);
+    if (state.tab === "squads" && el.dataset.path.includes("overseers")) renderMoons();
     if (el.dataset.path.endsWith(".name") && el.closest("details.block")) {
       const det = el.closest("details.block");
       updateClanSummary(det, el.value);
