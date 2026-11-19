@@ -161,6 +161,48 @@
           "note_label": "",
           "note_text": "",
           "subs": []
+        },
+        {
+          "name": "Свет",
+          "parent_label": "",
+          "parent": "",
+          "owner_rank": "",
+          "owner_name": "",
+          "overseers": [
+            {
+              "role": "Смотрящая высшая луна",
+              "people": [
+                "Доума - Вторая высшая луна"
+              ]
+            }
+          ],
+          "description": "",
+          "tasks_label": "Задачи клана:",
+          "tasks": [],
+          "note_label": "",
+          "note_text": "",
+          "subs": []
+        },
+        {
+          "name": "Лед",
+          "parent_label": "",
+          "parent": "",
+          "owner_rank": "",
+          "owner_name": "",
+          "overseers": [
+            {
+              "role": "Смотрящая высшая луна",
+              "people": [
+                "Доума - Вторая высшая луна"
+              ]
+            }
+          ],
+          "description": "",
+          "tasks_label": "Задачи клана:",
+          "tasks": [],
+          "note_label": "",
+          "note_text": "",
+          "subs": []
         }
       ]
     },
