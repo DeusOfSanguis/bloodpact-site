@@ -364,6 +364,20 @@
           "subs": []
         }
       ]
+    },
+    {
+      "name": "Корни ",
+      "parent_label": "",
+      "parent": "",
+      "owner_rank": "",
+      "owner_name": "",
+      "overseers": [],
+      "description": "",
+      "tasks_label": "Задачи клана:",
+      "tasks": [],
+      "note_label": "",
+      "note_text": "",
+      "subs": []
     }
   ],
   "special": [
